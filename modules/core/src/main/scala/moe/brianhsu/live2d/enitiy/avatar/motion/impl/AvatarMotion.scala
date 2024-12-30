@@ -36,7 +36,11 @@ class AvatarMotion(motionData: MotionData,
                    override val fadeInTimeInSeconds: Option[Float],
                    override val fadeOutTimeInSeconds: Option[Float]) extends Motion {
 
-  override def events: List[MotionEvent] = this.motionData.events
+  override val events: List[MotionEvent] = motionData.events
+
+
+  private var cachedFadeInTime: Option[Float] = None
+  private var cachedFadeOutTime: Option[Float] = None
 
   override def calculateOperations(model: Live2DModel, totalElapsedTimeInSeconds: Float, deltaTimeInSeconds: Float,
                                    weight: Float,
@@ -46,8 +50,17 @@ class AvatarMotion(motionData: MotionData,
 
     var operations: List[UpdateOperation] = Nil
 
-    val tmpFadeIn: Float = calculateTempFadeIn(totalElapsedTimeInSeconds, startTimeInSeconds)
-    val tmpFadeOut: Float = calculateTempFadeOut(totalElapsedTimeInSeconds, endTimeInSeconds)
+    val tmpFadeIn: Float = cachedFadeInTime.getOrElse {
+      val fadeInTime = calculateTempFadeIn(totalElapsedTimeInSeconds, startTimeInSeconds)
+      cachedFadeInTime = Some(fadeInTime)
+      fadeInTime
+    }
+
+    val tmpFadeOut: Float = cachedFadeOutTime.getOrElse {
+      val fadeOutTime = calculateTempFadeOut(totalElapsedTimeInSeconds, endTimeInSeconds)
+      cachedFadeOutTime = Some(fadeOutTime)
+      fadeOutTime
+    }
     val elapsedTimeSinceLastLoop = calculateElapsedTimeSinceLastLoop(totalElapsedTimeInSeconds, startTimeInSeconds)
 
     val eyeBlinkValueHolder = motionData.modelCurves
