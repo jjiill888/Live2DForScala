@@ -89,7 +89,14 @@ class GenericUpdateStrategy(val avatarSettings: Settings,
 
   def startMotion(motionSetting: MotionSetting, isLoop: Boolean): MotionWithTransition = {
     val avatarMotionDataReader = new AvatarMotionDataReader(motionSetting)
-    val motion = AvatarMotion(avatarMotionDataReader, motionSetting, avatarSettings.eyeBlinkParameterIds, avatarSettings.lipSyncParameterIds, isLoop)
+    val motion = AvatarMotion(
+  avatarMotionDataReader, 
+  motionSetting, 
+  avatarSettings.eyeBlinkParameterIds, 
+  avatarSettings.lipSyncParameterIds,  
+  isLoop
+)
+
     motionListener.foreach(_.onMotionStart(motionSetting))
 
     if (isLoop) {

@@ -6,13 +6,32 @@ import moe.brianhsu.live2d.usecase.renderer.opengl.shader.SpriteShader
 
 class SpriteRenderer(spriteShader: SpriteShader)(implicit gl: OpenGLBinding) {
 
-
   import gl.constants._
 
-  def draw(sprite: Sprite): Unit = {
+  private val positionVertex = new Array[Float](8)
+  private val uvVertex = Array(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f)
 
+  private val positionBuffer = gl.newDirectFloatBuffer(positionVertex)
+  private val uvBuffer = gl.newDirectFloatBuffer(uvVertex)
+  uvBuffer.put(uvVertex).flip()
+
+  def draw(sprite: Sprite): Unit = {
     val maxWidth = sprite.drawCanvasInfoReader.currentCanvasWidth
     val maxHeight = sprite.drawCanvasInfoReader.currentCanvasHeight
+    val halfWidth = maxWidth * 0.5f
+    val halfHeight = maxHeight * 0.5f
+
+    positionVertex(0) = (sprite.positionAndSize.rightX - halfWidth) / halfWidth
+    positionVertex(1) = (sprite.positionAndSize.topY - halfHeight) / halfHeight
+    positionVertex(2) = (sprite.positionAndSize.leftX - halfWidth) / halfWidth
+    positionVertex(3) = (sprite.positionAndSize.topY - halfHeight) / halfHeight
+    positionVertex(4) = (sprite.positionAndSize.leftX - halfWidth) / halfWidth
+    positionVertex(5) = (sprite.positionAndSize.bottomY - halfHeight) / halfHeight
+    positionVertex(6) = (sprite.positionAndSize.rightX - halfWidth) / halfWidth
+    positionVertex(7) = (sprite.positionAndSize.bottomY - halfHeight) / halfHeight
+
+    positionBuffer.clear()
+    positionBuffer.put(positionVertex).flip()
 
     gl.glUseProgram(spriteShader.programId)
     gl.glEnable(GL_TEXTURE_2D)
@@ -21,30 +40,11 @@ class SpriteRenderer(spriteShader: SpriteShader)(implicit gl: OpenGLBinding) {
     gl.glEnableVertexAttribArray(spriteShader.uvLocation)
     gl.glUniform1i(spriteShader.textureLocation, 0)
 
-    val positionVertex = Array(
-      (sprite.positionAndSize.rightX - maxWidth * 0.5f) / (maxWidth * 0.5f), (sprite.positionAndSize.topY - maxHeight * 0.5f) / (maxHeight * 0.5f),
-      (sprite.positionAndSize.leftX - maxWidth * 0.5f) / (maxWidth * 0.5f), (sprite.positionAndSize.topY - maxHeight * 0.5f) / (maxHeight * 0.5f),
-      (sprite.positionAndSize.leftX - maxWidth * 0.5f) / (maxWidth * 0.5f), (sprite.positionAndSize.bottomY - maxHeight * 0.5f) / (maxHeight * 0.5f),
-      (sprite.positionAndSize.rightX - maxWidth * 0.5f) / (maxWidth * 0.5f), (sprite.positionAndSize.bottomY - maxHeight * 0.5f) / (maxHeight * 0.5f)
-    )
-
-    val uvVertex = Array(
-      1.0f, 0.0f,
-      0.0f, 0.0f,
-      0.0f, 1.0f,
-      1.0f, 1.0f
-    )
-
-    val buffer1 = gl.newDirectFloatBuffer(positionVertex)
-    val buffer2 = gl.newDirectFloatBuffer(uvVertex)
-
-    gl.glVertexAttribPointer(spriteShader.positionLocation, 2, GL_FLOAT, normalized = false, 0, buffer1)
-    gl.glVertexAttribPointer(spriteShader.uvLocation, 2, GL_FLOAT, normalized = false, 0, buffer2)
+    gl.glVertexAttribPointer(spriteShader.positionLocation, 2, GL_FLOAT, normalized = false, 0, positionBuffer)
+    gl.glVertexAttribPointer(spriteShader.uvLocation, 2, GL_FLOAT, normalized = false, 0, uvBuffer)
 
     gl.glUniform4f(spriteShader.baseColorLocation, sprite.spriteColor.red, sprite.spriteColor.green, sprite.spriteColor.blue, sprite.spriteColor.alpha)
     gl.glBindTexture(GL_TEXTURE_2D, sprite.textureInfo.textureId)
     gl.glDrawArrays(GL_TRIANGLE_FAN, 0, 4)
   }
-
-
 }

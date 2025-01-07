@@ -13,6 +13,12 @@ import moe.brianhsu.live2d.enitiy.model.{MocInfo, ModelCanvasInfo, Part}
 import moe.brianhsu.live2d.exception._
 
 import scala.util.Try
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.Await
+
+
 
 /**
  * The Live 2D model that represent an .moc file.
@@ -29,21 +35,24 @@ class CubismModelBackend(mocInfo: MocInfo, override val textureFiles: List[Strin
   private lazy val modelMemoryInfo: MemoryInfo = core.memoryAllocator.allocate(this.modelSize, ModelAlignment)
   protected lazy val cubismModel: CPointerToModel = createCubsimModel()
 
-  private def createCubsimModel(): CPointerToModel = {
+ private def createCubsimModel(): CPointerToModel = {
+  val model = core.cubismAPI.csmInitializeModelInPlace(
+    this.mocInfo.revivedMoc,
+    this.modelMemoryInfo.alignedMemory,
+    this.modelSize
+  )
 
-    val model = core.cubismAPI.csmInitializeModelInPlace(
-      this.mocInfo.revivedMoc,
-      this.modelMemoryInfo.alignedMemory,
-      this.modelSize
-    )
-    val expectedTextureFileCount = calculateTextureCountFromModel(model)
+  // Move the calculation of texture count outside of this method
+  val expectedTextureFileCount = calculateTextureCountFromModel(model)
 
-    if (textureFiles.size != expectedTextureFileCount) {
-      throw new TextureSizeMismatchException(expectedTextureFileCount)
-    }
-
-    model
+  if (textureFiles.size != expectedTextureFileCount) {
+    throw new TextureSizeMismatchException(expectedTextureFileCount)
   }
+
+  model
+}
+
+
 
   private def calculateTextureCountFromModel(model: CPointerToModel): Int = {
     val drawableCounts = core.cubismAPI.csmGetDrawableCount(model)
@@ -92,15 +101,23 @@ class CubismModelBackend(mocInfo: MocInfo, override val textureFiles: List[Strin
    * @return  The model itself.
    */
   override def validatedBackend: Try[ModelBackend] = Try {
-    this.mocInfo.revivedMoc
-    this.modelSize
-    this.drawables
-    this.modelMemoryInfo
-    this.cubismModel
-    this.parameters
-    this.parts
-    this
-  }
+  val parametersFuture = Future(this.parameters)
+  val partsFuture = Future(this.parts)
+  val drawablesFuture = Future(this.drawables)
+
+  val parameters = Await.result(parametersFuture, Duration.Inf)
+  val parts = Await.result(partsFuture, Duration.Inf)
+  val drawables = Await.result(drawablesFuture, Duration.Inf)
+
+  this.mocInfo.revivedMoc
+  this.modelSize
+  this.modelMemoryInfo
+  this.cubismModel
+  parameters
+  parts
+  drawables
+  this
+}
 
   /**
    * Update the Live 2D Model and reset all dynamic flags of drawables.
@@ -126,71 +143,70 @@ class CubismModelBackend(mocInfo: MocInfo, override val textureFiles: List[Strin
 
 
   private def createPartList(): List[Part] = {
-    val partCount = core.cubismAPI.csmGetPartCount(this.cubismModel)
-    val partIds = core.cubismAPI.csmGetPartIds(this.cubismModel)
-    val parentIndices = core.cubismAPI.csmGetPartParentPartIndices(this.cubismModel)
-    val partOpacities = core.cubismAPI.csmGetPartOpacities(this.cubismModel)
+  val partCount = core.cubismAPI.csmGetPartCount(this.cubismModel)
+  val partIds = core.cubismAPI.csmGetPartIds(this.cubismModel)
+  val parentIndices = core.cubismAPI.csmGetPartParentPartIndices(this.cubismModel)
+  val partOpacities = core.cubismAPI.csmGetPartOpacities(this.cubismModel)
 
-    if (partCount == -1 || partIds == null || parentIndices == null || partOpacities == null) {
-      throw new PartInitException
-    }
-
-    val range = (0 until partCount).toList
-
-    range.map { i =>
-      val opacityPointer = partOpacities.pointerToFloat(i)
-      val partId = partIds(i)
-      val parentIndex = parentIndices(i)
-      val parentId = parentIndex match {
-        case n if n >= 0 && n < partCount => Some(partIds(n))
-        case _ => None
-      }
-
-      Part(opacityPointer, partId, parentId)
-    }
+  if (partCount == -1 || partIds == null || parentIndices == null || partOpacities == null) {
+    throw new PartInitException
   }
+
+  val range = (0 until partCount).toList
+
+  range.map { i =>
+    val opacityPointer = partOpacities.pointerToFloat(i)
+    val partId = partIds(i)
+    val parentIndex = parentIndices(i)
+    val parentId = parentIndex match {
+      case n if n >= 0 && n < partCount => Some(partIds(n))
+      case _ => None
+    }
+
+    Part(opacityPointer, partId, parentId)
+  }
+}
 
   private def createParts(): Map[String, Part] = {
     createPartList().map(part => part.id -> part).toMap
   }
 
   private def createParameterList(): List[Parameter] = {
-    val parametersCount = core.cubismAPI.csmGetParameterCount(this.cubismModel)
-    val parametersIds = core.cubismAPI.csmGetParameterIds(this.cubismModel)
-    val currentValues = core.cubismAPI.csmGetParameterValues(this.cubismModel)
-    val defaultValues = core.cubismAPI.csmGetParameterDefaultValues(this.cubismModel)
-    val minValues = core.cubismAPI.csmGetParameterMinimumValues(this.cubismModel)
-    val maxValues = core.cubismAPI.csmGetParameterMaximumValues(this.cubismModel)
-    val parameterTypes = core.cubismAPI.csmGetParameterTypes(this.cubismModel)
-    val keyCounts = core.cubismAPI.csmGetParameterKeyCounts(this.cubismModel)
-    val keyValues = core.cubismAPI.csmGetParameterKeyValues(this.cubismModel)
+  val parametersCount = core.cubismAPI.csmGetParameterCount(this.cubismModel)
+  val parametersIds = core.cubismAPI.csmGetParameterIds(this.cubismModel)
+  val currentValues = core.cubismAPI.csmGetParameterValues(this.cubismModel)
+  val defaultValues = core.cubismAPI.csmGetParameterDefaultValues(this.cubismModel)
+  val minValues = core.cubismAPI.csmGetParameterMinimumValues(this.cubismModel)
+  val maxValues = core.cubismAPI.csmGetParameterMaximumValues(this.cubismModel)
+  val parameterTypes = core.cubismAPI.csmGetParameterTypes(this.cubismModel)
+  val keyCounts = core.cubismAPI.csmGetParameterKeyCounts(this.cubismModel)
+  val keyValues = core.cubismAPI.csmGetParameterKeyValues(this.cubismModel)
 
-    if (parametersCount == -1 || parametersIds == null || currentValues == null ||
-      defaultValues == null || minValues == null || maxValues == null || parameterTypes == null ||
-      keyCounts == null || keyValues == null) {
-      throw new ParameterInitException
-    }
-
-    val range = (0 until parametersCount).toList
-
-    range.map { i =>
-      val id = parametersIds(i)
-      val minValue = minValues(i)
-      val maxValue = maxValues(i)
-      val defaultValue = defaultValues(i)
-      val currentValuePointer = currentValues.pointerToFloat(i)
-      val parameterType = ParameterType(parameterTypes(i))
-      val keyCount = keyCounts(i)
-      val parameterKeyValues = (0 until keyCount).map(keyValues(i)(_)).toList
-
-      CPointerParameter(
-        currentValuePointer, id, parameterType,
-        minValue, maxValue, defaultValue,
-        parameterKeyValues
-      )
-    }
-
+  if (parametersCount == -1 || parametersIds == null || currentValues == null ||
+    defaultValues == null || minValues == null || maxValues == null || parameterTypes == null ||
+    keyCounts == null || keyValues == null) {
+    throw new ParameterInitException
   }
+
+  val range = (0 until parametersCount).toList
+
+  range.map { i =>
+    val id = parametersIds(i)
+    val minValue = minValues(i)
+    val maxValue = maxValues(i)
+    val defaultValue = defaultValues(i)
+    val currentValuePointer = currentValues.pointerToFloat(i)
+    val parameterType = ParameterType(parameterTypes(i))
+    val keyCount = keyCounts(i)
+    val parameterKeyValues = (0 until keyCount).map(keyValues(i)(_)).toList
+
+    CPointerParameter(
+      currentValuePointer, id, parameterType,
+      minValue, maxValue, defaultValue,
+      parameterKeyValues
+    )
+  }
+}
 
   private def createParameters(): Map[String, Parameter] = {
     createParameterList().map(p => p.id -> p).toMap
