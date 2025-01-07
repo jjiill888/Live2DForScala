@@ -111,6 +111,7 @@ Both Swing and SWT version of demo application provide same functionality. The f
 2. User panel on the left to control effects / motions / expressions.
 3. Right click on the avatar and drag to move the avatar around.
 4. Use mouse wheel to zoom-in / zoom-out the avatar.
+5. Click the `Default Avatar` button to initiate the loading process.When clicked, the application attempts to load the avatar model located in the def_avatar directory, which resides in the same location as the application JAR file.
 
 
 Project Structure and Design
