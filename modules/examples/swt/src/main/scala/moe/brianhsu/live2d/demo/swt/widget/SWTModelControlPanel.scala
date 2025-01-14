@@ -64,17 +64,18 @@ if (defaultJsonFiles.isEmpty) {
   }
 
   // 读取并解析 JSON 文件
-  private def loadJsonFromFile(filePath: String): Option[ModelData] = {
-    try {
-      val jsonContent = Source.fromFile(filePath).mkString
-      implicit val formats: DefaultFormats.type = DefaultFormats
-      Some(parse(jsonContent).extract[ModelData])
-    } catch {
-      case ex: Exception =>
-        println(s"Error loading JSON file: ${ex.getMessage}")
-        None
-    }
+private def loadJsonFromFile(filePath: String): Option[ModelData] = {
+  try {
+    val jsonContent = Source.fromFile(filePath, "UTF-8").mkString
+    implicit val formats: DefaultFormats.type = DefaultFormats
+    Some(parse(jsonContent).extract[ModelData])
+  } catch {
+    case ex: Exception =>
+      println(s"Error loading JSON file: ${ex.getMessage}")
+      None
   }
+}
+
 
   // 创建物理设置选项卡
   private def createPhysicsTabs(modelData: ModelData): Unit = {
