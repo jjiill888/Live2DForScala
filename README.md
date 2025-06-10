@@ -58,12 +58,13 @@ The following list shows features that this project currently supports or plan t
   - [x] Auto breath effect
   - [x] Face direction control by mouse
   - [x] Lip sync from .WAV file in the avatar motion
-  - [x] Expression Shortcut Keys (1–9)
-  - [x] Default Avatar 
 
-### Advance Feature
+
+### Project-Implemented Advanced Features
   - [x] Lip sync from microphone
   - [x] Use webcam to control Live2D avatar (VTuber like)
+  - [x] Expression Shortcut Keys (1–9)
+  - [x] Default Avatar 
 
 ### Won't Implemented Feature
 
@@ -73,11 +74,12 @@ The following is the list of such features.
 
   - Priority motion queue
 
-TODO List
+Upcoming Features
 --------------------
 
   - [ ] Control OpenSeeFace -> Live2D model motion parameter through UI.
   - [ ] Live2D model body movement by face tracking.
+  - [ ] Separate the content of README.md into two files: USER_GUIDE.md for end-user instructions and DEVELOPER_GUIDE.md for developer-related documentation.
 
 Supported Platforms
 --------------------
