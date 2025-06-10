@@ -224,7 +224,7 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
       case _ =>
         //  Check if it is a numeric key to perform expression switching
         expressionKeyMap.get(key).foreach { expressionName =>
-          println(s"切换表情：$expressionName")
+          println(s"Emoji shortcut：$expressionName")
           startExpression(expressionName)
         }
     }
