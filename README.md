@@ -115,8 +115,6 @@ Both Swing and SWT version of demo application provide same functionality. The f
 4. Use mouse wheel to zoom-in / zoom-out the avatar.
 5. Click the `Default Avatar` button to initiate the loading process.When clicked, the application attempts to load the avatar model located in the def_avatar directory, which resides in the same location as the application JAR file.
 ```console
- $ 
- Live2DForScala-SWT-Linux-2.0.3-SNAPSHOT/
 ├── def_avatar                        # ← This file tells the app which model to load by default
 |   └──mao_pro.model3.json
 │      ├── mao_pro.cdi3.json
