@@ -197,7 +197,7 @@ createStartFile := {
   IO.createDirectory(new File(dirPath))
 
   // Run shell commands to create and rename the file
-  Seq("sh", "-c", s"echo 'java -XX:+UseZGC -Xmx512m -Xms256m -XX:+AlwaysPreTouch -XX:+UseNUMA Live2DForScala-SWT-Windows-${version.value}.jar' > $filePath && mv $filePath $renamedFilePath").!!
+  Seq("sh", "-c", s"echo 'java -XX:+UseZGC -Xmx512m -Xms256m -XX:+AlwaysPreTouch Live2DForScala-SWT-Windows-${version.value}.jar' > $filePath && mv $filePath $renamedFilePath").!!
 }
 
 lazy val releasewin = taskKey[Unit]("Performs both createReleasePackageTask and moveTxtTaskwin in order")
@@ -298,7 +298,7 @@ createDesktopEntrylinux := {
   val content = s"""
                     [Desktop Entry]
                    |Type=Application
-                   |Exec=java -XX:+UseZGC -Xmx512m -Xms256m -XX:+AlwaysPreTouch -XX:+UseNUMA -jar Live2DForScala-SWT-Linux-${version.value}.jar
+                   |Exec=java -XX:+UseZGC -Xmx512m -Xms256m -XX:+AlwaysPreTouch -jar Live2DForScala-SWT-Linux-${version.value}.jar
 """.stripMargin
 
   // Using Scala's file operations to write content
