@@ -58,6 +58,8 @@ The following list shows features that this project currently supports or plan t
   - [x] Auto breath effect
   - [x] Face direction control by mouse
   - [x] Lip sync from .WAV file in the avatar motion
+  - [x] Expression Shortcut Keys (1–9)
+  - [x] Default Avatar 
 
 ### Advance Feature
   - [x] Lip sync from microphone
@@ -112,6 +114,23 @@ Both Swing and SWT version of demo application provide same functionality. The f
 3. Right click on the avatar and drag to move the avatar around.
 4. Use mouse wheel to zoom-in / zoom-out the avatar.
 5. Click the `Default Avatar` button to initiate the loading process.When clicked, the application attempts to load the avatar model located in the def_avatar directory, which resides in the same location as the application JAR file.
+```console
+ $ 
+ Live2DForScala-SWT-Linux-2.0.3-SNAPSHOT/
+├── def_avatar                        # ← This file tells the app which model to load by default
+|   └──mao_pro.model3.json
+│      ├── mao_pro.cdi3.json
+│      ├── mao_pro.pose3.json
+│      ├── mao_pro.physics3.json
+│      ├── mao_pro.moc3
+│      ├── mao_pro.4096/
+│      ├── expressions/
+│      └── motions/
+├── Live2DForScala-SWT-*.jar         # Your app JAR
+├── openSeeFace/                     # Face tracking engine
+├── start.desktop                    # (Optional) Desktop shortcut launcher
+```
+
 
 
 Project Structure and Design
