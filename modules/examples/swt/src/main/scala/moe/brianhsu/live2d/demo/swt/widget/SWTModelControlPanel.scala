@@ -12,11 +12,11 @@ class ModelControlPanel(parent: Composite) extends Composite(parent, SWT.NONE) {
 
   private val tabFolder = new TabFolder(this, SWT.BORDER)
 
-  // 构造函数
+  // Constructor block
   {
     this.setLayout(new GridLayout(1, false))
 
-    // 添加 Load JSON 按钮
+    // Add Load JSON button
     val loadJsonButton = new Button(this, SWT.PUSH)
     loadJsonButton.setText("Load JSON")
     loadJsonButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false))
@@ -31,8 +31,8 @@ class ModelControlPanel(parent: Composite) extends Composite(parent, SWT.NONE) {
         loadJsonFromFile(filePath) match {
           case Some(modelData) =>
             println(s"Successfully loaded JSON file: $filePath")
-            tabFolder.getItems.foreach(_.dispose()) // 清空现有选项卡
-            createPhysicsTabs(modelData)           // 创建新选项卡
+            tabFolder.getItems.foreach(_.dispose()) // Clear existing tabs
+            createPhysicsTabs(modelData)           // Create new tabs
             tabFolder.layout()
           case None =>
             println(s"Failed to load JSON file: $filePath")
@@ -40,46 +40,46 @@ class ModelControlPanel(parent: Composite) extends Composite(parent, SWT.NONE) {
       }
     })
 
-    // 初始化加载默认 JSON 文件
+    // Attempt to load default JSON from def_avatar folder
     val defaultJsonPath = "def_avatar"
-    val defaultJsonFiles = new File(defaultJsonPath).listFiles.filter(file => file.isFile && file.getName.endsWith("physics3.json"))
+    val files = Option(new File(defaultJsonPath).listFiles).getOrElse(Array.empty)
+    val defaultJsonFiles = files.filter(file => file.isFile && file.getName.endsWith("physics3.json"))
 
-if (defaultJsonFiles.isEmpty) {
-  println(s"No physics3.json files found in $defaultJsonPath")
-  new Label(this, SWT.NONE).setText("No default model data found.")
-} else {
-  val defaultJsonFile = defaultJsonFiles.head
-  loadJsonFromFile(defaultJsonFile.getAbsolutePath) match {
-    case Some(modelData) =>
-      println(s"Successfully loaded default JSON file: ${defaultJsonFile.getAbsolutePath}")
-      createPhysicsTabs(modelData)
-      this.layout()
-    case None =>
-      println(s"Failed to load default JSON file: ${defaultJsonFile.getAbsolutePath}")
-      new Label(this, SWT.NONE).setText("Failed to load default model data.")
-  }
-}
+    if (defaultJsonFiles.isEmpty) {
+      // Print warning and allow program to continue
+      System.err.println("[WARN] No physics3.json files found in def_avatar. Skipping default model load.")
+      new Label(this, SWT.NONE).setText("No default model data found.")
+    } else {
+      val defaultJsonFile = defaultJsonFiles.head
+      loadJsonFromFile(defaultJsonFile.getAbsolutePath) match {
+        case Some(modelData) =>
+          println(s"Successfully loaded default JSON file: ${defaultJsonFile.getAbsolutePath}")
+          createPhysicsTabs(modelData)
+          this.layout()
+        case None =>
+          println(s"Failed to load default JSON file: ${defaultJsonFile.getAbsolutePath}")
+          new Label(this, SWT.NONE).setText("Failed to load default model data.")
+      }
+    }
 
     tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true))
   }
 
-  // 读取并解析 JSON 文件
-private def loadJsonFromFile(filePath: String): Option[ModelData] = {
-  try {
-    val jsonContent = Source.fromFile(filePath, "UTF-8").mkString
-    implicit val formats: DefaultFormats.type = DefaultFormats
-    Some(parse(jsonContent).extract[ModelData])
-  } catch {
-    case ex: Exception =>
-      println(s"Error loading JSON file: ${ex.getMessage}")
-      None
+  // Load and parse JSON file
+  private def loadJsonFromFile(filePath: String): Option[ModelData] = {
+    try {
+      val jsonContent = Source.fromFile(filePath, "UTF-8").mkString
+      implicit val formats: DefaultFormats.type = DefaultFormats
+      Some(parse(jsonContent).extract[ModelData])
+    } catch {
+      case ex: Exception =>
+        println(s"Error loading JSON file: ${ex.getMessage}")
+        None
+    }
   }
-}
 
-
-  // 创建物理设置选项卡
+  // Create tabs for physics settings
   private def createPhysicsTabs(modelData: ModelData): Unit = {
-    // 显示元信息
     val metaComposite = new Composite(tabFolder, SWT.NONE)
     metaComposite.setLayout(new GridLayout(2, false))
     val metaTab = new TabItem(tabFolder, SWT.NONE)
@@ -119,14 +119,14 @@ private def loadJsonFromFile(filePath: String): Option[ModelData] = {
     tabFolder.layout()
   }
 
-  // 根据物理设置内容生成界面
+  // Create UI content for a given physics setting
   private def createPhysicsContent(parent: Composite, settingId: String, modelData: ModelData): Unit = {
     val setting = modelData.PhysicsSettings.find(_.Id == settingId)
 
     setting.foreach { physicsSetting =>
       parent.setLayout(new GridLayout(2, false))
 
-      // 输入参数
+      // Input Parameters
       new Label(parent, SWT.NONE).setText("Input Parameters:")
       val inputComposite = new Composite(parent, SWT.NONE)
       inputComposite.setLayout(new GridLayout(2, false))
@@ -136,7 +136,7 @@ private def loadJsonFromFile(filePath: String): Option[ModelData] = {
         weightText.setText(input.Weight.toString)
       }
 
-      // 输出参数
+      // Output Parameters
       new Label(parent, SWT.NONE).setText("Output Parameters:")
       val outputComposite = new Composite(parent, SWT.NONE)
       outputComposite.setLayout(new GridLayout(2, false))
@@ -146,7 +146,7 @@ private def loadJsonFromFile(filePath: String): Option[ModelData] = {
         scaleText.setText(output.Scale.toString)
       }
 
-      // 顶点设置
+      // Vertices
       new Label(parent, SWT.NONE).setText("Vertices:")
       val vertexComposite = new Composite(parent, SWT.NONE)
       vertexComposite.setLayout(new GridLayout(4, false))
@@ -156,7 +156,7 @@ private def loadJsonFromFile(filePath: String): Option[ModelData] = {
         mobilityText.setText(vertex.Mobility.toString)
       }
 
-      // 归一化设置
+      // Normalization
       new Label(parent, SWT.NONE).setText("Normalization:")
       val normComposite = new Composite(parent, SWT.NONE)
       normComposite.setLayout(new GridLayout(2, false))
@@ -172,7 +172,7 @@ private def loadJsonFromFile(filePath: String): Option[ModelData] = {
   }
 }
 
-// 定义用于解析 JSON 数据的模型
+// JSON data model classes (unchanged) [omitted for brevity]
 case class ModelData(
   Version: Int,
   Meta: MetaData,

@@ -42,6 +42,9 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
   private var offsetX: Float = 0.0f
   private var offsetY: Float = 0.0f
 
+  // Emoji shortcut mapping: e.g. ‘1’ -> “Smile”
+  private var expressionKeyMap: Map[Char, String] = Map()
+
   {
     initOpenGL()
   }
@@ -82,11 +85,9 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
         .left(offsetX)
         .top(offsetY)
     }
-
   }
 
   def resize(): Unit = {
-
     viewPortMatrixCalculator.updateViewPort(
       drawCanvasInfo.currentCanvasWidth,
       drawCanvasInfo.currentCanvasHeight
@@ -131,7 +132,6 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
   }
 
   private def initOpenGL(): Unit = {
-
     viewPortMatrixCalculator.updateViewPort(
       drawCanvasInfo.currentCanvasWidth,
       drawCanvasInfo.currentCanvasHeight
@@ -181,7 +181,18 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
       avatar.updateStrategyHolder = this.mUpdateStrategyHolder
       onStatusUpdated(s"$directoryPath loaded.")
       avatar.model.parameters.keySet.foreach(println)
-    }
+
+      // Emoji Shortcut Binding Update
+      this.expressionKeyMap = avatar.avatarSettings.expressions.toSeq.zipWithIndex
+      .take(9)
+      .map { case ((expressionName, _), i) => ((i + '1').toChar, expressionName) }
+      .toMap
+
+
+      // Console outputs current mapping for debugging 
+       println("Expression shortcut mapping created:") 
+ expressionKeyMap.foreach { case (k, v) => println(s" key '$k' -> expression '$v'") } 
+ }
 
     onOpenGLThread {
       this.rendererHolder = modelHolder.map(model => AvatarRenderer(model))
@@ -210,7 +221,12 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
       case 'c' => switchAvatar("src/main/resources/Rice")
       case 'v' => switchAvatar("src/main/resources/Natori")
       case 'b' => switchAvatar("src/main/resources/Hiyori")
-      case _   =>
+      case _ =>
+        //  Check if it is a numeric key to perform expression switching
+        expressionKeyMap.get(key).foreach { expressionName =>
+          println(s"切换表情：$expressionName")
+          startExpression(expressionName)
+        }
     }
   }
 
