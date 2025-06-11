@@ -69,12 +69,16 @@ class OpenSeeFaceDataConverter(settings: Settings = DefaultSettings) {
 
     val eyeSmile = if (isEyeSmile) 1.0f else 0.0f
 
+    // ✅ Append head translation X/Y as ParamBodyX/Y source
     TrackingNode(
       faceXAngle, faceYAngle, faceZAngle,
       leftEyeOpenness, rightEyeOpenness,
       mouthOpenness, mouthForm,
-      eyeSmile, eyeSmile
+      eyeSmile, eyeSmile,
+      currentData.translation.x,  // horizontal head movement → ParamBodyX
+      currentData.translation.y   // vertical head movement → ParamBodyY
     )
+
   }
 
   private def calcFaceXAngle(currentData: OpenSeeFaceData): Float = {

@@ -65,6 +65,7 @@ The following list shows features that this project currently supports or plan t
   - [x] Use webcam to control Live2D avatar (VTuber like)
   - [x] Expression Shortcut Keys (1–9)
   - [x] Default Avatar 
+  - [x] body movement and full-body sway driven by face tracking
 
 ### Won't Implemented Feature
 
@@ -78,7 +79,6 @@ Upcoming Features
 --------------------
 
   - [ ] Control OpenSeeFace -> Live2D model motion parameter through UI.
-  - [ ] Live2D model body movement by face tracking.
   - [ ] Separate the content of README.md into two files: USER_GUIDE.md for end-user instructions and DEVELOPER_GUIDE.md for developer-related documentation.
 
 Supported Platforms
