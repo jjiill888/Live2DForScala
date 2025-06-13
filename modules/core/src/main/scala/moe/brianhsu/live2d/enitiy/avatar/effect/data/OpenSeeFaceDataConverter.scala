@@ -59,8 +59,9 @@ class OpenSeeFaceDataConverter(settings: Settings = DefaultSettings) {
     val rightEyeOpenness = calcEyeOpenness(currentData.rightEye, faceYAngle)
     val previousLeftEyeOpenness = previousLeftEyeNodes.map(_.leftEyeOpenness)
     val previousRightEyeOpenness = previousRightEyeNodes.map(_.rightEyeOpenness)
-    val leftEyeAvg = previousLeftEyeOpenness.appended(leftEyeOpenness).sum / previousLeftEyeOpenness.size + 1
-    val rightEyeAvg = previousRightEyeOpenness.appended(rightEyeOpenness).sum / previousRightEyeOpenness.size + 1
+    val leftEyeAvg = previousLeftEyeOpenness.appended(leftEyeOpenness).sum / (previousLeftEyeOpenness.size + 1)
+    val rightEyeAvg = previousRightEyeOpenness.appended(rightEyeOpenness).sum / (previousRightEyeOpenness.size + 1)
+
 
     val isEyeSmile = leftEyeAvg <= settings.eyeSmileEyeOpenThreshold &&
       rightEyeAvg <= settings.eyeSmileEyeOpenThreshold &&
