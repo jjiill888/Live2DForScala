@@ -22,6 +22,20 @@ object SWTWithLWJGLMain {
     setupUILayout()
     setupAvatarEventListener()
 
+ // Try to load the avatar used last time; fall back to def_avatar on failure.
+    val loadResult = DemoApp.loadLastAvatarPath() match {
+      case Some(path) =>
+        avatarArea.demoApp.switchAvatar(path).recoverWith { case e =>
+          System.err.println(s"[WARN] Cannot load last avatar '$path': ${e.getMessage}")
+          avatarArea.demoApp.switchAvatar("def_avatar")
+        }
+      case None =>
+        avatarArea.demoApp.switchAvatar("def_avatar")
+    }
+    loadResult.failed.foreach { e =>
+      System.err.println(s"[WARN] Cannot load default avatar: ${e.getMessage}")
+    }
+
     shell.setText("Live 2D Scala Demo (SWT+LWJGL)")
     shell.setSize(1080, 720)
     shell.open()

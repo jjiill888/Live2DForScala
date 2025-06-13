@@ -14,6 +14,8 @@ import moe.brianhsu.live2d.usecase.updater.impl.EasyUpdateStrategy
 
 import scala.annotation.unused
 import scala.util.Try
+import java.io.{File, PrintWriter}
+import scala.io.Source
 
 object DemoApp {
   type OnOpenGLThread = (=> Any) => Unit
@@ -21,6 +23,29 @@ object DemoApp {
   sealed trait FaceDirectionMode
   case object FollowMouse extends FaceDirectionMode
   case object ClickAndDrag extends FaceDirectionMode
+
+  private val LastAvatarFile = new File("last_avatar")
+
+  def saveLastAvatar(path: String): Unit =
+    try {
+      val writer = new PrintWriter(LastAvatarFile, "UTF-8")
+      try writer.print(path) finally writer.close()
+    } catch {
+      case e: Exception =>
+        System.err.println(s"[WARN] Cannot save last avatar path: ${e.getMessage}")
+    }
+
+  def loadLastAvatarPath(): Option[String] =
+    if (LastAvatarFile.exists()) {
+      try {
+        val src = Source.fromFile(LastAvatarFile, "UTF-8")
+        try Some(src.mkString.trim) finally src.close()
+      } catch {
+        case e: Exception =>
+          System.err.println(s"[WARN] Cannot read last avatar path: ${e.getMessage}")
+          None
+      }
+    } else None
 }
 
 abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnOpenGLThread)
@@ -199,7 +224,10 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
       initOpenGL()
     }
 
-    newAvatarHolder.foreach(_ => onAvatarLoaded(this))
+     newAvatarHolder.foreach { _ =>
+      DemoApp.saveLastAvatar(directoryPath)
+      onAvatarLoaded(this)
+    }
     newAvatarHolder
   }
 
