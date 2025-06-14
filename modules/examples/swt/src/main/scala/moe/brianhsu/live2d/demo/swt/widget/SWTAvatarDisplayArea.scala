@@ -125,6 +125,7 @@ class SWTAvatarDisplayArea(parent: Composite) extends Composite(parent, SWT.NONE
   private def createDoubleBufferGLData(): GLData = {
     val glData = new GLData
     glData.doubleBuffer = true
+    glData.alphaSize = 8
     glData
   }
 

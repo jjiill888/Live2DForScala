@@ -14,16 +14,19 @@ class SwingToolbar(live2DWidget: Live2DUI) extends JToolBar("Live 2D For Scala S
   private val pureBackground = new JButton("Pure Color Background")
   private val defaultBackground = new JButton("Green Background")
   private val selectBackground = new JButton("Select Background Image")
+  private val transparentBackground = new JToggleButton("Transparent Background")
 
   {
     this.loadAvatar.addActionListener(loadAvatarAction)
     this.defaultBackground.addActionListener(switchToDefaultBackground)
     this.pureBackground.addActionListener(switchToPureColor)
     this.selectBackground.addActionListener(changeBackground)
+    this.transparentBackground.addActionListener(switchToTransparent)
     this.add(loadAvatar)
     this.add(defaultBackground)
     this.add(selectBackground)
     this.add(pureBackground)
+    this.add(transparentBackground)
   }
 
   private def changeBackground(@unused actionEvent: ActionEvent): Unit = {
@@ -70,6 +73,11 @@ class SwingToolbar(live2DWidget: Live2DUI) extends JToolBar("Live 2D For Scala S
     }
   }
 
+  private def switchToTransparent(@unused actionEvent: ActionEvent): Unit = {
+    val enabled = transparentBackground.isSelected
+    live2DWidget.demoAppHolder.foreach(_.setTransparentBackground(enabled))
+  }
+  
   private def loadAvatarAction(@unused action: ActionEvent): Unit = {
     val fileChooser = new JFileChooser()
     fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY)

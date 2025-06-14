@@ -1,6 +1,6 @@
 package moe.brianhsu.live2d.demo.app
 
-import moe.brianhsu.live2d.demo.sprite.{BackgroundSprite, GearSprite, PowerSprite}
+import moe.brianhsu.live2d.demo.sprite.BackgroundSprite
 import moe.brianhsu.live2d.enitiy.opengl.sprite.Sprite
 import moe.brianhsu.live2d.enitiy.opengl.texture.TextureInfo
 import moe.brianhsu.live2d.usecase.renderer.opengl.shader.SpriteShader
@@ -14,11 +14,7 @@ trait SpriteControl {
 
   protected var backgroundColor = new Color(0, 255, 0)
 
-  protected lazy val powerTexture: TextureInfo = textureManager.loadTexture("/texture/power.png")
-  protected lazy val powerSprite: Sprite = new PowerSprite(drawCanvasInfo, powerTexture)
-  protected lazy val gearTexture: TextureInfo = textureManager.loadTexture("/texture/settings.png")
-  protected lazy val gearSprite: Sprite = new GearSprite(drawCanvasInfo, gearTexture)
-  protected var sprites: List[Sprite] = this.gearSprite :: this.powerSprite :: Nil
+  protected var sprites: List[Sprite] = Nil
 
   protected val spriteRenderer = new SpriteRenderer(new SpriteShader)
 
@@ -36,6 +32,15 @@ trait SpriteControl {
 
   def switchToPureColorBackground(color: Color): Unit = {
     this.backgroundColor = color
+    this.sprites = this.sprites.filterNot(_.isInstanceOf[BackgroundSprite])
+    this.display(true)
+  }
+  
+def setTransparentBackground(enabled: Boolean): Unit =
+    if (enabled) switchToTransparentBackground() else switchToDefaultBackground()
+
+  def switchToTransparentBackground(): Unit = {
+    this.backgroundColor = new Color(0, 0, 0, 0)
     this.sprites = this.sprites.filterNot(_.isInstanceOf[BackgroundSprite])
     this.display(true)
   }

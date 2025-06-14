@@ -14,7 +14,7 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
   private val toolBar = new ToolBar(this, SWT.NONE)
   private val (
     loadAvatar, defaultAvatar, changeToDefaultBackground,
-    selectBackground, pureColorBackground) = createToolItems()
+    selectBackground, pureColorBackground, transparentBackground) = createToolItems()
 
   {
     this.setLayout(new FillLayout)
@@ -22,6 +22,7 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
     selectBackground.addListener(SWT.Selection, onSelectBackgroundSelected)
     changeToDefaultBackground.addListener(SWT.Selection, onDefaultBackgroundSelected)
     pureColorBackground.addListener(SWT.Selection, onPureColorBackground)
+    transparentBackground.addListener(SWT.Selection, onTransparentBackground)
     defaultAvatar.addListener(SWT.Selection, onDefaultAvatarSelected)
   }
 
@@ -60,6 +61,11 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
     }
   }
 
+  private def onTransparentBackground(@unused event: Event): Unit = {
+    val enabled = transparentBackground.getSelection
+    demoAppHolder.foreach(_.setTransparentBackground(enabled))
+  }
+
   private def onDefaultBackgroundSelected(@unused event: Event): Unit = {
     demoAppHolder.foreach(_.switchToDefaultBackground())
   }
@@ -92,7 +98,7 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
     }
   }
 
-  private def createToolItems(): (ToolItem, ToolItem, ToolItem, ToolItem, ToolItem) = {
+  private def createToolItems(): (ToolItem, ToolItem, ToolItem, ToolItem, ToolItem, ToolItem) = {
     val loadAvatar = new ToolItem(toolBar, SWT.PUSH)
     val defaultAvatar = new ToolItem(toolBar, SWT.PUSH)
     new ToolItem(toolBar, SWT.SEPARATOR)
@@ -101,13 +107,16 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
     val selectBackground = new ToolItem(toolBar, SWT.PUSH)
     new ToolItem(toolBar, SWT.SEPARATOR)
     val pureColorBackground = new ToolItem(toolBar, SWT.PUSH)
+    new ToolItem(toolBar, SWT.SEPARATOR)
+    val transparentBackground = new ToolItem(toolBar, SWT.CHECK)
 
     loadAvatar.setText("Load Avatar")
     defaultAvatar.setText("Default Avatar")
     defaultBackground.setText("Green Background")
     selectBackground.setText("Select Background")
     pureColorBackground.setText("Pure Color Background")
+    transparentBackground.setText("Transparent Background")
 
-    (loadAvatar, defaultAvatar, defaultBackground, selectBackground, pureColorBackground)
+    (loadAvatar, defaultAvatar, defaultBackground, selectBackground, pureColorBackground, transparentBackground)
   }
 }

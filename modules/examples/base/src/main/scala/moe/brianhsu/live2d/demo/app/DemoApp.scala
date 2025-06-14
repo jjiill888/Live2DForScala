@@ -150,14 +150,6 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
   override def onMouseReleased(x: Int, y: Int): Unit = {
     super.onMouseReleased(x, y)
 
-    if (powerSprite.isHit(x.toFloat, y.toFloat)) {
-      onStatusUpdated("Clicked on Power sprite.")
-    } else if (gearSprite.isHit(x.toFloat, y.toFloat)) {
-      onStatusUpdated("Clicked on Gear sprite.")
-    } else {
-      onStatusUpdated("Clicked nothing.")
-    }
-
     for {
       _ <- mAvatarHolder
       model <- modelHolder
@@ -207,7 +199,7 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
       backgroundColor.getRed / 255.0f,
       backgroundColor.getGreen / 255.0f,
       backgroundColor.getBlue / 255.0f,
-      1.0f
+      backgroundColor.getAlpha / 255.0f
     )
     openGL.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     openGL.glClearDepth(1.0)

@@ -66,6 +66,7 @@ The following list shows features that this project currently supports or plan t
   - [x] Expression Shortcut Keys (1–9)
   - [x] Default Avatar 
   - [x] body movement and full-body sway driven by face tracking
+  - [x] Transparent background rendering for OBS capture
 
 ### Won't Implemented Feature
 
@@ -118,6 +119,7 @@ Both Swing and SWT version of demo application provide same functionality. The f
 5. Click the `Default Avatar` button to initiate the loading process.When clicked, the application attempts to load the avatar model located in the def_avatar directory, which resides in the same location as the application JAR file.
 6. The application stores the directory of the last loaded avatar in a `last_avatar` file. When launched again, it tries to load that avatar automatically and falls back to `def_avatar` if it fails.
 7. Enabling the `Auto Start` checkbox in the face tracking panel writes a `auto_start` file so tracking starts automatically next time.
+8. Toggle `Transparent Background` in the toolbar when you need an alpha channel output for OBS.
    
 ```console
 ├── def_avatar                        # This file tells the app which model to load by default

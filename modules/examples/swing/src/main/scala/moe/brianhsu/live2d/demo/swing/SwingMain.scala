@@ -100,6 +100,8 @@ object SwingMain {
   private def createGLCanvas(): Live2DUI = {
     val profile = GLProfile.get(GLProfile.GL2)
     val capabilities = new GLCapabilities(profile)
+    capabilities.setAlphaBits(8)
+    capabilities.setBackgroundOpaque(false)
 
     val canvas = new GLCanvas(capabilities)
     val live2DUI = new Live2DUI(canvas)
