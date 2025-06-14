@@ -3,7 +3,7 @@ package moe.brianhsu.live2d.enitiy.avatar.effect.data
 import moe.brianhsu.live2d.enitiy.avatar.effect.data.OpenSeeFaceDataConverter._
 import moe.brianhsu.live2d.enitiy.avatar.effect.impl.FaceTracking.TrackingNode
 import moe.brianhsu.live2d.enitiy.math.Radian
-import moe.brianhsu.live2d.enitiy.openSeeFace.OpenSeeFaceData
+import moe.brianhsu.live2d.enitiy.openSeeFace.{EyeGazeEstimator, OpenSeeFaceData}
 import moe.brianhsu.live2d.enitiy.openSeeFace.OpenSeeFaceData.Point
 
 object OpenSeeFaceDataConverter {
@@ -70,14 +70,15 @@ class OpenSeeFaceDataConverter(settings: Settings = DefaultSettings) {
 
     val eyeSmile = if (isEyeSmile) 1.0f else 0.0f
 
-    // ✅ Append head translation X/Y as ParamBodyX/Y source
+    val (gazeX, gazeY) = EyeGazeEstimator.estimate(currentData)
     TrackingNode(
       faceXAngle, faceYAngle, faceZAngle,
       leftEyeOpenness, rightEyeOpenness,
       mouthOpenness, mouthForm,
       eyeSmile, eyeSmile,
       currentData.translation.x,  // horizontal head movement → ParamBodyX
-      currentData.translation.y   // vertical head movement → ParamBodyY
+      currentData.translation.y,  // vertical head movement → ParamBodyY
+      gazeX, gazeY
     )
 
   }

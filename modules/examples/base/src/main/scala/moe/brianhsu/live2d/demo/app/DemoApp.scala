@@ -27,6 +27,39 @@ object DemoApp {
   private val LastAvatarFile = new File("last_avatar")
   private val AutoStartFile = new File("auto_start")
 
+  private def readSettings(): Map[String, String] =
+    if (AutoStartFile.exists()) {
+      try {
+        val src = Source.fromFile(AutoStartFile, "UTF-8")
+        try {
+          val lines = src.getLines().toList.map(_.trim).filter(_.nonEmpty)
+          if (lines.size == 1 && !lines.head.contains("=")) {
+            Map("autoStart" -> lines.head)
+          } else {
+            lines.flatMap { line =>
+              line.split("=", 2) match {
+                case Array(k, v) => Some(k -> v)
+                case _ => None
+              }
+            }.toMap
+          }
+        } finally src.close()
+      } catch {
+        case e: Exception =>
+          System.err.println(s"[WARN] Cannot read settings: ${e.getMessage}")
+          Map.empty
+      }
+    } else Map.empty
+
+  private def writeSettings(settings: Map[String, String]): Unit =
+    try {
+      val writer = new PrintWriter(AutoStartFile, "UTF-8")
+      try settings.foreach { case (k, v) => writer.println(s"$k=$v") } finally writer.close()
+    } catch {
+      case e: Exception =>
+        System.err.println(s"[WARN] Cannot save settings: ${e.getMessage}")
+    }
+
   def saveLastAvatar(path: String): Unit =
     try {
       val writer = new PrintWriter(LastAvatarFile, "UTF-8")
@@ -48,26 +81,21 @@ object DemoApp {
       }
     } else None
 
-    def saveAutoStart(enabled: Boolean): Unit =
-    try {
-      val writer = new PrintWriter(AutoStartFile, "UTF-8")
-      try writer.print(enabled) finally writer.close()
-    } catch {
-      case e: Exception =>
-        System.err.println(s"[WARN] Cannot save auto start flag: ${e.getMessage}")
-    }
+  def saveAutoStart(enabled: Boolean): Unit = {
+    val settings = readSettings() + ("autoStart" -> enabled.toString)
+    writeSettings(settings)
+  }
 
   def loadAutoStart(): Boolean =
-    if (AutoStartFile.exists()) {
-      try {
-        val src = Source.fromFile(AutoStartFile, "UTF-8")
-        try src.mkString.trim.toBooleanOption.getOrElse(false) finally src.close()
-      } catch {
-        case e: Exception =>
-          System.err.println(s"[WARN] Cannot read auto start flag: ${e.getMessage}")
-          false
-      }
-    } else false
+ readSettings().get("autoStart").flatMap(_.toBooleanOption).getOrElse(false)
+
+  def saveEyeGaze(enabled: Boolean): Unit = {
+    val settings = readSettings() + ("eyeGaze" -> enabled.toString)
+    writeSettings(settings)
+  }
+
+  def loadEyeGaze(): Boolean =
+    readSettings().get("eyeGaze").flatMap(_.toBooleanOption).getOrElse(false)
 }
 
 abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnOpenGLThread)

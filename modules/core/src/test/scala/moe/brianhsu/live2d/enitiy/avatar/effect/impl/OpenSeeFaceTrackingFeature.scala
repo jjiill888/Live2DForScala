@@ -29,7 +29,7 @@ class OpenSeeFaceTrackingFeature extends AnyFeatureSpec with GivenWhenThen with 
       }
       val dataReader = new StubbedOpenFaceDataReader(stubbedData.get)
       val converter = stub[OpenSeeFaceDataConverter]
-      val stubbedTrackingNode = TrackingNode(0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f)
+      val stubbedTrackingNode = TrackingNode(0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 0f, 0f)
       (converter.convert _).when(*, *, *).returns(stubbedTrackingNode)
 
       When("create a OpenSeeFaceTracking based on this dataReader")
@@ -69,9 +69,9 @@ class OpenSeeFaceTrackingFeature extends AnyFeatureSpec with GivenWhenThen with 
 
       And("a data converter that converts OpenSeeFace data to Tracking Node")
       val converter = stub[OpenSeeFaceDataConverter]
-      val stubbedTrackingNode1 = TrackingNode(1.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f)
-      val stubbedTrackingNode2 = TrackingNode(2.2f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f)
-      val stubbedTrackingNode3 = TrackingNode(3.3f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f)
+      val stubbedTrackingNode1 = TrackingNode(1.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 0f, 0f)
+      val stubbedTrackingNode2 = TrackingNode(2.2f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 0f, 0f)
+      val stubbedTrackingNode3 = TrackingNode(3.3f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 0f, 0f)
 
       (converter.convert _).when(*, *, *).returns(stubbedTrackingNode1).noMoreThanOnce()
       (converter.convert _).when(*, *, *).returns(stubbedTrackingNode2).noMoreThanOnce()
@@ -102,11 +102,11 @@ class OpenSeeFaceTrackingFeature extends AnyFeatureSpec with GivenWhenThen with 
 
       And("a data converter that converts OpenSeeFace data to Tracking Node")
       val converter = stub[OpenSeeFaceDataConverter]
-      val stubbedTrackingNode1 = TrackingNode(1.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f)
-      val stubbedTrackingNode2 = TrackingNode(2.2f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f)
-      val stubbedTrackingNode3 = TrackingNode(3.3f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f)
-      val stubbedTrackingNode4 = TrackingNode(4.3f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f)
-      val stubbedTrackingNode5 = TrackingNode(5.3f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f)
+      val stubbedTrackingNode1 = TrackingNode(1.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 0f, 0f)
+      val stubbedTrackingNode2 = TrackingNode(2.2f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 0f, 0f)
+      val stubbedTrackingNode3 = TrackingNode(3.3f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 0f, 0f)
+      val stubbedTrackingNode4 = TrackingNode(4.3f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 0f, 0f)
+      val stubbedTrackingNode5 = TrackingNode(5.3f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 0f, 0f)
 
       (converter.convert _).when(*, *, *).returns(stubbedTrackingNode1).noMoreThanOnce()
       (converter.convert _).when(*, *, *).returns(stubbedTrackingNode2).noMoreThanOnce()
@@ -139,9 +139,9 @@ class OpenSeeFaceTrackingFeature extends AnyFeatureSpec with GivenWhenThen with 
 
       And("a data converter that converts OpenSeeFace data to Tracking Node")
       val converter = stub[OpenSeeFaceDataConverter]
-      val stubbedTrackingNode1 = TrackingNode(1.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f)
-      val stubbedTrackingNode2 = TrackingNode(2.2f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f)
-      val stubbedTrackingNode3 = TrackingNode(3.3f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f)
+      val stubbedTrackingNode1 = TrackingNode(1.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 0f, 0f)
+      val stubbedTrackingNode2 = TrackingNode(2.2f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 0f, 0f)
+      val stubbedTrackingNode3 = TrackingNode(3.3f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 0f, 0f)
 
       (converter.convert _).when(*, *, *).returns(stubbedTrackingNode1).noMoreThanOnce()
       (converter.convert _).when(*, *, *).returns(stubbedTrackingNode2).noMoreThanOnce()

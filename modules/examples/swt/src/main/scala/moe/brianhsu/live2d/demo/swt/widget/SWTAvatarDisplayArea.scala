@@ -9,6 +9,7 @@ import org.eclipse.swt.layout.FillLayout
 import org.eclipse.swt.opengl.{GLCanvas, GLData}
 import org.eclipse.swt.widgets._
 import org.lwjgl.opengl.GL
+import scala.util.Try
 
 object SWTAvatarDisplayArea {
   trait AvatarListener {
@@ -139,12 +140,19 @@ class SWTAvatarDisplayArea(parent: Composite) extends Composite(parent, SWT.NONE
 
   private class CanvasUpdater extends Runnable {
 
-    private val FrameRate = System.getProperty("os.name") match {
-      case os if os.toLowerCase.contains("windows") => 144 // I don't know why Windows need a higher value to make it smooth
-      case os if os.toLowerCase.contains("linux")   => 60
-      case _ => 60
-    }
+   private val FrameRate: Int = {
+      val overrideValue =
+        sys.props.get("live2d.frameRate").orElse(sys.env.get("LIVE2D_FRAME_RATE"))
+          .flatMap(v => Try(v.toInt).toOption)
 
+      overrideValue.getOrElse {
+        System.getProperty("os.name").toLowerCase match {
+          case os if os.contains("windows") => 144 // I don't know why Windows need a higher value to make it smooth
+          case os if os.contains("linux")   => 60
+          case _ => 60
+        }
+      }
+    }
     private val threshold = ((1 / FrameRate.toFloat) * 1000).toInt
 
     override def run(): Unit = {

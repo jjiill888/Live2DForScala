@@ -13,16 +13,21 @@ trait EffectControl {
 
   var faceDirectionMode: FaceDirectionMode = ClickAndDrag
 
+  private var faceTrackingHolder: Option[OpenSeeFaceTracking] = None
+
   protected val faceDirectionCalculator = new FaceDirectionByMouse(60)
   protected val faceDirection = new FaceDirection(faceDirectionCalculator)
 
   def enableFaceTracking(dataReader: OpenSeeFaceDataReader): Unit = {
     val x = new OpenSeeFaceTracking(dataReader, 1000)
+    x.eyeGazeEnabled = DemoApp.loadEyeGaze()
+    faceTrackingHolder = Some(x)
     this.mUpdateStrategyHolder.foreach(_.appendAndStartEffects(x :: Nil))
   }
 
   def disableFaceTracking(): Unit = {
     this.mUpdateStrategyHolder.foreach(_.stopAndRemoveEffects(_.isInstanceOf[OpenSeeFaceTracking]))
+    faceTrackingHolder = None
   }
 
   def updateMotionLipSyncVolume(volume: Int): Unit = {
@@ -63,6 +68,10 @@ trait EffectControl {
 
   def enableEyeBlink(isEnabled: Boolean): Unit = {
     this.mUpdateStrategyHolder.foreach(_.enableEyeBlink(isEnabled))
+  }
+
+  def enableEyeGaze(isEnabled: Boolean): Unit = {
+    faceTrackingHolder.foreach(_.eyeGazeEnabled = isEnabled)
   }
 
   def onMouseMoved(x: Int, y: Int): Unit = {

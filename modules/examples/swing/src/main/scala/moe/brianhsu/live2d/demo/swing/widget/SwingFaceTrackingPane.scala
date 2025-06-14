@@ -26,6 +26,12 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
   private val openSeeFaceBundle = createBundleByOS()
   private val cardLayout = new CardLayout
   private val openSeeFacePanel = new JPanel(cardLayout)
+  private val eyeGazeCheckBox = new JCheckBox("Simulate Eye Gaze")
+  eyeGazeCheckBox.setSelected(DemoApp.loadEyeGaze())
+  eyeGazeCheckBox.addActionListener(_ => {
+    DemoApp.saveEyeGaze(eyeGazeCheckBox.isSelected)
+    live2DWidget.demoAppHolder.foreach(_.enableEyeGaze(eyeGazeCheckBox.isSelected))
+  })
   private val autoStartCheckBox = new JCheckBox("Auto Start")
   autoStartCheckBox.setSelected(DemoApp.loadAutoStart())
   autoStartCheckBox.addActionListener(_ => DemoApp.saveAutoStart(autoStartCheckBox.isSelected))
@@ -60,6 +66,13 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
     this.openSeeFacePanel.add(openSeeFaceAdvance, "Advanced")
     this.add(openSeeFacePanel, gc3)
 
+ val gcGaze = new GridBagConstraints()
+    gcGaze.gridx = 0
+    gcGaze.gridy = 3
+    gcGaze.gridwidth = 2
+    gcGaze.anchor = GridBagConstraints.NORTHWEST
+    this.add(eyeGazeCheckBox, gcGaze)
+    
     val gcAuto = new GridBagConstraints()
     gcAuto.gridx = 0
     gcAuto.gridy = 2
@@ -69,7 +82,7 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
 
     val gc4 = new GridBagConstraints()
     gc4.gridx = 0
-    gc4.gridy = 3
+    gc4.gridy = 4
     gc4.gridwidth = 2
     gc4.fill = GridBagConstraints.HORIZONTAL
     gc4.weightx = 1
@@ -78,7 +91,7 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
 
     val gc5 = new GridBagConstraints()
     gc5.gridx = 0
-    gc5.gridy = 4
+    gc5.gridy = 5
     gc5.gridwidth = 2
     gc5.fill = GridBagConstraints.BOTH
     gc5.weightx = 1

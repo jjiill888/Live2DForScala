@@ -15,7 +15,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
 import scala.annotation.unused
-import scala.util.Try
 
 class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.NONE) {
 
@@ -30,6 +29,12 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
   private val openSeeFacePanel = new Composite(openSeeFaceGroup, SWT.NONE)
   private val bundle = new SWTOpenSeeFaceBundle(openSeeFacePanel, CameraListing.createByOS())
   private val advanced = new SWTOpenSeeFaceAdvance(openSeeFacePanel)
+  private val eyeGazeButton = new Button(openSeeFaceGroup, SWT.CHECK)
+  eyeGazeButton.setSelection(DemoApp.loadEyeGaze())
+  eyeGazeButton.addListener(SWT.Selection, (_: Event) => {
+    DemoApp.saveEyeGaze(eyeGazeButton.getSelection)
+    demoAppHolder.foreach(_.enableEyeGaze(eyeGazeButton.getSelection))
+  })
   private val autoStartButton = new Button(openSeeFaceGroup, SWT.CHECK)
   autoStartButton.setSelection(DemoApp.loadAutoStart())
   autoStartButton.addListener(SWT.Selection, (_: Event) => DemoApp.saveAutoStart(autoStartButton.getSelection))
@@ -62,6 +67,11 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
     gridData2.horizontalSpan = 2
 
     this.openSeeFacePanel.setLayoutData(gridData2)
+
+    eyeGazeButton.setText("Simulate Eye Gaze")
+    val gazeData = new GridData()
+    gazeData.horizontalSpan = 2
+    eyeGazeButton.setLayoutData(gazeData)
 
     autoStartButton.setText("Auto Start")
     val autoData = new GridData()

@@ -21,7 +21,8 @@ object FaceTracking {
     leftEyeOpenness: Float, rightEyeOpenness: Float,
     mouthOpenness: Float, mouthForm: Float,
     leftEyeSmile: Float, rightEyeSmile: Float,
-    transX: Float, transY: Float // ✅ New: translation from head movement
+    transX: Float, transY: Float,                 //  Head translation
+    eyeBallX: Float, eyeBallY: Float             //  Eye gaze offsets
   )
 }
 
@@ -29,6 +30,8 @@ abstract class FaceTracking(protected val trackingTaps: TrackingTaps) extends Ef
 
   protected[impl] var trackingNoes: List[TrackingNode] = Nil
 
+  var eyeGazeEnabled: Boolean = true
+  
   override def calculateOperations(model: Live2DModel, totalElapsedTimeInSeconds: Float, deltaTimeInSeconds: Float): List[UpdateOperation] = {
     trackingNoes match {
       case Nil => Nil
@@ -40,7 +43,7 @@ abstract class FaceTracking(protected val trackingTaps: TrackingTaps) extends Ef
   private var lastFaceYAngle = 0.0f
   private var lastFaceZAngle = 0.0f
   private var lastBodyXAngle = 0.0f
-  private var lastBodyZAngle = 0.0f // ✅ New: body rotation Z
+  private var lastBodyZAngle = 0.0f //  New: body rotation Z
 
   private var isFirst = true
 
@@ -59,9 +62,11 @@ abstract class FaceTracking(protected val trackingTaps: TrackingTaps) extends Ef
     val rightShoulder = if (this.lastFaceXAngle > 10) 1.0f else 0.0f
 
 
-    // ✅ New: Average translation
+    //  New: Average translation
     val transX = average(trackingNoes.map(_.transX))
     val transY = average(trackingNoes.map(_.transY))
+    val eyeBallX = if (eyeGazeEnabled) average(trackingNoes.map(_.eyeBallX)) else 0f
+    val eyeBallY = if (eyeGazeEnabled) average(trackingNoes.map(_.eyeBallY)) else 0f
 
     if (isFirst) {
       this.lastFaceXAngle = faceXAngle
@@ -86,22 +91,24 @@ abstract class FaceTracking(protected val trackingTaps: TrackingTaps) extends Ef
       ParameterValueUpdate("ParamAngleY", this.lastFaceYAngle),
       ParameterValueUpdate("ParamAngleZ", this.lastFaceZAngle),
       ParameterValueUpdate("ParamBodyAngleX", this.lastBodyXAngle, 0.75f),
-      ParameterValueUpdate("ParamBodyAngleZ", this.lastBodyZAngle, 0.75f), // ✅ New
-      ParameterValueUpdate("ParamBodyX", transX),                           // ✅ New
-      ParameterValueUpdate("ParamBodyY", transY),                           // ✅ New
-      ParameterValueUpdate("ParamBodyAngleY", this.lastFaceYAngle * 0.5f, 0.6f),  // ✅ New
-      ParameterValueUpdate("ParamBodyAngleZ", this.lastFaceZAngle * 0.3f, 0.6f),  // ✅ New
-      ParameterValueUpdate("ParamAllX", this.lastFaceXAngle * 0.08f, 0.4f),  // ✅ New
-      ParameterValueUpdate("ParamAllY", this.lastFaceYAngle * 0.06f, 0.4f),  // ✅ New
-      ParameterValueUpdate("ParamAllRotate", this.lastFaceZAngle * 0.25f, 0.4f),  // ✅ New
-      ParameterValueUpdate("ParamLeftShoulderUp", leftShoulder, 0.3f),  // ✅ New
-      ParameterValueUpdate("ParamRightShoulderUp", rightShoulder, 0.3f),  // ✅ New
+      ParameterValueUpdate("ParamBodyAngleZ", this.lastBodyZAngle, 0.75f), //  New
+      ParameterValueUpdate("ParamBodyX", transX),                           //  New
+      ParameterValueUpdate("ParamBodyY", transY),                           //  New
+      ParameterValueUpdate("ParamBodyAngleY", this.lastFaceYAngle * 0.5f, 0.6f),  //  New
+      ParameterValueUpdate("ParamBodyAngleZ", this.lastFaceZAngle * 0.3f, 0.6f),  //  New
+      ParameterValueUpdate("ParamAllX", this.lastFaceXAngle * 0.08f, 0.4f),  //  New
+      ParameterValueUpdate("ParamAllY", this.lastFaceYAngle * 0.06f, 0.4f),  //  New
+      ParameterValueUpdate("ParamAllRotate", this.lastFaceZAngle * 0.25f, 0.4f),  //  New
+      ParameterValueUpdate("ParamLeftShoulderUp", leftShoulder, 0.3f),  //  New
+      ParameterValueUpdate("ParamRightShoulderUp", rightShoulder, 0.3f),  //  New
       ParameterValueUpdate("ParamEyeLOpen", leftEyeOpenness),
       ParameterValueUpdate("ParamEyeROpen", rightEyeOpenness),
       ParameterValueUpdate("ParamMouthOpenY", mouthOpenness),
       ParameterValueUpdate("ParamMouthForm", mouthForm),
       ParameterValueUpdate("ParamEyeLSmile", leftEyeSmile),
-      ParameterValueUpdate("ParamEyeRSmile", rightEyeSmile)
+      ParameterValueUpdate("ParamEyeRSmile", rightEyeSmile),
+      ParameterValueUpdate("ParamEyeBallX", eyeBallX),
+      ParameterValueUpdate("ParamEyeBallY", eyeBallY)
     )
 
     result
