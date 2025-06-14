@@ -3,21 +3,25 @@ package moe.brianhsu.live2d.demo.openSeeFace
 import moe.brianhsu.live2d.adapter.gateway.openSeeFace.UDPOpenSeeFaceDataReader
 import moe.brianhsu.live2d.boundary.gateway.openSeeFace.OpenSeeFaceDataReader
 import moe.brianhsu.live2d.enitiy.openSeeFace.OpenSeeFaceData
+import java.lang.ProcessBuilder.Redirect
+import scala.concurrent.{ExecutionContext, Future}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.io.Source
 import scala.util.Try
 
 object ExternalOpenSeeFaceDataReader {
   def apply(command: String, hostname: String, port: Int, onDataRead: OpenSeeFaceData => Unit): ExternalOpenSeeFaceDataReader = {
 
-    println("===> command:" + command)
-    val process = new ProcessBuilder(command.split(" "):_*)
-      .redirectErrorStream(true)
-      .start()
+    val builder = new ProcessBuilder(command.split(" "):_*)
+      .redirectOutput(Redirect.DISCARD)
+      .redirectError(Redirect.DISCARD)
+    val process = builder.start()
 
     new ExternalOpenSeeFaceDataReader(process, hostname, port, onDataRead)
+  }
+   def startAsync(command: String, hostname: String, port: Int, onDataRead: OpenSeeFaceData => Unit)
+                (implicit ec: ExecutionContext): Future[ExternalOpenSeeFaceDataReader] = Future {
+    val reader = apply(command, hostname, port, onDataRead)
+    reader.ensureStarted().get
   }
 }
 
@@ -51,7 +55,6 @@ class ExternalOpenSeeFaceDataReader(process: Process, hostname: String, port: In
   override def readData(): Try[OpenSeeFaceData] = {
     val data = this.udpDataReader.readData()
     data.foreach(onDataRead)
-    Future { Source.fromInputStream(process.getInputStream).mkString }
     data
   }
 
@@ -62,4 +65,5 @@ class ExternalOpenSeeFaceDataReader(process: Process, hostname: String, port: In
 
     this.udpDataReader.close()
   }
+  
 }

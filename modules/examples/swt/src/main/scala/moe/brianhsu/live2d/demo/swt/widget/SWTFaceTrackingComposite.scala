@@ -11,6 +11,8 @@ import org.eclipse.swt.events.PaintEvent
 import org.eclipse.swt.graphics.Color
 import org.eclipse.swt.layout.{FillLayout, GridData, GridLayout}
 import org.eclipse.swt.widgets.{Button, Canvas, Combo, Composite, Event, Group, Label, MessageBox}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success}
 
 import scala.annotation.unused
 import scala.util.Try
@@ -207,35 +209,34 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
     demoAppHolder.foreach(_.disableFaceTracking())
 
     val settings = getOpenSeeFaceSetting
-    val dataReader: Try[ExternalOpenSeeFaceDataReader] = for {
-      reader <- Try(ExternalOpenSeeFaceDataReader(settings.getCommand, settings.getHostname, settings.getPort, onDataRead))
-      startedReader <- reader.ensureStarted()
-    } yield {
-      startedReader
-    }
-
-    this.openSeeFaceReaderHolder = dataReader.toOption
-
-    dataReader.failed.foreach { e =>
-      val messageBox = new MessageBox(this.getShell, SWT.OK)
-      messageBox.setText("Failed to start OpenSeeFace")
-      messageBox.setMessage(e.getMessage)
-      messageBox.open()
-    }
-
-    for {
-      demoApp <- demoAppHolder
-      reader <- dataReader
-    } {
-      demoApp.enableFaceTracking(reader)
-      this.startButton.setEnabled(false)
-      this.stopButton.setEnabled(true)
-      this.buttonStackLayout.topControl = this.stopButton
-      this.buttonComposite.layout(true)
-    }
-
-    this.canvas.redraw()
-    this.canvas.update()
+    ExternalOpenSeeFaceDataReader
+      .startAsync(settings.getCommand, settings.getHostname, settings.getPort, onDataRead)
+      .onComplete {
+        case Success(reader) =>
+          this.openSeeFaceReaderHolder = Some(reader)
+          for (demoApp <- demoAppHolder) demoApp.enableFaceTracking(reader)
+          if (!this.getDisplay.isDisposed) {
+            this.getDisplay.asyncExec(() => {
+              if (!this.canvas.isDisposed) {
+                startButton.setEnabled(false)
+                stopButton.setEnabled(true)
+                buttonStackLayout.topControl = stopButton
+                buttonComposite.layout(true)
+                canvas.redraw()
+                canvas.update()
+              }
+            })
+          }
+        case Failure(e) =>
+          if (!this.getDisplay.isDisposed) {
+            this.getDisplay.asyncExec(() => {
+              val messageBox = new MessageBox(getShell, SWT.OK)
+              messageBox.setText("Failed to start OpenSeeFace")
+              messageBox.setMessage(e.getMessage)
+              messageBox.open()
+            })
+          }
+      }
 
   }
 

@@ -8,6 +8,8 @@ import moe.brianhsu.live2d.enitiy.openSeeFace.OpenSeeFaceData
 import moe.brianhsu.live2d.enitiy.openSeeFace.OpenSeeFaceData.Point
 
 import java.awt.event.ActionEvent
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success}
 import java.awt.{BasicStroke, CardLayout, Color, Graphics, Graphics2D, GridBagConstraints, GridBagLayout}
 import java.util.concurrent.{Callable, ScheduledThreadPoolExecutor, TimeUnit}
 import javax.swing._
@@ -109,30 +111,24 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
     live2DWidget.demoAppHolder.foreach(_.disableFaceTracking())
 
     val settings = getOpenSeeFaceSetting
-    val dataReader: Try[ExternalOpenSeeFaceDataReader] = for {
-      reader <- Try(ExternalOpenSeeFaceDataReader(settings.getCommand, settings.getHostname, settings.getPort, onDataRead))
-      startedReader <- reader.ensureStarted()
-    } yield {
-      startedReader
-    }
 
-    this.openSeeFaceReaderHolder = dataReader.toOption
-
-    dataReader.failed.foreach { e =>
-      JOptionPane.showMessageDialog(this, e.getMessage, "Failed to start OpenSeeFace", JOptionPane.ERROR_MESSAGE)
-    }
-
-    for {
-      demoApp <- live2DWidget.demoAppHolder
-      reader <- dataReader
-    } {
-      demoApp.enableFaceTracking(reader)
-      this.startButton.setEnabled(false)
-      this.stopButton.setEnabled(true)
-      this.buttonCardLayout.show(buttonPanel, "Stop")
-    }
-
-    this.outlinePanel.update(this.outlinePanel.getGraphics)
+    ExternalOpenSeeFaceDataReader
+      .startAsync(settings.getCommand, settings.getHostname, settings.getPort, onDataRead)
+      .onComplete {
+        case Success(reader) =>
+          this.openSeeFaceReaderHolder = Some(reader)
+          for (demoApp <- live2DWidget.demoAppHolder) demoApp.enableFaceTracking(reader)
+          SwingUtilities.invokeLater { () =>
+            startButton.setEnabled(false)
+            stopButton.setEnabled(true)
+            buttonCardLayout.show(buttonPanel, "Stop")
+            outlinePanel.update(outlinePanel.getGraphics)
+          }
+        case Failure(e) =>
+          SwingUtilities.invokeLater { () =>
+            JOptionPane.showMessageDialog(this, e.getMessage, "Failed to start OpenSeeFace", JOptionPane.ERROR_MESSAGE)
+          }
+      }
 
   }
 
