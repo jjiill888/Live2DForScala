@@ -1,6 +1,7 @@
 package moe.brianhsu.live2d.demo.swing.widget
 
 import moe.brianhsu.live2d.demo.openSeeFace.{CameraListing, ExternalOpenSeeFaceDataReader, OpenSeeFaceSetting}
+import moe.brianhsu.live2d.demo.app.DemoApp
 import moe.brianhsu.live2d.demo.swing.Live2DUI
 import moe.brianhsu.live2d.demo.swing.widget.faceTracking.{SwingOpenSeeFaceAdvance, SwingOpenSeeFaceBundle, SwingOpenSeeFacePlaceholder}
 import moe.brianhsu.live2d.enitiy.openSeeFace.OpenSeeFaceData
@@ -23,6 +24,9 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
   private val openSeeFaceBundle = createBundleByOS()
   private val cardLayout = new CardLayout
   private val openSeeFacePanel = new JPanel(cardLayout)
+  private val autoStartCheckBox = new JCheckBox("Auto Start")
+  autoStartCheckBox.setSelected(DemoApp.loadAutoStart())
+  autoStartCheckBox.addActionListener(_ => DemoApp.saveAutoStart(autoStartCheckBox.isSelected))
   private val (startButton, stopButton, buttonPanel, buttonCardLayout) = createStartStopButton()
   private val outlinePanel = new OutlinePanel
   private val executor = new ScheduledThreadPoolExecutor(1)
@@ -54,9 +58,16 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
     this.openSeeFacePanel.add(openSeeFaceAdvance, "Advanced")
     this.add(openSeeFacePanel, gc3)
 
+    val gcAuto = new GridBagConstraints()
+    gcAuto.gridx = 0
+    gcAuto.gridy = 2
+    gcAuto.gridwidth = 2
+    gcAuto.anchor = GridBagConstraints.NORTHWEST
+    this.add(autoStartCheckBox, gcAuto)
+
     val gc4 = new GridBagConstraints()
     gc4.gridx = 0
-    gc4.gridy = 2
+    gc4.gridy = 3
     gc4.gridwidth = 2
     gc4.fill = GridBagConstraints.HORIZONTAL
     gc4.weightx = 1
@@ -65,7 +76,7 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
 
     val gc5 = new GridBagConstraints()
     gc5.gridx = 0
-    gc5.gridy = 3
+    gc5.gridy = 4
     gc5.gridwidth = 2
     gc5.fill = GridBagConstraints.BOTH
     gc5.weightx = 1
@@ -81,6 +92,9 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
 
   def enableStartButton(): Unit = {
     this.startButton.setEnabled(true)
+        if (autoStartCheckBox.isSelected) {
+      onStartSelected(new ActionEvent(autoStartCheckBox, ActionEvent.ACTION_PERFORMED, "AutoStart"))
+    }
   }
 
   private def createBundleByOS() = {

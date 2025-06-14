@@ -25,6 +25,7 @@ object DemoApp {
   case object ClickAndDrag extends FaceDirectionMode
 
   private val LastAvatarFile = new File("last_avatar")
+  private val AutoStartFile = new File("auto_start")
 
   def saveLastAvatar(path: String): Unit =
     try {
@@ -46,6 +47,27 @@ object DemoApp {
           None
       }
     } else None
+
+    def saveAutoStart(enabled: Boolean): Unit =
+    try {
+      val writer = new PrintWriter(AutoStartFile, "UTF-8")
+      try writer.print(enabled) finally writer.close()
+    } catch {
+      case e: Exception =>
+        System.err.println(s"[WARN] Cannot save auto start flag: ${e.getMessage}")
+    }
+
+  def loadAutoStart(): Boolean =
+    if (AutoStartFile.exists()) {
+      try {
+        val src = Source.fromFile(AutoStartFile, "UTF-8")
+        try src.mkString.trim.toBooleanOption.getOrElse(false) finally src.close()
+      } catch {
+        case e: Exception =>
+          System.err.println(s"[WARN] Cannot read auto start flag: ${e.getMessage}")
+          false
+      }
+    } else false
 }
 
 abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnOpenGLThread)

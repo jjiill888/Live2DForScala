@@ -14,7 +14,7 @@ class SWTOpenSeeFaceAdvance(parent: Composite) extends Composite(parent, SWT.NON
   private val portText = createTextField(this,"Port:", "11573", "Set port for sending tracking data")
   private val cameraIdText = createTextField(this,"Camera ID:", "0", "Set camera ID (0, 1...)")
   private val modelCombo = createComboField(
-    this, "Model:", Array("-3", "-2", "-1", "0", "1", "2", "3", "4"), 6,
+    this, "Model:", Array("-3", "-2", "-1", "0", "1", "2", "3", "4"), 7,
     "This can be used to select the tracking model.\n" +
       "Higher numbers are models with better tracking quality, but slower speed, " +
       "except for model 4, which is wink optimized.\n" +
@@ -27,7 +27,7 @@ class SWTOpenSeeFaceAdvance(parent: Composite) extends Composite(parent, SWT.NON
     "Set this to 1 to visualize the tracking, to 2 to also show face ids, " +
       "to 3 to add confidence values or to 4 to add numbers to the point display."
   )
-  private val extraParameterText = createTextField(this, "Extra Parameters:", "--width 640 --height 480 --fps 30")
+  private val extraParameterText = createTextField(this, "Extra Parameters:", "--width 640 --height 480 --fps 60")
   private val mirrorCheckbox = createCheckbox(this, "Mirror Input", "Process a mirror image of the input video")
   private val commandPreviewText = createCommandPreview(this, "Command Preview:")
 

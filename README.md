@@ -117,6 +117,8 @@ Both Swing and SWT version of demo application provide same functionality. The f
 4. Use mouse wheel to zoom-in / zoom-out the avatar.
 5. Click the `Default Avatar` button to initiate the loading process.When clicked, the application attempts to load the avatar model located in the def_avatar directory, which resides in the same location as the application JAR file.
 6. The application stores the directory of the last loaded avatar in a `last_avatar` file. When launched again, it tries to load that avatar automatically and falls back to `def_avatar` if it fails.
+7. Enabling the `Auto Start` checkbox in the face tracking panel writes a `auto_start` file so tracking starts automatically next time.
+   
 ```console
 ├── def_avatar                        # This file tells the app which model to load by default
 |   └──mao_pro.model3.json
@@ -130,6 +132,7 @@ Both Swing and SWT version of demo application provide same functionality. The f
 ├── Live2DForScala-SWT-*.jar         # Your app JAR
 ├── openSeeFace/                     # Face tracking engine
 ├── last_avatar                      # Path of the avatar loaded last time
+├── auto_start                       # Whether face tracking auto start is enabled
 ├── start.desktop                    # (Optional) Desktop shortcut launcher
 ```
 

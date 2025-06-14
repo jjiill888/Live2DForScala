@@ -28,6 +28,9 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
   private val openSeeFacePanel = new Composite(openSeeFaceGroup, SWT.NONE)
   private val bundle = new SWTOpenSeeFaceBundle(openSeeFacePanel, CameraListing.createByOS())
   private val advanced = new SWTOpenSeeFaceAdvance(openSeeFacePanel)
+  private val autoStartButton = new Button(openSeeFaceGroup, SWT.CHECK)
+  autoStartButton.setSelection(DemoApp.loadAutoStart())
+  autoStartButton.addListener(SWT.Selection, (_: Event) => DemoApp.saveAutoStart(autoStartButton.getSelection))
   private val (startButton, stopButton, buttonComposite, buttonStackLayout) = createStartStopButton(openSeeFaceGroup)
   private val outlineGroup = new Group(this, SWT.BORDER)
   private val canvas = new Canvas(outlineGroup, SWT.NONE)
@@ -58,6 +61,11 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
 
     this.openSeeFacePanel.setLayoutData(gridData2)
 
+    autoStartButton.setText("Auto Start")
+    val autoData = new GridData()
+    autoData.horizontalSpan = 2
+    autoStartButton.setLayoutData(autoData)
+
     this.combo.addListener(SWT.Selection, onModeSelected)
     this.startButton.addListener(SWT.Selection, onStartSelected)
     this.stopButton.addListener(SWT.Selection, onStopSelected)
@@ -70,6 +78,9 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
 
   def enableStartButton(): Unit = {
     this.startButton.setEnabled(true)
+        if (autoStartButton.getSelection) {
+      onStartSelected(new Event())
+    }
   }
 
   private def createStartStopButton(parent: Composite) = {

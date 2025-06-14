@@ -13,7 +13,7 @@ class SwingOpenSeeFaceBundle(cameraListing: CameraListing) extends JPanel with O
 
   private val cameraCombo = createComboField(this, 0, "Camera:", cameraListing.listing.map(_.title), 0, "Select camera for face tracking")
   private val fpsCombo = createComboField(
-    this, 1, "FPS:", List("24", "30", "60", "120"), 1,
+    this, 1, "FPS:", List("24", "30", "60", "120"), 2,
     "Set camera frames per second"
   )
 
@@ -23,7 +23,7 @@ class SwingOpenSeeFaceBundle(cameraListing: CameraListing) extends JPanel with O
   )
 
   private val modelCombo = createComboField(
-    this, 3, "Model:", List("-3", "-2", "-1", "0", "1", "2", "3", "4"), 6,
+    this, 3, "Model:", List("-3", "-2", "-1", "0", "1", "2", "3", "4"), 7,
     "This can be used to select the tracking model.\n" +
       "Higher numbers are models with better tracking quality, but slower speed, " +
       "except for model 4, which is wink optimized.\n" +
