@@ -104,7 +104,7 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
 
     loadAvatar.setText("Load Avatar")
     defaultAvatar.setText("Default Avatar")
-    defaultBackground.setText("Default Background")
+    defaultBackground.setText("Green Background")
     selectBackground.setText("Select Background")
     pureColorBackground.setText("Pure Color Background")
 

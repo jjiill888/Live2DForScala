@@ -12,7 +12,7 @@ class SwingToolbar(live2DWidget: Live2DUI) extends JToolBar("Live 2D For Scala S
 
   private val loadAvatar = new JButton("Load Avatar")
   private val pureBackground = new JButton("Pure Color Background")
-  private val defaultBackground = new JButton("Default Background")
+  private val defaultBackground = new JButton("Green Background")
   private val selectBackground = new JButton("Select Background Image")
 
   {

@@ -414,13 +414,6 @@ The bunlded OpenSeeFace package also contains it's dependencies, namely:
  - [Pillow](https://pypi.org/project/Pillow/) released under Historical Permission Notice and Disclaimer.
  - [Numpy](https://pypi.org/project/numpy/) released under BSD License.
 
-Background
---------------
-
-The default background in the example program is licensed under [Freepik License][11] by:
-
-- [Japanese koi vector created by rawpixel.com - www.freepik.com][7]
-
 Icons
 --------------
 
