@@ -129,7 +129,11 @@ class SWTAvatarDisplayArea(parent: Composite) extends Composite(parent, SWT.NONE
   }
 
   private def runOnOpenGLThread(callback: => Any): Any = {
-    callback
+     if (canvas.getDisplay.getThread == Thread.currentThread()) {
+      callback
+    } else {
+      canvas.getDisplay.syncExec(() => callback)
+    }
   }
 
   private class CanvasUpdater extends Runnable {
