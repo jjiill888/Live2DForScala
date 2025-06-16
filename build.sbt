@@ -20,7 +20,7 @@ val swtLinux = "org.eclipse.platform" % "org.eclipse.swt.gtk.linux.x86_64" % swt
 
 val testFramework = Seq(
   "org.scalatest" %% "scalatest" % "3.2.16" % Test,
-  "org.scalamock" %% "scalamock" % "5.2.0" % Test,
+  "org.scalamock" %% "scalamock" % "6.0.0" % Test,
   "com.vladsch.flexmark" % "flexmark-all" % "0.64.8" % Test
 )
 
