@@ -20,7 +20,7 @@ jobs:
       GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       EXCLUDE_TEST_TAG: moe.brianhsu.AudioOutputTest  
     container:
-      image: openjdk:11
+      image: openjdk:17
     steps:
       - uses: actions/checkout@v3
       - name: Install packages
