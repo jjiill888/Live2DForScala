@@ -8,6 +8,7 @@ import moe.brianhsu.live2d.enitiy.model.drawable.{ConstantFlags, Drawable, Drawa
 import moe.brianhsu.live2d.enitiy.opengl.RichOpenGLBinding.ViewPort
 import moe.brianhsu.live2d.enitiy.opengl.texture.{TextureInfo, TextureManager}
 import moe.brianhsu.live2d.enitiy.opengl.{OpenGLBinding, RichOpenGLBinding}
+import scala.Conversion
 import moe.brianhsu.live2d.usecase.renderer.opengl.shader.ShaderRenderer
 import moe.brianhsu.live2d.usecase.renderer.opengl.{OffscreenFrame, Profile}
 import moe.brianhsu.utils.mock.{Live2DModelMock, OpenGLMock, ShaderFactoryMock}
@@ -28,7 +29,7 @@ class ClippingRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenT
       Given("a stubbed OpenGL binding / Live2D model / TextureManager / ShaderRenderer")
       implicit val binding: OpenGLBinding = createOpenGLStub()
       val richOpenGLBinding: RichOpenGLBinding = stub[RichOpenGLBinding]
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
+      implicit val wrapper: Conversion[OpenGLBinding, RichOpenGLBinding] = { _ => richOpenGLBinding}
       val live2DModel = new Live2DModel(stub[ModelBackend]) {
         override lazy val containMaskedDrawables: Boolean = false
       }
@@ -46,7 +47,7 @@ class ClippingRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenT
       Given("a stubbed OpenGL binding / Live2D model / TextureManager / ShaderRenderer")
       implicit val binding: OpenGLBinding = createOpenGLStub()
       val richOpenGLBinding: RichOpenGLBinding = stub[RichOpenGLBinding]
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
+      implicit val wrapper: Conversion[OpenGLBinding, RichOpenGLBinding] = { _ => richOpenGLBinding}
       val textureManager = stub[TextureManager]
       val shaderRenderer = new ShaderRenderer(createShaderFactory())
       val clippingManager = stub[ClippingManager]
@@ -73,7 +74,7 @@ class ClippingRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenT
       Given("a stubbed OpenGL binding / Live2D model / TextureManager / ShaderRenderer")
       implicit val binding: OpenGLBinding = createOpenGLStub()
       val richOpenGLBinding: RichOpenGLBinding = stub[RichOpenGLBinding]
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
+      implicit val wrapper: Conversion[OpenGLBinding, RichOpenGLBinding] = { _ => richOpenGLBinding}
       val textureManager = stub[TextureManager]
       val shaderRenderer = new ShaderRenderer(createShaderFactory())
       val live2DModel = new Live2DModel(stub[ModelBackend])
@@ -99,7 +100,7 @@ class ClippingRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenT
       Given("a stubbed OpenGL binding / Live2D model / TextureManager / ShaderRenderer")
       implicit val binding: OpenGLBinding = createOpenGLStub()
       val richOpenGLBinding: RichOpenGLBinding = stub[RichOpenGLBinding]
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
+      implicit val wrapper: Conversion[OpenGLBinding, RichOpenGLBinding] = { _ => richOpenGLBinding}
       val textureManager = stub[TextureManager]
       val shaderRenderer = new ShaderRenderer(createShaderFactory())
       val live2DModel = new Live2DModel(stub[ModelBackend])
@@ -130,7 +131,7 @@ class ClippingRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenT
       Given("a mocked OpenGL binding / Live2D model / TextureManager / ShaderRenderer")
       implicit val binding: OpenGLBinding = createOpenGLMock()
       val richOpenGLBinding: RichOpenGLBinding = mock[RichOpenGLBinding]
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
+      implicit val wrapper: Conversion[OpenGLBinding, RichOpenGLBinding] = { _ => richOpenGLBinding}
       val textureManager = stub[TextureManager]
       val shaderRenderer = new ShaderRenderer(createShaderFactory())
       val live2DModel = new Live2DModel(stub[ModelBackend])
@@ -150,7 +151,7 @@ class ClippingRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenT
       Given("a mocked OpenGL binding / Live2D model / TextureManager / ShaderRenderer")
       implicit val binding: OpenGLBinding = createOpenGLMock()
       val richOpenGLBinding: RichOpenGLBinding = mock[RichOpenGLBinding]
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
+      implicit val wrapper: Conversion[OpenGLBinding, RichOpenGLBinding] = { _ => richOpenGLBinding}
       val textureManager = stub[TextureManager]
       val shaderRenderer = new ShaderRenderer(createShaderFactory())
       val live2DModel = new Live2DModel(stub[ModelBackend])
@@ -196,7 +197,7 @@ class ClippingRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenT
       And("a mocked OpenGL binding / Live2D model / TextureManager / ShaderRenderer")
       implicit val binding: OpenGLBinding = createOpenGLStub()
       val richOpenGLBinding: RichOpenGLBinding = stub[RichOpenGLBinding]
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
+      implicit val wrapper: Conversion[OpenGLBinding, RichOpenGLBinding] = { _ => richOpenGLBinding}
       val shaderRenderer = stub[MockableShaderRenderer]
       val live2DModel = new Live2DModel(stub[ModelBackend]) {
         override val textureFiles: List[String] = List("0.png", "1.png" ,"2.png", "3.png")
@@ -276,7 +277,7 @@ class ClippingRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenT
       And("a mocked OpenGL binding / Live2D model / TextureManager / ShaderRenderer")
       implicit val binding: OpenGLBinding = createOpenGLStub()
       val richOpenGLBinding: RichOpenGLBinding = stub[RichOpenGLBinding]
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
+      implicit val wrapper: Conversion[OpenGLBinding, RichOpenGLBinding] = { _ => richOpenGLBinding}
       val shaderRenderer = stub[MockableShaderRenderer]
       val live2DModel = new Live2DModel(stub[ModelBackend]) {
         override val textureFiles: List[String] = List("0.png", "1.png" ,"2.png", "3.png")

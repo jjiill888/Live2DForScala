@@ -5,18 +5,18 @@ import moe.brianhsu.live2d.enitiy.model.drawable.{Drawable, DrawableColor, Verte
 import moe.brianhsu.live2d.enitiy.opengl.texture.TextureManager
 import moe.brianhsu.live2d.enitiy.opengl.{OpenGLBinding, RichOpenGLBinding}
 import moe.brianhsu.live2d.usecase.renderer.opengl.shader.ShaderRenderer
+import moe.brianhsu.live2d.enitiy.opengl.RichOpenGLBinding.given
 import moe.brianhsu.live2d.usecase.renderer.opengl.{OffscreenFrame, Profile}
 
 class ClippingRenderer(model: Live2DModel, textureManager: TextureManager, shaderRenderer: ShaderRenderer,
                        initClippingManager: Option[ClippingManager], val offscreenFrameHolder: Option[OffscreenFrame])
-                      (implicit gl: OpenGLBinding, wrapper: OpenGLBinding => RichOpenGLBinding) {
-
+                      (using gl: OpenGLBinding, wrapper: Conversion[OpenGLBinding, RichOpenGLBinding]) {
   import gl.constants._
 
   private var clippingManagerHolder: Option[ClippingManager] = initClippingManager
 
   def this(model: Live2DModel, textureManager: TextureManager, shaderRenderer: ShaderRenderer)
-          (implicit gl: OpenGLBinding, wrapper: OpenGLBinding => RichOpenGLBinding = RichOpenGLBinding.wrapOpenGLBinding) = {
+          (using gl: OpenGLBinding, wrapper: Conversion[OpenGLBinding, RichOpenGLBinding] = RichOpenGLBinding.wrapOpenGLBinding) = {
 
     this(
       model, textureManager, shaderRenderer,
@@ -32,7 +32,7 @@ class ClippingRenderer(model: Live2DModel, textureManager: TextureManager, shade
 
   def this(model: Live2DModel, textureManager: TextureManager,
            shaderRenderer: ShaderRenderer, initClippingManager: Option[ClippingManager])
-          (implicit gl: OpenGLBinding, wrapper: OpenGLBinding => RichOpenGLBinding) = {
+          (using gl: OpenGLBinding, wrapper: Conversion[OpenGLBinding, RichOpenGLBinding]) = {
 
     this(
       model, textureManager, shaderRenderer,

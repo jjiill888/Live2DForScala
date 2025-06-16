@@ -2,6 +2,9 @@ package moe.brianhsu.live2d.enitiy.opengl
 
 import moe.brianhsu.live2d.enitiy.opengl.RichOpenGLBinding.{ColorWriteMask, ViewPort}
 import moe.brianhsu.live2d.enitiy.opengl.texture.TextureColor
+import scala.language.implicitConversions
+import scala.language.implicitConversions
+import scala.Conversion
 
 import java.nio.ByteBuffer
 
@@ -16,6 +19,8 @@ object RichOpenGLBinding {
         wrapper(binding)
     }
   }
+
+  given Conversion[OpenGLBinding, RichOpenGLBinding] = wrapOpenGLBinding(_)
 
   case class ColorWriteMask(red: Boolean, green: Boolean, blue: Boolean, alpha: Boolean)
   case class ViewPort(x: Int, y: Int, width: Int, height: Int)

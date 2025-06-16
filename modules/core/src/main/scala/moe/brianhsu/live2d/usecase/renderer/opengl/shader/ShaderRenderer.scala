@@ -4,6 +4,7 @@ import moe.brianhsu.live2d.enitiy.model.drawable.ConstantFlags.BlendMode
 import moe.brianhsu.live2d.enitiy.model.drawable.DrawableColor
 import moe.brianhsu.live2d.enitiy.opengl.texture.TextureColor
 import moe.brianhsu.live2d.enitiy.opengl.{BlendFunction, OpenGLBinding, RichOpenGLBinding}
+import moe.brianhsu.live2d.enitiy.opengl.RichOpenGLBinding.given
 import moe.brianhsu.live2d.usecase.renderer.opengl.OffscreenFrame
 import moe.brianhsu.live2d.usecase.renderer.opengl.clipping.ClippingContext
 import moe.brianhsu.live2d.usecase.renderer.opengl.shader.ShaderFactory.DefaultShaderFactory
@@ -21,7 +22,7 @@ object ShaderRenderer {
     shaderRendererHolder.get(gl) match {
       case Some(renderer) => renderer
       case None =>
-        this.shaderRendererHolder += (gl -> new ShaderRenderer(shaderFactory)(gl, {x: OpenGLBinding => new RichOpenGLBinding(x)}))
+        this.shaderRendererHolder += (gl -> new ShaderRenderer(shaderFactory)(using gl, RichOpenGLBinding.wrapOpenGLBinding))
         this.shaderRendererHolder(gl)
     }
   }
@@ -29,11 +30,11 @@ object ShaderRenderer {
 
 class ShaderRenderer(setupMaskShader: SetupMaskShader, normalShader: NormalShader,
                      maskedShader: MaskedShader, invertedMaskedShader: InvertedMaskedShader)
-                    (implicit gl: OpenGLBinding, richOpenGLWrapper: OpenGLBinding => RichOpenGLBinding) {
+                    (using gl: OpenGLBinding, wrapper: Conversion[OpenGLBinding, RichOpenGLBinding]) {
 
   import gl.constants._
 
-  def this(shaderFactory: ShaderFactory)(implicit gl: OpenGLBinding, richOpenGLWrapper: OpenGLBinding => RichOpenGLBinding) = {
+  def this(shaderFactory: ShaderFactory)(using gl: OpenGLBinding, wrapper: Conversion[OpenGLBinding, RichOpenGLBinding]) = {
     this(
       shaderFactory.setupMaskShader,
       shaderFactory.normalShader,

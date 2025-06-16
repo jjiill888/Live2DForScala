@@ -1,6 +1,7 @@
 package moe.brianhsu.utils.mock
 
 import moe.brianhsu.live2d.enitiy.opengl.{OpenGLBinding, RichOpenGLBinding}
+import scala.Conversion
 import moe.brianhsu.live2d.usecase.renderer.opengl.shader.{InvertedMaskedShader, MaskedShader, NormalShader, SetupMaskShader, ShaderFactory, ShaderRenderer}
 
 trait ShaderFactoryMock {
@@ -9,7 +10,7 @@ trait ShaderFactoryMock {
   protected val stubbedInvertedMaskShader: InvertedMaskedShader = createInvertedMaskShader()
   protected val stubbedNormalShader: NormalShader = createNormalShader()
 
-  class MockableShaderRenderer(implicit gl: OpenGLBinding, wrapper: OpenGLBinding => RichOpenGLBinding) extends ShaderRenderer(createShaderFactory())(gl, wrapper)
+  class MockableShaderRenderer(implicit gl: OpenGLBinding, wrapper: Conversion[OpenGLBinding, RichOpenGLBinding]) extends ShaderRenderer(createShaderFactory())(gl, wrapper)
 
   def createShaderFactory(): ShaderFactory = {
 

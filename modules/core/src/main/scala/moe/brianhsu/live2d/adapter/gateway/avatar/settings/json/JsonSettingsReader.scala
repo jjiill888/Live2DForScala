@@ -7,6 +7,7 @@ import moe.brianhsu.live2d.adapter.gateway.avatar.settings.json.model.{Group, Mo
 import moe.brianhsu.live2d.boundary.gateway.avatar.SettingsReader
 import org.json4s.native.JsonMethods.parse
 import org.json4s.{DefaultFormats, Formats}
+import moe.brianhsu.live2d.adapter.gateway.avatar.settings.json.JsonImplicits.*
 
 import java.io.FileNotFoundException
 import java.nio.file.{Files, Path, Paths}

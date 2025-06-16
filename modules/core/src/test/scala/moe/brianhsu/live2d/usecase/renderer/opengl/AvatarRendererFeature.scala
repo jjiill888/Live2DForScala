@@ -10,6 +10,7 @@ import moe.brianhsu.live2d.enitiy.model.drawable.Drawable.ColorFetcher
 import moe.brianhsu.live2d.enitiy.model.drawable.{ConstantFlags, Drawable, DrawableColor, DynamicFlags, VertexInfo}
 import moe.brianhsu.live2d.enitiy.opengl.texture.{TextureColor, TextureInfo, TextureManager}
 import moe.brianhsu.live2d.enitiy.opengl.{OpenGLBinding, RichOpenGLBinding}
+import scala.Conversion
 import moe.brianhsu.live2d.usecase.renderer.opengl.clipping.{ClippingContext, ClippingRenderer}
 import moe.brianhsu.live2d.usecase.renderer.opengl.shader.ShaderRenderer
 import moe.brianhsu.live2d.usecase.renderer.viewport.matrix.ProjectionMatrix
@@ -56,7 +57,7 @@ class AvatarRendererFeature extends AnyFeatureSpec with Matchers with GivenWhenT
       Given("stubbed OpenGL / RichOpenGL binding")
       val richOpenGLBinding = stub[RichOpenGLBinding]
       implicit val binding: OpenGLBinding = createOpenGLStub()
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding }
+      implicit val wrapper: Conversion[OpenGLBinding, RichOpenGLBinding] = _ => richOpenGLBinding
 
       And("a Live2D model without any drawables")
       val modelBackend = stub[ModelBackend]
@@ -77,7 +78,7 @@ class AvatarRendererFeature extends AnyFeatureSpec with Matchers with GivenWhenT
       Given("mocked OpenGL / RichOpenGL binding")
       val richOpenGLBinding = stub[RichOpenGLBinding]
       implicit val binding: OpenGLBinding = createOpenGLStub()
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding }
+      implicit val wrapper: Conversion[OpenGLBinding, RichOpenGLBinding] = _ => richOpenGLBinding
 
       And("a Live2D model without any drawables")
       val live2DModel = createStubbedLive2DModel(drawable = Nil)
@@ -115,7 +116,7 @@ class AvatarRendererFeature extends AnyFeatureSpec with Matchers with GivenWhenT
       And("mocked OpenGL / RichOpenGL binding")
       val richOpenGLBinding = stub[RichOpenGLBinding]
       implicit val binding: OpenGLBinding = createOpenGLStub()
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding }
+      implicit val wrapper: Conversion[OpenGLBinding, RichOpenGLBinding] = _ => richOpenGLBinding
 
       And("a Live2D model / textureManager handle with above drawables")
       val live2DModel = createStubbedLive2DModel(drawables)

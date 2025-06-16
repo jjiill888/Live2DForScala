@@ -2,10 +2,11 @@ package moe.brianhsu.live2d.usecase.renderer.opengl
 
 import moe.brianhsu.live2d.enitiy.opengl.RichOpenGLBinding._
 import moe.brianhsu.live2d.enitiy.opengl.{BlendFunction, OpenGLBinding, RichOpenGLBinding}
+import moe.brianhsu.live2d.enitiy.opengl.RichOpenGLBinding.given
 
 object Profile {
   private var profile: Map[OpenGLBinding, Profile] = Map.empty
-  private implicit val richOpenGLWrapper: OpenGLBinding => RichOpenGLBinding = RichOpenGLBinding.wrapOpenGLBinding
+  private given Conversion[OpenGLBinding, RichOpenGLBinding] = RichOpenGLBinding.wrapOpenGLBinding
 
   def getInstance(implicit gl: OpenGLBinding): Profile = {
 
@@ -30,7 +31,7 @@ object Profile {
  * @param gl The OpenGL binding
  * @param richOpenGLWrapper The converter that will wrap OpenGLBinding to a RichOpenGLBinding
  */
-class Profile private[opengl] (implicit gl: OpenGLBinding, richOpenGLWrapper: OpenGLBinding => RichOpenGLBinding) {
+class Profile private[opengl] (using gl: OpenGLBinding, wrapper: Conversion[OpenGLBinding, RichOpenGLBinding]) {
 
   import gl.constants._
   private var lastProgram: Int = 0

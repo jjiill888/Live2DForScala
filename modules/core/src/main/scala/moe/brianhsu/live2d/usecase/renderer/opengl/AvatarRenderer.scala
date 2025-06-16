@@ -5,29 +5,30 @@ import moe.brianhsu.live2d.enitiy.model.drawable.ConstantFlags.BlendMode
 import moe.brianhsu.live2d.enitiy.model.drawable.{DrawableColor, VertexInfo}
 import moe.brianhsu.live2d.enitiy.opengl.texture.{TextureColor, TextureManager}
 import moe.brianhsu.live2d.enitiy.opengl.{OpenGLBinding, RichOpenGLBinding}
+import moe.brianhsu.live2d.enitiy.opengl.RichOpenGLBinding.given
 import moe.brianhsu.live2d.usecase.renderer.opengl.clipping.{ClippingContext, ClippingRenderer}
 import moe.brianhsu.live2d.usecase.renderer.opengl.shader.ShaderRenderer
 import moe.brianhsu.live2d.usecase.renderer.viewport.matrix.ProjectionMatrix
 
 object AvatarRenderer {
 
-  def apply(model: Live2DModel)(implicit gl: OpenGLBinding, wrapper: OpenGLBinding => RichOpenGLBinding = RichOpenGLBinding.wrapOpenGLBinding): AvatarRenderer = {
+ def apply(model: Live2DModel)(using gl: OpenGLBinding, wrapper: Conversion[OpenGLBinding, RichOpenGLBinding] = RichOpenGLBinding.wrapOpenGLBinding): AvatarRenderer = {
     val textureManager = TextureManager.getInstance(gl)
     val shaderRenderer = ShaderRenderer.getInstance(gl)
     val profile = Profile.getInstance(gl)
-    val clippingRenderer = new ClippingRenderer(model, textureManager, shaderRenderer)(gl, wrapper)
+    val clippingRenderer = new ClippingRenderer(model, textureManager, shaderRenderer)(using gl, wrapper)
 
     new AvatarRenderer(
       model, textureManager, shaderRenderer,
       profile, clippingRenderer
-    )(gl, wrapper)
+    )(using gl, wrapper)
   }
 }
 
 class AvatarRenderer(model: Live2DModel,
                      textureManager: TextureManager, shaderRenderer: ShaderRenderer, profile: Profile,
                      clippingRenderer: ClippingRenderer)
-                    (implicit gl: OpenGLBinding, wrapper: OpenGLBinding => RichOpenGLBinding) {
+                    (using gl: OpenGLBinding, wrapper: Conversion[OpenGLBinding, RichOpenGLBinding]) {
 
   import gl.constants._
 

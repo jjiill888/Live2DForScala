@@ -1,12 +1,13 @@
 package moe.brianhsu.live2d.usecase.renderer.opengl
 
 import moe.brianhsu.live2d.enitiy.opengl.{OpenGLBinding, RichOpenGLBinding}
+import moe.brianhsu.live2d.enitiy.opengl.RichOpenGLBinding.given
 
 object OffscreenFrame {
   private var offscreenFrame: Map[OpenGLBinding, OffscreenFrame] = Map.empty
 
   def getInstance(displayBufferWidth: Int, displayBufferHeight: Int)
-                 (implicit gl: OpenGLBinding, converter: OpenGLBinding => RichOpenGLBinding): OffscreenFrame = {
+                 (using gl: OpenGLBinding, converter: Conversion[OpenGLBinding, RichOpenGLBinding]): OffscreenFrame = {
     offscreenFrame.get(gl) match {
       case Some(offscreenFrame) => offscreenFrame
       case None =>
@@ -16,7 +17,7 @@ object OffscreenFrame {
     }
   }
 
-  protected def createColorTextureBufferAndFrameBuffer(displayBufferWidth: Int, displayBufferHeight: Int)(implicit gl: OpenGLBinding, converter: OpenGLBinding => RichOpenGLBinding): (Int, Int) = {
+   protected def createColorTextureBufferAndFrameBuffer(displayBufferWidth: Int, displayBufferHeight: Int)(using gl: OpenGLBinding, converter: Conversion[OpenGLBinding, RichOpenGLBinding]): (Int, Int) = {
     import gl.constants._
     val colorTextureBufferId = gl.generateTextures(10).head
     gl.glBindTexture(GL_TEXTURE_2D, colorTextureBufferId)

@@ -3,6 +3,7 @@ package moe.brianhsu.live2d.adapter.gateway.avatar.settings.json.model
 import moe.brianhsu.live2d.adapter.RichPath.convertFromPath
 import org.json4s.native.JsonMethods.parse
 import org.json4s.{DefaultFormats, Formats}
+import moe.brianhsu.live2d.adapter.gateway.avatar.settings.json.JsonImplicits.*
 
 import java.nio.file.Paths
 import scala.util.Try

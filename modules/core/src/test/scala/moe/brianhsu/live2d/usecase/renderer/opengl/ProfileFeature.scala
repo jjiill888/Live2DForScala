@@ -2,6 +2,7 @@ package moe.brianhsu.live2d.usecase.renderer.opengl
 
 import moe.brianhsu.live2d.enitiy.opengl.RichOpenGLBinding.{ColorWriteMask, ViewPort}
 import moe.brianhsu.live2d.enitiy.opengl.{BlendFunction, OpenGLBinding, RichOpenGLBinding}
+import scala.Conversion
 import moe.brianhsu.utils.mock.OpenGLMock
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.featurespec.AnyFeatureSpec
@@ -158,8 +159,8 @@ class ProfileFeature extends AnyFeatureSpec with Matchers with GivenWhenThen wit
   }
 
   private def createProfile(binding: OpenGLBinding, richOpenGLBinding: RichOpenGLBinding): Profile = {
-    val converter: OpenGLBinding => RichOpenGLBinding = _ => richOpenGLBinding
-    new Profile()(binding, converter)
+    val converter: Conversion[OpenGLBinding, RichOpenGLBinding] = _ => richOpenGLBinding
+    new Profile()(using binding, converter)
   }
 
 }
