@@ -21,8 +21,8 @@ object FaceTracking {
     leftEyeOpenness: Float, rightEyeOpenness: Float,
     mouthOpenness: Float, mouthForm: Float,
     leftEyeSmile: Float, rightEyeSmile: Float,
-    transX: Float, transY: Float,                 //  Head translation
-    eyeBallX: Float, eyeBallY: Float             //  Eye gaze offsets
+    transX: Float = 0f, transY: Float = 0f,       //  Head translation
+    eyeBallX: Float = 0f, eyeBallY: Float = 0f    //  Eye gaze offsets
   )
 }
 

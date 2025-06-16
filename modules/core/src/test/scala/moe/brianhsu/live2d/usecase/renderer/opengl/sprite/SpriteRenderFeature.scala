@@ -59,13 +59,14 @@ class SpriteRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenThe
       val stubbedPositionBuffer = FloatBuffer.wrap(expectedPositionVertex)
       val stubbedUvBuffer = FloatBuffer.wrap(expectedUvVertex)
 
-      (binding.newDirectFloatBuffer _)
-        .when(where{x: Array[Float] => x sameElements expectedPositionVertex})
-        .returns(stubbedPositionBuffer)
 
+      var callCount = 0
       (binding.newDirectFloatBuffer _)
-        .when(where{x: Array[Float] => x sameElements expectedUvVertex})
-        .returns(stubbedUvBuffer)
+        .when(*)
+        .onCall { _: Array[Float] =>
+          callCount += 1
+          if (callCount == 1) stubbedPositionBuffer else stubbedUvBuffer
+        }
 
       When("draw the sprite")
       spriteRenderer.draw(sprite)
