@@ -28,7 +28,7 @@ object OffscreenFrame {
     gl.glBindTexture(GL_TEXTURE_2D, 0)
 
     val frameBufferId = gl.generateFrameBuffers(10).head
-    val originalFrameBuffer = gl.openGLParameters[Int](GL_FRAMEBUFFER_BINDING)
+    val originalFrameBuffer = gl.openGLIntParameter(GL_FRAMEBUFFER_BINDING)
     gl.glBindFramebuffer(GL_FRAMEBUFFER, frameBufferId)
     gl.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTextureBufferId, 0)
     gl.glBindFramebuffer(GL_FRAMEBUFFER, originalFrameBuffer)

@@ -55,24 +55,24 @@ class Profile private[opengl] (implicit gl: OpenGLBinding, richOpenGLWrapper: Op
   var lastViewPort: ViewPort = _
 
   def save(): Unit = {
-    lastProgram = gl.openGLParameters[Int](GL_CURRENT_PROGRAM)
+    lastProgram = gl.openGLIntParameter(GL_CURRENT_PROGRAM)
     lastVertexAttributes = gl.vertexAttributes
     lastScissorTest = gl.glIsEnabled(GL_SCISSOR_TEST)
     lastStencilTest = gl.glIsEnabled(GL_STENCIL_TEST)
     lastDepthTest = gl.glIsEnabled(GL_DEPTH_TEST)
     lastCullFace = gl.glIsEnabled(GL_CULL_FACE)
     lastBlend = gl.glIsEnabled(GL_BLEND)
-    lastFrontFace = gl.openGLParameters[Int](GL_FRONT_FACE)
+    lastFrontFace = gl.openGLIntParameter(GL_FRONT_FACE)
     lastColorWriteMask = gl.colorWriteMask
-    lastArrayBufferBinding = gl.openGLParameters[Int](GL_ARRAY_BUFFER_BINDING)
-    lastElementArrayBufferBinding = gl.openGLParameters[Int](GL_ELEMENT_ARRAY_BUFFER_BINDING)
+    lastArrayBufferBinding = gl.openGLIntParameter(GL_ARRAY_BUFFER_BINDING)
+    lastElementArrayBufferBinding = gl.openGLIntParameter(GL_ELEMENT_ARRAY_BUFFER_BINDING)
     lastTexture1Binding2D = gl.textureBinding2D(GL_TEXTURE1)
     lastTexture0Binding2D = gl.textureBinding2D(GL_TEXTURE0)
-    lastActiveTexture = gl.openGLParameters[Int](GL_ACTIVE_TEXTURE)
+    lastActiveTexture = gl.openGLIntParameter(GL_ACTIVE_TEXTURE)
 
     lastBlending = gl.blendFunction
 
-    lastFrameBufferBinding = gl.openGLParameters[Int](GL_FRAMEBUFFER_BINDING)
+    lastFrameBufferBinding = gl.openGLIntParameter(GL_FRAMEBUFFER_BINDING)
     lastViewPort = gl.viewPort
     isSaved = true
   }

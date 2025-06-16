@@ -1,6 +1,6 @@
 ThisBuild / organization := "moe.brianhsu.live2d"
-ThisBuild / scalaVersion := "2.13.11"
-ThisBuild / scalacOptions := Seq("-deprecation", "-Ywarn-unused", "-feature")
+ThisBuild / scalaVersion := "3.3.1"
+ThisBuild / scalacOptions := Seq("-deprecation", "-Wunused:all", "-feature")
 ThisBuild / publishArtifact := false
 ThisBuild / Test / testOptions += Tests.Argument("-l", sys.env.get("EXCLUDE_TEST_TAG").getOrElse("noExclude"))
 
@@ -183,7 +183,7 @@ moveTaskwin := {
   val releaseTarget = releaseBaseDir + File.separator + releaseSubDir
 
 
-  val extraFilePath = s"modules/examples/swt-windows-bundle/target/scala-2.13/Live2DForScala-SWT-Windows-${version.value}.jar"
+  val extraFilePath = s"modules/examples/swt-windows-bundle/target/scala-3/Live2DForScala-SWT-Windows-${version.value}.jar"
   val extraFile = new File(extraFilePath)
   if (extraFile.exists()) {
     val targetExtraFile = new File(releaseTarget, s"Live2DForScala-SWT-Windows-${version.value}.jar")
@@ -280,7 +280,7 @@ moveTasklinux := {
   val releaseTarget = releaseBaseDir + File.separator + releaseSubDir
 
 
-  val extraFilePath = s"modules/examples/swt-linux-bundle/target/scala-2.13/Live2DForScala-SWT-Linux-${version.value}.jar"
+  val extraFilePath = s"modules/examples/swt-linux-bundle/target/scala-3/Live2DForScala-SWT-Linux-${version.value}.jar"
   val extraFile = new File(extraFilePath)
   if (extraFile.exists()) {
     val targetExtraFile = new File(releaseTarget, s"Live2DForScala-SWT-Linux-${version.value}.jar")
@@ -385,7 +385,7 @@ moveTaskswing := {
   val releaseTarget = releaseBaseDir + File.separator + releaseSubDir
 
 
-  val extraFilePath = s"modules/examples/swing/target/scala-2.13/Live2DForScala-Swing-${version.value}.jar"
+  val extraFilePath = s"modules/examples/swing/target/scala-3/Live2DForScala-Swing-${version.value}.jar"
   val extraFile = new File(extraFilePath)
   if (extraFile.exists()) {
     val targetExtraFile = new File(releaseTarget, s"Live2DForScala-Swing-${version.value}.jar")

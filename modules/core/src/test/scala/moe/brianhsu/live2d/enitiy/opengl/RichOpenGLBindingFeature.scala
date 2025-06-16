@@ -57,8 +57,8 @@ class RichOpenGLBindingFeature extends AnyFeatureSpec with Matchers with GivenWh
       addDummyIntegerVariable(binding, GL_CURRENT_PROGRAM, 0, 456)
 
       When("read those parameters through RichOpenGL binding")
-      val bufferBinding: Int = richOpenGL.openGLParameters(GL_ARRAY_BUFFER_BINDING)
-      val currentProgram: Int = richOpenGL.openGLParameters(GL_CURRENT_PROGRAM)
+      val bufferBinding: Int = richOpenGL.openGLIntParameter(GL_ARRAY_BUFFER_BINDING)
+      val currentProgram: Int = richOpenGL.openGLIntParameter(GL_CURRENT_PROGRAM)
 
       Then("they should have correct value")
       bufferBinding shouldBe 123
@@ -66,17 +66,7 @@ class RichOpenGLBindingFeature extends AnyFeatureSpec with Matchers with GivenWh
 
     }
 
-    Scenario("Read boolean parameter") {
-      Given("a RichOpenGL with a stubbed OpenGL binding")
-      val binding = createOpenGLStub()
-      val richOpenGL = new RichOpenGLBinding(binding)
 
-      an[Exception] should be thrownBy {
-        When("read a boolean parameter")
-        Then("it should thrown exception")
-        richOpenGL.openGLParameters[Boolean](GL_COLOR_WRITEMASK)
-      }
-    }
 
   }
   Feature("Enable / Disable capability") {
