@@ -86,6 +86,7 @@ lazy val exampleSwing = (project in file("modules/examples/swing"))
     sharedSettings
   )
 
+
 lazy val exampleJavaFX = (project in file("modules/examples/javafx"))
   .dependsOn(core, joglBinding, lwjglBinding, swtBinding, exampleBase)
   .settings(
@@ -95,9 +96,15 @@ lazy val exampleJavaFX = (project in file("modules/examples/javafx"))
     Compile / mainClass := Some("moe.brianhsu.live2d.demo.javafx.JavaFXMain"),
     assembly / assemblyJarName := s"Live2DForScala-JavaFX-${version.value}.jar",
     sharedSettings,
+
     libraryDependencies ++= Seq(
-      "org.openjfx" % "javafx-controls" % javafxVersion,
-      "org.openjfx" % "javafx-graphics" % javafxVersion
+      "org.openjfx" % "javafx-controls" % javafxVersion classifier "linux",
+      "org.openjfx" % "javafx-graphics" % javafxVersion classifier "linux"
+    ),
+
+    run / javaOptions ++= Seq(
+      "--module-path", sys.props.getOrElse("javafx.module.path", ""),
+      "--add-modules", "javafx.controls,javafx.graphics"
     )
   )
 

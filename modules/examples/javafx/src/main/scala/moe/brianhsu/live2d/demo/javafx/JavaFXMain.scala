@@ -1,5 +1,7 @@
+package moe.brianhsu.live2d.demo.javafx
+
 import javafx.application.Application
-import javafx.scene.{Scene}
+import javafx.scene.Scene
 import javafx.scene.layout.BorderPane
 import javafx.stage.Stage
 
