@@ -45,8 +45,6 @@ class SpriteRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenThe
         override protected def calculatePositionAndSize(): Rectangle = Rectangle(10, 20, 30, 40)
       }
 
-      And("create a SpriteRenderer")
-      val spriteRenderer = new SpriteRenderer(stubbedShader)
       val expectedPositionVertex = Array(
         -0.921875f, -0.8333333f, -0.98046875f, -0.8333333f,
         -0.98046875f, -0.9444444f, -0.921875f, -0.9444444f
@@ -67,6 +65,9 @@ class SpriteRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenThe
           callCount += 1
           if (callCount == 1) stubbedPositionBuffer else stubbedUvBuffer
         }
+
+      And("create a SpriteRenderer")
+      val spriteRenderer = new SpriteRenderer(stubbedShader)
 
       When("draw the sprite")
       spriteRenderer.draw(sprite)

@@ -25,10 +25,22 @@ class OpenSeeFaceDataConverterFeature extends AnyFeatureSpec with GivenWhenThen 
 
       for (expectation <- expectationList) {
         When(s"convert data from ${expectation.currentData}")
-        val trackingNode = converter.convert(expectation.currentData, expectation.previousLeftEyeNodes, expectation.previousRightEyeNodes)
+        val trackingNode = converter.convert(
+          expectation.currentData,
+          expectation.previousLeftEyeNodes,
+          expectation.previousRightEyeNodes
+        )
 
         Then("it should have correct data")
-        trackingNode shouldBe expectation.trackingNode
+        trackingNode.faceXAngle shouldBe expectation.trackingNode.faceXAngle
+        trackingNode.faceYAngle shouldBe expectation.trackingNode.faceYAngle
+        trackingNode.faceZAngle shouldBe expectation.trackingNode.faceZAngle
+        trackingNode.leftEyeOpenness shouldBe expectation.trackingNode.leftEyeOpenness
+        trackingNode.rightEyeOpenness shouldBe expectation.trackingNode.rightEyeOpenness
+        trackingNode.mouthOpenness shouldBe expectation.trackingNode.mouthOpenness
+        trackingNode.mouthForm shouldBe expectation.trackingNode.mouthForm
+        trackingNode.leftEyeSmile shouldBe expectation.trackingNode.leftEyeSmile
+        trackingNode.rightEyeSmile shouldBe expectation.trackingNode.rightEyeSmile
       }
     }
 
