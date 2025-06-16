@@ -119,6 +119,24 @@ lazy val exampleSWTWin = (project in file("modules/examples/swt-windows-bundle")
   )
 
 
+lazy val root = (project in file("."))
+  .aggregate(
+    core,
+    joglBinding,
+    lwjglBinding,
+    swtBinding,
+    exampleBase,
+    exampleSwing,
+    exampleSWT,
+    exampleSWTLinux,
+    exampleSWTWin
+  )
+  .settings(
+    name := "Live2DForScala",
+    publishArtifact := false,
+    sharedSettings
+  )
+
 // win-pkg
 
 import sbt.IO
