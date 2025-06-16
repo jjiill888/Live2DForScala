@@ -118,25 +118,6 @@ lazy val exampleSWTWin = (project in file("modules/examples/swt-windows-bundle")
     libraryDependencies += swtWindows
   )
 
-
-lazy val root = (project in file("."))
-  .aggregate(
-    core,
-    joglBinding,
-    lwjglBinding,
-    swtBinding,
-    exampleBase,
-    exampleSwing,
-    exampleSWT,
-    exampleSWTLinux,
-    exampleSWTWin
-  )
-  .settings(
-    name := "Live2DForScala",
-    publishArtifact := false,
-    sharedSettings
-  )
-
 // win-pkg
 
 import sbt.IO
@@ -215,7 +196,7 @@ createStartFile := {
   IO.createDirectory(new File(dirPath))
 
   // Run shell commands to create and rename the file
-  Seq("sh", "-c", s"echo 'java -jar Live2DForScala-SWT-Windows-${version.value}.jar' > $filePath && mv $filePath $renamedFilePath").!!
+  Seq("sh", "-c", s"echo 'java -Xms256m -Xmx600m -XX:+UseG1GC -Dsun.java2d.opengl=true -jar Live2DForScala-SWT-Windows-${version.value}.jar' > $filePath && mv $filePath $renamedFilePath").!!
 }
 
 lazy val releasewin = taskKey[Unit]("Performs both createReleasePackageTask and moveTxtTaskwin in order")
@@ -316,7 +297,7 @@ createDesktopEntrylinux := {
   val content = s"""
                     [Desktop Entry]
                    |Type=Application
-                   |Exec=java -jar Live2DForScala-SWT-Linux-${version.value}.jar
+                   |Exec=java -Xms256m -Xmx600m -XX:+UseG1GC -Dsun.java2d.opengl=true -jar Live2DForScala-SWT-Linux-${version.value}.jar
 """.stripMargin
 
   // Using Scala's file operations to write content

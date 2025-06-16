@@ -111,7 +111,7 @@ class LipSyncFeature extends AnyFeatureSpec with GivenWhenThen with Matchers wit
   }
 
   class MockLipSync(mRMS: Float, mWeight: Float) extends LipSync {
-    override protected var weight: Float = mWeight
+    override protected var _weight: Float = mWeight
     override protected def lipSyncIds: List[String] = lipSyncParameters
     override protected def currentRms: Float = mRMS
     override def start(): Unit = {}

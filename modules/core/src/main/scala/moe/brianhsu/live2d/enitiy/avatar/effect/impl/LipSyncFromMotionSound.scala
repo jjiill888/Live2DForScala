@@ -68,5 +68,5 @@ class LipSyncFromMotionSound(processorsFactory: ProcessorsFactory, override val 
     processorsHolder.foreach(processors => new Thread(processors.dispatcher).start())
   }
 
-  override var weight: Float = DefaultWeight
+  override protected[live2d] var weight: Float = DefaultWeight
 }
