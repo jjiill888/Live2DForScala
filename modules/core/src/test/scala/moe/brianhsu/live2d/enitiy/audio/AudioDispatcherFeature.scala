@@ -2,6 +2,7 @@ package moe.brianhsu.live2d.enitiy.audio
 
 import org.json4s.native.{Serialization, parseJson}
 import org.json4s.{Formats, NoTypeHints}
+import org.json4s.jvalue2extractable
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec

@@ -7,6 +7,7 @@ import moe.brianhsu.live2d.enitiy.avatar.effect.impl.OpenSeeFaceTracking.Default
 import moe.brianhsu.live2d.enitiy.openSeeFace.OpenSeeFaceData
 import org.json4s.DefaultFormats
 import org.json4s.native.JsonMethods
+import org.json4s.jvalue2extractable
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec

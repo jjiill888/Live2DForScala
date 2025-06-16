@@ -5,6 +5,7 @@ import moe.brianhsu.live2d.enitiy.avatar.effect.impl.FaceTracking.TrackingNode
 import moe.brianhsu.live2d.enitiy.openSeeFace.OpenSeeFaceData
 import org.json4s.native.JsonMethods
 import org.json4s.{DefaultFormats, Formats}
+import org.json4s.jvalue2extractable
 import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers

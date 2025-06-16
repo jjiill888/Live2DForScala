@@ -1,6 +1,7 @@
 package moe.brianhsu.live2d.adapter.gateway.avatar.settings.json
 
 import org.json4s.{JField, JValue}
+import org.json4s.jvalue2monadic
 
 object JsonImplicits {
   private def camelize(name: String): String = {

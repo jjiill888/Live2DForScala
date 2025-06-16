@@ -4,6 +4,7 @@ import moe.brianhsu.live2d.enitiy.openSeeFace.OpenSeeFaceData
 import moe.brianhsu.live2d.exception.OpenSeeFaceException
 import org.json4s.DefaultFormats
 import org.json4s.native.JsonMethods
+import org.json4s.jvalue2extractable
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
