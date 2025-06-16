@@ -53,7 +53,7 @@ jobs:
       - name: Set Coverage rate for badges
         id: CoverageExport
         run: |
-          echo "COVERAGE_RATE=$(xmllint --xpath "string(/scoverage/@branch-rate)" target/scala-2.13/scoverage-report/scoverage.xml)" >> $GITHUB_OUTPUT
+          echo "COVERAGE_RATE=$(xmllint --xpath \"string(/scoverage/@branch-rate)\" target/scala-3/scoverage-report/scoverage.xml)" >> $GITHUB_OUTPUT
 
       - name: Release
         run: |

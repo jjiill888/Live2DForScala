@@ -42,7 +42,7 @@ moveTaskwin := {
   val releaseSubDir = s"Live2DForScala-SWT-Windows-${version.value}"
   val releaseTarget = releaseBaseDir + File.separator + releaseSubDir
 
-  val extraFilePath = s"modules\\examples\\swt-windows-bundle\\target\\scala-2.13\\Live2DForScala-SWT-Windows-${version.value}.jar"
+  val extraFilePath = s"modules\\examples\\swt-windows-bundle\\target\\scala-3\\Live2DForScala-SWT-Windows-${version.value}.jar"
   val extraFile = new File(extraFilePath)
   if (extraFile.exists()) {
     val targetExtraFile = new File(releaseTarget, s"Live2DForScala-SWT-Windows-${version.value}.jar")
