@@ -14,6 +14,8 @@ val swtPackageName = {
   }
 }
 
+val javafxVersion = "17.0.2"
+
 val swtFramework = "org.eclipse.platform" % swtPackageName % swtVersion exclude("org.eclipse.platform", "org.eclipse.swt")
 val swtWindows = "org.eclipse.platform" % "org.eclipse.swt.win32.win32.x86_64" % swtVersion exclude("org.eclipse.platform", "org.eclipse.swt")
 val swtLinux = "org.eclipse.platform" % "org.eclipse.swt.gtk.linux.x86_64" % swtVersion exclude("org.eclipse.platform", "org.eclipse.swt")
@@ -82,6 +84,21 @@ lazy val exampleSwing = (project in file("modules/examples/swing"))
     publishArtifact := false,
     assembly / assemblyJarName := s"Live2DForScala-Swing-${version.value}.jar",
     sharedSettings
+  )
+
+lazy val exampleJavaFX = (project in file("modules/examples/javafx"))
+  .dependsOn(core, joglBinding, lwjglBinding, swtBinding, exampleBase)
+  .settings(
+    name := "Example JavaFX",
+    fork := true,
+    publishArtifact := false,
+    Compile / mainClass := Some("moe.brianhsu.live2d.demo.javafx.JavaFXMain"),
+    assembly / assemblyJarName := s"Live2DForScala-JavaFX-${version.value}.jar",
+    sharedSettings,
+    libraryDependencies ++= Seq(
+      "org.openjfx" % "javafx-controls" % javafxVersion,
+      "org.openjfx" % "javafx-graphics" % javafxVersion
+    )
   )
 
 lazy val exampleSWT = (project in file("modules/examples/swt"))
