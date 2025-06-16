@@ -7,7 +7,7 @@ import moe.brianhsu.live2d.enitiy.updater.UpdateOperation.ParameterValueAdd
 
 
 trait LipSync extends Effect {
-  protected var weight: Float
+  protected[live2d] var weight: Float
 
   protected def lipSyncIds: List[String]
   protected def currentRms: Float
