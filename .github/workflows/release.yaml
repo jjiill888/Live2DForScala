@@ -45,7 +45,7 @@ jobs:
 
       - name: Archive Test Results
         if: always()
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: target/test-reports-html/
@@ -104,19 +104,19 @@ jobs:
 
 
       - name: Upload Swing Version
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: Live2DForScala-Swing
           path: Live2DForScala-Swing-${{ steps.VersionExport.outputs.CURRENT_VERSION }}.zip
 
       - name: Upload SWT Linux Version
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: Live2DForScala-SWT-Linux
           path: Live2DForScala-SWT-Linux-${{ steps.VersionExport.outputs.CURRENT_VERSION }}.tar.gz
 
       - name: Upload SWT Windows Version
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: Live2DForScala-SWT-Windows
           path: Live2DForScala-SWT-Windows-${{ steps.VersionExport.outputs.CURRENT_VERSION }}.zip
