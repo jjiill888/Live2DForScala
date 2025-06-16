@@ -65,5 +65,5 @@ class LipSyncFromMic(override val lipSyncIds: List[String],
     thread.join()
   }
 
-  override var weight: Float = DefaultWeight
+  override protected var weight: Float = DefaultWeight
 }

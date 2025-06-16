@@ -44,7 +44,7 @@ class JnaNativeCubismAPILoader(override val memoryAllocator: MemoryAllocator, lo
    */
   def this(logger: CsmLogFunction) = this(JnaMemoryAllocator, logger)
 
-  override lazy val cubismAPI: NativeCubismAPI = {
+  override val cubismAPI: NativeCubismAPI = {
     try {
       val lib = Native.load("Live2DCubismCore", classOf[NativeCubismAPI])
       lib.csmSetLogFunction(logger)
