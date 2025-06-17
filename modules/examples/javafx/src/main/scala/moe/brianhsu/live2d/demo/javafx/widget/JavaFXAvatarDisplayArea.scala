@@ -120,6 +120,10 @@ class JavaFXAvatarDisplayArea extends StackPane {
 
     override def display(drawable: GLAutoDrawable): Unit = {
       demoAppHolder.foreach(_.display())
+            // Swap buffers manually if auto swap is disabled
+      if (!glCanvas.getAutoSwapBufferMode) {
+        glCanvas.swapBuffers()
+      }
     }
 
     override def reshape(drawable: GLAutoDrawable, x: Int, y: Int, width: Int, height: Int): Unit = {

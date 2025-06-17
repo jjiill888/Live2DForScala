@@ -264,6 +264,8 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
     onOpenGLThread {
       this.rendererHolder = modelHolder.map(model => AvatarRenderer(model))
       initOpenGL()
+            // Render the first frame after the OpenGL context is initialized
+      display()
     }
 
      newAvatarHolder.foreach { _ =>
