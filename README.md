@@ -24,6 +24,7 @@ I would like to express sincere gratitude to the original author of [brianhsu/Li
   ❌ Not supported on X11 due to limitations in transparency handling.
 - Expression Shortcut Keys (1–9)
 - Simulate Eye Gaze
+- Enabling the Auto Start and Simulate Eye Gaze checkbox in the face tracking panel writes a auto_start file so tracking starts and enable Simulate Eye Gaze automatically next time
 - Default Avatar
 
 ###  Screenshots
