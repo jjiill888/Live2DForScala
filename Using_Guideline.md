@@ -2,7 +2,6 @@
 
 If you only want to use the program, you need to do the following:
 
-> ⚠️ Note: macOS version is currently **not released**.
 
 ---
 
@@ -31,6 +30,12 @@ Install OpenJDK 17 using your distribution’s package manager:
 
 Download and install `microsoft-jdk-17.X.Y-windows-x64.msi` from [Microsoft Build of OpenJDK](https://learn.microsoft.com/en-us/java/openjdk/download).
 
+- ###  MacOS
+      Install Homebrew
+      Run brew install openjdk@17 to install
+          
+
+
 ---
 
 ##  Step 2. Download Compressed Files
@@ -42,6 +47,7 @@ Go to the **Releases** section on GitHub and download the appropriate version:
 - **Windows**:
   - `Live2DForScala-Swing-X.Y.Z.zip`
   - or `Live2DForScala-SWT-Windows-X.Y.Z.zip`
+-  **Mac**: `Live2DForScala-Swing-X.Y.Z.zip`
 
 Extract the downloaded archive.
 
@@ -51,6 +57,7 @@ Extract the downloaded archive.
 
 - **Windows**: Double-click `start.bat`
 - **Linux**: Double-click `start.desktop`
+-  **Mac**: `java -jar Live2DForScala-Swing-X.Y.Z-SNAPSHOT.jar`
 
 ---
 
