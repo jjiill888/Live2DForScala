@@ -131,6 +131,10 @@ class SWTAvatarDisplayArea(parent: Composite) extends Composite(parent, SWT.NONE
     val glData = new GLData
     glData.doubleBuffer = true
     glData.alphaSize = 8
+    glData.redSize = 8
+    glData.greenSize = 8
+    glData.blueSize = 8
+    glData.depthSize = 24
     glData
   }
 

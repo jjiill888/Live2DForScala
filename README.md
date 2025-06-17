@@ -26,6 +26,7 @@ I would like to express sincere gratitude to the original author of [brianhsu/Li
 - Simulate Eye Gaze
 - Enabling the Auto Start and Simulate Eye Gaze checkbox in the face tracking panel writes a auto_start file so tracking starts and enable Simulate Eye Gaze automatically next time
 - Default Avatar
+- XWayland support
 
 ###  Screenshots
 

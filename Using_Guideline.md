@@ -43,7 +43,9 @@ Download and install `microsoft-jdk-17.X.Y-windows-x64.msi` from [Microsoft Buil
 Go to the **Releases** section on GitHub and download the appropriate version:
 
 - **Linux (X11)**: `Live2DForScala-SWT-Linux-X.Y.Z.tar.gz`
-- **Linux (Wayland)**: `Live2DForScala-Swing-X.Y.Z.zip`
+- **Linux (Wayland)**:
+  -  `Live2DForScala-SWT-Linux-X.Y.Z.tar.gz` 
+  -  or `Live2DForScala-Swing-X.Y.Z.zip`
 - **Windows**:
   - `Live2DForScala-Swing-X.Y.Z.zip`
   - or `Live2DForScala-SWT-Windows-X.Y.Z.zip`
@@ -56,7 +58,9 @@ Extract the downloaded archive.
 ##  Step 3. Run the Demo Application
 
 - **Windows**: Double-click `start.bat`
-- **Linux**: Double-click `start.desktop`
+- **Linux**: Double-click `start.desktop`(x11)
+- If you using Wayland,please edit 'start.desktop's context :`GDK_BACKEND=x11 java -jar Live2DForScala-SWT-Linux-2.0.0-SNAPSHOT.jar`
+
 -  **Mac**: `java -jar Live2DForScala-Swing-X.Y.Z-SNAPSHOT.jar`
 
 ---
@@ -88,7 +92,7 @@ Extract the downloaded archive.
 - **Full-Body Sway from Face Tracking** – More immersive avatar movement
 - **OBS-Friendly Transparency** – For streaming with alpha channel
 - **Simulated Eye Gaze** – Natural idle gaze movement
-
+- **XWayland support** SWT version can working on XWayland
 ---
 
 Happy streaming!

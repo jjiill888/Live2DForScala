@@ -3,6 +3,7 @@ package moe.brianhsu.live2d.demo.swt
 import moe.brianhsu.live2d.demo.app.DemoApp
 import moe.brianhsu.live2d.demo.swt.widget.SWTAvatarDisplayArea.AvatarListener
 import moe.brianhsu.live2d.demo.swt.widget.{SWTAvatarControlPanel, SWTAvatarDisplayArea, SWTStatusBar, SWTToolbar}
+import moe.brianhsu.live2d.adapter.util.WaylandSupport
 import org.eclipse.swt.SWT
 import org.eclipse.swt.custom.SashForm
 import org.eclipse.swt.layout.{GridData, GridLayout}
@@ -10,6 +11,8 @@ import org.eclipse.swt.widgets.{Display, Shell}
 
 object SWTWithLWJGLMain {
 
+  WaylandSupport.setup()
+  
   private val display = new Display()
   private val shell = new Shell(display)
   private val toolbar = new SWTToolbar(shell)
