@@ -106,7 +106,9 @@ lazy val exampleJavaFX = (project in file("modules/examples/javafx"))
     run / javaOptions ++= Seq(
       "--module-path", sys.props.getOrElse("javafx.module.path", ""),
       "--add-modules", "javafx.controls,javafx.graphics,javafx.swing"
-    )
+        ),
+
+    Compile / resourceDirectories += baseDirectory.value / "src/main/resources"
   )
 
 lazy val exampleSWT = (project in file("modules/examples/swt"))

@@ -34,6 +34,7 @@ class JavaFXMain extends Application {
     root.setTop(toolbar)
     root.setCenter(avatarArea)
     val scene = new Scene(root, 800, 600)
+    scene.getStylesheets.add(getClass.getResource("/style/dark-theme.css").toExternalForm)
     primaryStage.setTitle("Live2D Scala Demo (JavaFX)")
     primaryStage.setScene(scene)
     primaryStage.show()

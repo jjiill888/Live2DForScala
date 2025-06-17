@@ -9,6 +9,7 @@ import java.awt.Color
 import scala.annotation.unused
 
 class JavaFXToolbar extends ToolBar {
+  this.setId("main-toolbar")
 
   private var demoAppHolder: Option[DemoApp] = None
 

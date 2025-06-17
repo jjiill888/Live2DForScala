@@ -1,0 +1,18 @@
+.root {
+    -fx-background-color: #2b2b2b;
+    -fx-text-fill: #dddddd;
+}
+
+.tool-bar {
+    -fx-background-color: #3c3f41;
+}
+
+.button {
+    -fx-background-color: #3c3f41;
+    -fx-text-fill: #dddddd;
+}
+
+.check-box {
+    -fx-text-fill: #dddddd;
+}
+
