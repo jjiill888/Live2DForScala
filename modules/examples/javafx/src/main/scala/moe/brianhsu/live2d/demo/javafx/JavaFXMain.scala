@@ -9,9 +9,7 @@ import javafx.stage.Stage
 import moe.brianhsu.live2d.demo.app.DemoApp
 import moe.brianhsu.live2d.demo.javafx.widget.JavaFXAvatarDisplayArea
 import moe.brianhsu.live2d.demo.javafx.widget.JavaFXAvatarDisplayArea.AvatarListener
-import moe.brianhsu.live2d.demo.javafx.widget.JavaFXToolbar
-import moe.brianhsu.live2d.demo.javafx.widget.{JavaFXToolbar, JavaFXAvatarControlPanel}
-import moe.brianhsu.live2d.demo.javafx.widget.{JavaFXToolbar, JavaFXAvatarControlPanel, JavaFXStatusBar}
+import moe.brianhsu.live2d.demo.javafx.widget.{JavaFXAvatarControlPanel, JavaFXStatusBar, JavaFXToolbar}
 
 /** Simple JavaFX entry point that will later host the Live2D view. */
 class JavaFXMain extends Application {
@@ -22,8 +20,6 @@ class JavaFXMain extends Application {
     val statusBar = new JavaFXStatusBar
 
     avatarArea.setAvatarListener(new AvatarListener {
-      override def onAvatarLoaded(live2DView: DemoApp): Unit = {}
-      override def onStatusUpdated(status: String): Unit = {}
       override def onAvatarLoaded(live2DView: DemoApp): Unit =
         statusBar.updateStatus("Avatar loaded")
       override def onStatusUpdated(status: String): Unit =
