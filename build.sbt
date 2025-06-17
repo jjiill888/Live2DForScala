@@ -99,12 +99,13 @@ lazy val exampleJavaFX = (project in file("modules/examples/javafx"))
 
     libraryDependencies ++= Seq(
       "org.openjfx" % "javafx-controls" % javafxVersion classifier "linux",
-      "org.openjfx" % "javafx-graphics" % javafxVersion classifier "linux"
+      "org.openjfx" % "javafx-graphics" % javafxVersion classifier "linux",
+      "org.openjfx" % "javafx-swing" % javafxVersion classifier "linux"
     ),
 
     run / javaOptions ++= Seq(
       "--module-path", sys.props.getOrElse("javafx.module.path", ""),
-      "--add-modules", "javafx.controls,javafx.graphics"
+      "--add-modules", "javafx.controls,javafx.graphics,javafx.swing"
     )
   )
 

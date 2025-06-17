@@ -6,8 +6,9 @@ ThisBuild / assemblyMergeStrategy := {
   case x if x.endsWith("module-info.class") => {
     MergeStrategy.discard
   }
+  case PathList("META-INF", "substrate", "config", _*) => MergeStrategy.first
   case x => {
-    val oldStrategy = (ThisBuild / assemblyMergeStrategy).value
+    val oldStrategy = (assembly / assemblyMergeStrategy).value
     oldStrategy(x)
   }
 }
