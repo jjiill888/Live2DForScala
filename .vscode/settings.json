@@ -1,6 +1,0 @@
-{
-    "Codegeex.RepoIndex": true,
-    "files.watcherExclude": {
-        "**/target": true
-    }
-}
