@@ -15,6 +15,7 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
   private val (
     loadAvatar, defaultAvatar, changeToDefaultBackground,
     selectBackground, pureColorBackground, transparentBackground) = createToolItems()
+    transparentBackground.setSelection(DemoApp.loadTransparentBackground())
 
   {
     this.setLayout(new FillLayout)
@@ -28,6 +29,8 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
 
   def setDemoApp(demoApp: DemoApp): Unit = {
     this.demoAppHolder = Some(demoApp)
+    val enabled = DemoApp.loadTransparentBackground()
+    demoApp.setTransparentBackground(enabled)
   }
 
   private def onSelectBackgroundSelected(@unused event: Event): Unit = {
@@ -64,10 +67,13 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
   private def onTransparentBackground(@unused event: Event): Unit = {
     val enabled = transparentBackground.getSelection
     demoAppHolder.foreach(_.setTransparentBackground(enabled))
+    DemoApp.saveTransparentBackground(enabled)
   }
 
   private def onDefaultBackgroundSelected(@unused event: Event): Unit = {
     demoAppHolder.foreach(_.switchToDefaultBackground())
+    transparentBackground.setSelection(false)
+    DemoApp.saveTransparentBackground(false)
   }
 
   private def openLoadAvatarDialog(@unused event: Event): Unit = {
@@ -109,6 +115,7 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
     val pureColorBackground = new ToolItem(toolBar, SWT.PUSH)
     new ToolItem(toolBar, SWT.SEPARATOR)
     val transparentBackground = new ToolItem(toolBar, SWT.CHECK)
+    transparentBackground.setSelection(DemoApp.loadTransparentBackground())
 
     loadAvatar.setText("Load Avatar")
     defaultAvatar.setText("Default Avatar")

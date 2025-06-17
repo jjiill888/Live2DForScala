@@ -28,13 +28,17 @@ class SWTAvatarDisplayArea(parent: Composite) extends Composite(parent, SWT.NONE
   private val canvasInfo = new SWTOpenGLCanvasInfoReader(canvas)
   private val canvasUpdater: Runnable = new CanvasUpdater
 
-  val demoApp: DemoApp = new DemoApp(canvasInfo, runOnOpenGLThread) {
-    override def onAvatarLoaded(live2DView: DemoApp): Unit = {
-      avatarListenerHolder.foreach(_.onAvatarLoaded(live2DView))
+  val demoApp: DemoApp = {
+    val app = new DemoApp(canvasInfo, runOnOpenGLThread) {
+      override def onAvatarLoaded(live2DView: DemoApp): Unit = {
+        avatarListenerHolder.foreach(_.onAvatarLoaded(live2DView))
+      }
+      override def onStatusUpdated(status: String): Unit = {
+        avatarListenerHolder.foreach(_.onStatusUpdated(status))
+      }
     }
-    override def onStatusUpdated(status: String): Unit = {
-      avatarListenerHolder.foreach(_.onStatusUpdated(status))
-    }
+    app.setTransparentBackground(DemoApp.loadTransparentBackground())
+    app
   }
 
   {

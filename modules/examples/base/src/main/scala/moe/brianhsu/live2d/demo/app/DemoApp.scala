@@ -25,7 +25,7 @@ object DemoApp {
   case object ClickAndDrag extends FaceDirectionMode
 
   private val LastAvatarFile = new File("last_avatar")
-  private val AutoStartFile = new File("auto_start")
+  private val AutoStartFile = new File("auto_start.txt")
 
   private def readSettings(): Map[String, String] =
     if (AutoStartFile.exists()) {
@@ -96,6 +96,14 @@ object DemoApp {
 
   def loadEyeGaze(): Boolean =
     readSettings().get("eyeGaze").flatMap(_.toBooleanOption).getOrElse(false)
+    
+  def saveTransparentBackground(enabled: Boolean): Unit = {
+    val settings = readSettings() + ("transparentBackground" -> enabled.toString)
+    writeSettings(settings)
+  }
+
+  def loadTransparentBackground(): Boolean =
+    readSettings().get("transparentBackground").flatMap(_.toBooleanOption).getOrElse(false)
 }
 
 abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnOpenGLThread)

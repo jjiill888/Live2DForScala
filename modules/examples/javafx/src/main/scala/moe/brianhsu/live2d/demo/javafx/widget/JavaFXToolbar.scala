@@ -19,6 +19,7 @@ class JavaFXToolbar extends ToolBar {
   private val selectBackground  = new Button("Select Background")
   private val pureColorBackground = new Button("Pure Color Background")
   private val transparentBackground = new CheckBox("Transparent Background")
+  transparentBackground.setSelected(DemoApp.loadTransparentBackground())
 
   this.getItems.addAll(
     loadAvatar,
@@ -36,7 +37,11 @@ class JavaFXToolbar extends ToolBar {
   pureColorBackground.setOnAction(_ => onPureColorBackground())
   transparentBackground.setOnAction(_ => onTransparentBackground())
 
-  def setDemoApp(demoApp: DemoApp): Unit = this.demoAppHolder = Some(demoApp)
+  def setDemoApp(demoApp: DemoApp): Unit = {
+    this.demoAppHolder = Some(demoApp)
+    val enabled = DemoApp.loadTransparentBackground()
+    demoApp.setTransparentBackground(enabled)
+  }
 
   private def openLoadAvatarDialog(): Unit = {
     val chooser = new DirectoryChooser()
@@ -105,10 +110,13 @@ class JavaFXToolbar extends ToolBar {
   private def onTransparentBackground(): Unit = {
     val enabled = transparentBackground.isSelected
     demoAppHolder.foreach(_.setTransparentBackground(enabled))
+    DemoApp.saveTransparentBackground(enabled)
   }
 
   private def onDefaultBackgroundSelected(): Unit = {
     demoAppHolder.foreach(_.switchToDefaultBackground())
+    transparentBackground.setSelected(false)
+    DemoApp.saveTransparentBackground(false)
   }
 
   private def currentWindow: Window = Option(this.getScene).map(_.getWindow).orNull
