@@ -26,6 +26,12 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
   private val openSeeFaceBundle = createBundleByOS()
   private val cardLayout = new CardLayout
   private val openSeeFacePanel = new JPanel(cardLayout)
+  private val disableEyeBlinkCheckBox = new JCheckBox("Disable Eye Blink")
+  disableEyeBlinkCheckBox.setSelected(DemoApp.loadDisableEyeBlink())
+  disableEyeBlinkCheckBox.addActionListener(_ => {
+    DemoApp.saveDisableEyeBlink(disableEyeBlinkCheckBox.isSelected)
+    live2DWidget.demoAppHolder.foreach(_.enableTrackingEyeBlink(!disableEyeBlinkCheckBox.isSelected))
+  })
   private val eyeGazeCheckBox = new JCheckBox("Simulate Eye Gaze")
   eyeGazeCheckBox.setSelected(DemoApp.loadEyeGaze())
   eyeGazeCheckBox.addActionListener(_ => {
@@ -66,9 +72,16 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
     this.openSeeFacePanel.add(openSeeFaceAdvance, "Advanced")
     this.add(openSeeFacePanel, gc3)
 
- val gcGaze = new GridBagConstraints()
+    val gcBlink = new GridBagConstraints()
+    gcBlink.gridx = 0
+    gcBlink.gridy = 3
+    gcBlink.gridwidth = 2
+    gcBlink.anchor = GridBagConstraints.NORTHWEST
+    this.add(disableEyeBlinkCheckBox, gcBlink)
+
+    val gcGaze = new GridBagConstraints()
     gcGaze.gridx = 0
-    gcGaze.gridy = 3
+    gcGaze.gridy = 4
     gcGaze.gridwidth = 2
     gcGaze.anchor = GridBagConstraints.NORTHWEST
     this.add(eyeGazeCheckBox, gcGaze)
@@ -82,7 +95,7 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
 
     val gc4 = new GridBagConstraints()
     gc4.gridx = 0
-    gc4.gridy = 4
+    gc4.gridy = 5
     gc4.gridwidth = 2
     gc4.fill = GridBagConstraints.HORIZONTAL
     gc4.weightx = 1
@@ -91,7 +104,7 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
 
     val gc5 = new GridBagConstraints()
     gc5.gridx = 0
-    gc5.gridy = 5
+    gc5.gridy = 6
     gc5.gridwidth = 2
     gc5.fill = GridBagConstraints.BOTH
     gc5.weightx = 1

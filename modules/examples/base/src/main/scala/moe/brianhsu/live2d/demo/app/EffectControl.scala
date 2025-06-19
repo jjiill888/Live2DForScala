@@ -21,6 +21,7 @@ trait EffectControl {
   def enableFaceTracking(dataReader: OpenSeeFaceDataReader): Unit = {
     val x = new OpenSeeFaceTracking(dataReader, 1000)
     x.eyeGazeEnabled = DemoApp.loadEyeGaze()
+    x.eyeBlinkEnabled = !DemoApp.loadDisableEyeBlink()
     faceTrackingHolder = Some(x)
     this.mUpdateStrategyHolder.foreach(_.appendAndStartEffects(x :: Nil))
   }
@@ -74,6 +75,10 @@ trait EffectControl {
     faceTrackingHolder.foreach(_.eyeGazeEnabled = isEnabled)
   }
 
+  def enableTrackingEyeBlink(isEnabled: Boolean): Unit = {
+    faceTrackingHolder.foreach(_.eyeBlinkEnabled = isEnabled)
+  }
+  
   def onMouseMoved(x: Int, y: Int): Unit = {
     if (faceDirectionMode == FollowMouse) {
       val transformedX = viewPortMatrixCalculator.drawCanvasToModelMatrix.transformedX(x.toFloat)

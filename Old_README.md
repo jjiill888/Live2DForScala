@@ -119,7 +119,7 @@ Both Swing and SWT version of demo application provide same functionality. The f
 4. Use mouse wheel to zoom-in / zoom-out the avatar.
 5. Click the `Default Avatar` button to initiate the loading process.When clicked, the application attempts to load the avatar model located in the def_avatar directory, which resides in the same location as the application JAR file.
 6. The application stores the directory of the last loaded avatar in a `last_avatar` file. When launched again, it tries to load that avatar automatically and falls back to `def_avatar` if it fails.
-7. Enabling the `Auto Start` and `Simulate Eye Gaze` checkbox in the face tracking panel writes a `auto_start` file so tracking starts and enable Simulate Eye Gaze automatically next time.
+7. Enabling the `Auto Start`, `Simulate Eye Gaze` and `Disable Eye Blink` checkbox in the face tracking panel writes a `auto_start` file so tracking starts with those options automatically next time.
 8. Toggle `Transparent Background` in the toolbar when you need an alpha channel output for OBS.
    
 ```console

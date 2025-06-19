@@ -96,6 +96,14 @@ object DemoApp {
 
   def loadEyeGaze(): Boolean =
     readSettings().get("eyeGaze").flatMap(_.toBooleanOption).getOrElse(false)
+
+  def saveDisableEyeBlink(enabled: Boolean): Unit = {
+    val settings = readSettings() + ("disableEyeBlink" -> enabled.toString)
+    writeSettings(settings)
+  }
+
+  def loadDisableEyeBlink(): Boolean =
+    readSettings().get("disableEyeBlink").flatMap(_.toBooleanOption).getOrElse(false)
     
   def saveTransparentBackground(enabled: Boolean): Unit = {
     val settings = readSettings() + ("transparentBackground" -> enabled.toString)

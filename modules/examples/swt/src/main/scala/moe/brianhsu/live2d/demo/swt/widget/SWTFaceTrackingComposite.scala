@@ -29,6 +29,12 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
   private val openSeeFacePanel = new Composite(openSeeFaceGroup, SWT.NONE)
   private val bundle = new SWTOpenSeeFaceBundle(openSeeFacePanel, CameraListing.createByOS())
   private val advanced = new SWTOpenSeeFaceAdvance(openSeeFacePanel)
+  private val disableEyeBlinkButton = new Button(openSeeFaceGroup, SWT.CHECK)
+  disableEyeBlinkButton.setSelection(DemoApp.loadDisableEyeBlink())
+  disableEyeBlinkButton.addListener(SWT.Selection, (_: Event) => {
+    DemoApp.saveDisableEyeBlink(disableEyeBlinkButton.getSelection)
+    demoAppHolder.foreach(_.enableTrackingEyeBlink(!disableEyeBlinkButton.getSelection))
+  })
   private val eyeGazeButton = new Button(openSeeFaceGroup, SWT.CHECK)
   eyeGazeButton.setSelection(DemoApp.loadEyeGaze())
   eyeGazeButton.addListener(SWT.Selection, (_: Event) => {
@@ -68,6 +74,11 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
 
     this.openSeeFacePanel.setLayoutData(gridData2)
 
+    disableEyeBlinkButton.setText("Disable Eye Blink")
+    val blinkData = new GridData()
+    blinkData.horizontalSpan = 2
+    disableEyeBlinkButton.setLayoutData(blinkData)
+    
     eyeGazeButton.setText("Simulate Eye Gaze")
     val gazeData = new GridData()
     gazeData.horizontalSpan = 2

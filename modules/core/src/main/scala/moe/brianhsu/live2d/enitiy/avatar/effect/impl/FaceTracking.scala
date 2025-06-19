@@ -31,7 +31,8 @@ abstract class FaceTracking(protected val trackingTaps: TrackingTaps) extends Ef
   protected[impl] var trackingNoes: List[TrackingNode] = Nil
 
   var eyeGazeEnabled: Boolean = true
-  
+  var eyeBlinkEnabled: Boolean = true
+
   override def calculateOperations(model: Live2DModel, totalElapsedTimeInSeconds: Float, deltaTimeInSeconds: Float): List[UpdateOperation] = {
     trackingNoes match {
       case Nil => Nil
@@ -86,6 +87,12 @@ abstract class FaceTracking(protected val trackingTaps: TrackingTaps) extends Ef
     this.lastBodyXAngle = lastBodyXAngle + calculateNewDiff(faceXAngle - lastBodyXAngle, 0.85f)
     this.lastBodyZAngle = lastBodyZAngle + calculateNewDiff(faceZAngle - lastBodyZAngle, 0.85f)
 
+    val eyeOpenUpdates =
+      if (eyeBlinkEnabled) List(
+        ParameterValueUpdate("ParamEyeLOpen", leftEyeOpenness),
+        ParameterValueUpdate("ParamEyeROpen", rightEyeOpenness)
+      ) else Nil
+
     val result = List(
       ParameterValueUpdate("ParamAngleX", this.lastFaceXAngle),
       ParameterValueUpdate("ParamAngleY", this.lastFaceYAngle),
@@ -101,15 +108,13 @@ abstract class FaceTracking(protected val trackingTaps: TrackingTaps) extends Ef
       ParameterValueUpdate("ParamAllRotate", this.lastFaceZAngle * 0.25f, 0.4f),  //  New
       ParameterValueUpdate("ParamLeftShoulderUp", leftShoulder, 0.3f),  //  New
       ParameterValueUpdate("ParamRightShoulderUp", rightShoulder, 0.3f),  //  New
-      ParameterValueUpdate("ParamEyeLOpen", leftEyeOpenness),
-      ParameterValueUpdate("ParamEyeROpen", rightEyeOpenness),
       ParameterValueUpdate("ParamMouthOpenY", mouthOpenness),
       ParameterValueUpdate("ParamMouthForm", mouthForm),
       ParameterValueUpdate("ParamEyeLSmile", leftEyeSmile),
       ParameterValueUpdate("ParamEyeRSmile", rightEyeSmile),
       ParameterValueUpdate("ParamEyeBallX", eyeBallX),
       ParameterValueUpdate("ParamEyeBallY", eyeBallY)
-    )
+    ) ++ eyeOpenUpdates
 
     result
   }

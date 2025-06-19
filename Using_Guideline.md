@@ -80,7 +80,7 @@ Extract the downloaded archive.
 - The application saves the last loaded model path to `last_avatar`
   - It auto-loads this model on next launch
   - Falls back to `def_avatar` if unavailable
-- Enable `Auto Start` and `Simulate Eye Gaze` in the tracking panel to save preferences to `auto_start`
+- Enable `Auto Start`, `Simulate Eye Gaze` and `Disable Eye Blink` in the tracking panel to save preferences to `auto_start`
 - Toggle `Transparent Background` in the toolbar for alpha channel output (e.g. for OBS streaming)
 
 ---
