@@ -30,7 +30,7 @@ Install OpenJDK 17 using your distribution’s package manager:
 
 Download and install `microsoft-jdk-17.X.Y-windows-x64.msi` from [Microsoft Build of OpenJDK](https://learn.microsoft.com/en-us/java/openjdk/download).
 
-- ###  MacOS
+ ###  MacOS
       Install Homebrew
       Run brew install openjdk@17 to install
           
