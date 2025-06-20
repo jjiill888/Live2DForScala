@@ -4,6 +4,7 @@ import moe.brianhsu.live2d.adapter.gateway.openSeeFace.UDPOpenSeeFaceDataReader
 import moe.brianhsu.live2d.boundary.gateway.openSeeFace.OpenSeeFaceDataReader
 import moe.brianhsu.live2d.enitiy.openSeeFace.OpenSeeFaceData
 import java.lang.ProcessBuilder.Redirect
+import java.util.concurrent.TimeUnit
 import scala.concurrent.{ExecutionContext, Future}
 
 import scala.util.Try
@@ -16,7 +17,9 @@ object ExternalOpenSeeFaceDataReader {
       .redirectError(Redirect.DISCARD)
     val process = builder.start()
 
-    new ExternalOpenSeeFaceDataReader(process, hostname, port, onDataRead)
+    val reader = new ExternalOpenSeeFaceDataReader(process, hostname, port, onDataRead)
+    sys.addShutdownHook(reader.close())
+    reader
   }
    def startAsync(command: String, hostname: String, port: Int, onDataRead: OpenSeeFaceData => Unit)
                 (implicit ec: ExecutionContext): Future[ExternalOpenSeeFaceDataReader] = Future {
@@ -61,6 +64,10 @@ class ExternalOpenSeeFaceDataReader(process: Process, hostname: String, port: In
   override def close(): Unit = {
     if (process.isAlive) {
       process.destroy()
+      if (!process.waitFor(500, TimeUnit.MILLISECONDS)) {
+        process.destroyForcibly()
+        process.waitFor(500, TimeUnit.MILLISECONDS)
+      }
     }
 
     this.udpDataReader.close()

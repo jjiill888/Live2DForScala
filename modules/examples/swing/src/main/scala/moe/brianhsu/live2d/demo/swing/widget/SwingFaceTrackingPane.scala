@@ -159,6 +159,8 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
 
   private def onStartSelected(@unused event: ActionEvent): Unit = {
     live2DWidget.demoAppHolder.foreach(_.disableFaceTracking())
+    this.openSeeFaceReaderHolder.foreach(_.close())
+    this.openSeeFaceReaderHolder = None
 
     val settings = getOpenSeeFaceSetting
 
@@ -185,6 +187,7 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
   private def onStopSelected(@unused event: ActionEvent): Unit = {
     this.live2DWidget.demoAppHolder.foreach(_.disableFaceTracking())
     this.openSeeFaceReaderHolder = None
+    this.openSeeFaceReaderHolder.foreach(_.close())
 
     this.openSeeFaceDataHolder = None
 

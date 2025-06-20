@@ -234,6 +234,7 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
 
   private def onStopSelected(@unused event: Event): Unit = {
     this.demoAppHolder.foreach(_.disableFaceTracking())
+    this.openSeeFaceReaderHolder.foreach(_.close())
     this.openSeeFaceReaderHolder = None
 
     this.openSeeFaceDataHolder = None
@@ -249,7 +250,9 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
 
   private def onStartSelected(@unused event: Event): Unit = {
     demoAppHolder.foreach(_.disableFaceTracking())
-
+    this.openSeeFaceReaderHolder.foreach(_.close())
+    this.openSeeFaceReaderHolder = None
+    
     val settings = getOpenSeeFaceSetting
     ExternalOpenSeeFaceDataReader
       .startAsync(settings.getCommand, settings.getHostname, settings.getPort, onDataRead)
