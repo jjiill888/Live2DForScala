@@ -48,7 +48,9 @@ class OpenSeeFaceDataConverter(settings: Settings = DefaultSettings) {
 
   def convert(currentData: OpenSeeFaceData,
               previousLeftEyeNodes: List[TrackingNode],
-              previousRightEyeNodes: List[TrackingNode]): TrackingNode = {
+              previousRightEyeNodes: List[TrackingNode],
+              simulateGaze: Boolean,
+              pupilGaze: Boolean): TrackingNode = {
 
     val faceXAngle = calcFaceXAngle(currentData)
     val mouthForm = calcMouthForm(currentData)
@@ -70,7 +72,7 @@ class OpenSeeFaceDataConverter(settings: Settings = DefaultSettings) {
 
     val eyeSmile = if (isEyeSmile) 1.0f else 0.0f
 
-    val (gazeX, gazeY) = EyeGazeEstimator.estimate(currentData)
+    val (gazeX, gazeY) = EyeGazeEstimator.estimate(currentData, simulateGaze, pupilGaze)
     TrackingNode(
       faceXAngle, faceYAngle, faceZAngle,
       leftEyeOpenness, rightEyeOpenness,

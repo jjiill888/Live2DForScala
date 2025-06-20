@@ -32,11 +32,17 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
     DemoApp.saveDisableEyeBlink(disableEyeBlinkCheckBox.isSelected)
     live2DWidget.demoAppHolder.foreach(_.enableTrackingEyeBlink(!disableEyeBlinkCheckBox.isSelected))
   })
-  private val eyeGazeCheckBox = new JCheckBox("Simulate Eye Gaze")
-  eyeGazeCheckBox.setSelected(DemoApp.loadEyeGaze())
-  eyeGazeCheckBox.addActionListener(_ => {
-    DemoApp.saveEyeGaze(eyeGazeCheckBox.isSelected)
-    live2DWidget.demoAppHolder.foreach(_.enableEyeGaze(eyeGazeCheckBox.isSelected))
+  private val simulateEyeGazeCheckBox = new JCheckBox("Simulate Eye Gaze")
+  simulateEyeGazeCheckBox.setSelected(DemoApp.loadEyeGaze())
+  simulateEyeGazeCheckBox.addActionListener(_ => {
+    DemoApp.saveEyeGaze(simulateEyeGazeCheckBox.isSelected)
+    live2DWidget.demoAppHolder.foreach(_.enableSimulateEyeGaze(simulateEyeGazeCheckBox.isSelected))
+  })
+  private val pupilGazeCheckBox = new JCheckBox("Gaze Tracking")
+  pupilGazeCheckBox.setSelected(DemoApp.loadPupilGaze())
+  pupilGazeCheckBox.addActionListener(_ => {
+    DemoApp.savePupilGaze(pupilGazeCheckBox.isSelected)
+    live2DWidget.demoAppHolder.foreach(_.enablePupilGaze(pupilGazeCheckBox.isSelected))
   })
   private val autoStartCheckBox = new JCheckBox("Auto Start")
   autoStartCheckBox.setSelected(DemoApp.loadAutoStart())
@@ -84,7 +90,14 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
     gcGaze.gridy = 4
     gcGaze.gridwidth = 2
     gcGaze.anchor = GridBagConstraints.NORTHWEST
-    this.add(eyeGazeCheckBox, gcGaze)
+    this.add(simulateEyeGazeCheckBox, gcGaze)
+
+    val gcRealGaze = new GridBagConstraints()
+    gcRealGaze.gridx = 0
+    gcRealGaze.gridy = 5
+    gcRealGaze.gridwidth = 2
+    gcRealGaze.anchor = GridBagConstraints.NORTHWEST
+    this.add(pupilGazeCheckBox, gcRealGaze)
     
     val gcAuto = new GridBagConstraints()
     gcAuto.gridx = 0

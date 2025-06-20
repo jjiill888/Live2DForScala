@@ -45,7 +45,13 @@ class OpenSeeFaceTracking(dataReader: OpenSeeFaceDataReader,
               val leftEyePreviousNodes = trackingNoes.take(trackingTaps.leftEyeOpenness)
               val rightEyePreviousNodes = trackingNoes.take(trackingTaps.rightEyeOpenness)
 
-              dataConverter.convert(data, leftEyePreviousNodes, rightEyePreviousNodes)
+              dataConverter.convert(
+                data,
+                leftEyePreviousNodes,
+                rightEyePreviousNodes,
+                simulateEyeGazeEnabled,
+                pupilGazeEnabled
+              )
             }
 
           trackingNodeHolder.foreach { node =>

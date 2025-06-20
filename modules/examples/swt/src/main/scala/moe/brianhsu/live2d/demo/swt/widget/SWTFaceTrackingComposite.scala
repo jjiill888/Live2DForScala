@@ -35,11 +35,17 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
     DemoApp.saveDisableEyeBlink(disableEyeBlinkButton.getSelection)
     demoAppHolder.foreach(_.enableTrackingEyeBlink(!disableEyeBlinkButton.getSelection))
   })
-  private val eyeGazeButton = new Button(openSeeFaceGroup, SWT.CHECK)
-  eyeGazeButton.setSelection(DemoApp.loadEyeGaze())
-  eyeGazeButton.addListener(SWT.Selection, (_: Event) => {
-    DemoApp.saveEyeGaze(eyeGazeButton.getSelection)
-    demoAppHolder.foreach(_.enableEyeGaze(eyeGazeButton.getSelection))
+  private val simulateEyeGazeButton = new Button(openSeeFaceGroup, SWT.CHECK)
+  simulateEyeGazeButton.setSelection(DemoApp.loadEyeGaze())
+  simulateEyeGazeButton.addListener(SWT.Selection, (_: Event) => {
+    DemoApp.saveEyeGaze(simulateEyeGazeButton.getSelection)
+    demoAppHolder.foreach(_.enableSimulateEyeGaze(simulateEyeGazeButton.getSelection))
+  })
+  private val pupilGazeButton = new Button(openSeeFaceGroup, SWT.CHECK)
+  pupilGazeButton.setSelection(DemoApp.loadPupilGaze())
+  pupilGazeButton.addListener(SWT.Selection, (_: Event) => {
+    DemoApp.savePupilGaze(pupilGazeButton.getSelection)
+    demoAppHolder.foreach(_.enablePupilGaze(pupilGazeButton.getSelection))
   })
   private val autoStartButton = new Button(openSeeFaceGroup, SWT.CHECK)
   autoStartButton.setSelection(DemoApp.loadAutoStart())
@@ -79,10 +85,16 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
     blinkData.horizontalSpan = 2
     disableEyeBlinkButton.setLayoutData(blinkData)
     
-    eyeGazeButton.setText("Simulate Eye Gaze")
+    simulateEyeGazeButton.setText("Simulate Eye Gaze")
     val gazeData = new GridData()
     gazeData.horizontalSpan = 2
-    eyeGazeButton.setLayoutData(gazeData)
+    simulateEyeGazeButton.setLayoutData(gazeData)
+
+    pupilGazeButton.setText("Gaze Tracking")
+    val pupilData = new GridData()
+    pupilData.horizontalSpan = 2
+    pupilGazeButton.setLayoutData(pupilData)
+
 
     autoStartButton.setText("Auto Start")
     val autoData = new GridData()

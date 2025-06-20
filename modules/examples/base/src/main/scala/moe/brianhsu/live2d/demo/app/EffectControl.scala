@@ -20,7 +20,8 @@ trait EffectControl {
 
   def enableFaceTracking(dataReader: OpenSeeFaceDataReader): Unit = {
     val x = new OpenSeeFaceTracking(dataReader, 1000)
-    x.eyeGazeEnabled = DemoApp.loadEyeGaze()
+    x.simulateEyeGazeEnabled = DemoApp.loadEyeGaze()
+    x.pupilGazeEnabled = DemoApp.loadPupilGaze()
     x.eyeBlinkEnabled = !DemoApp.loadDisableEyeBlink()
     faceTrackingHolder = Some(x)
     this.mUpdateStrategyHolder.foreach(_.appendAndStartEffects(x :: Nil))
@@ -71,10 +72,14 @@ trait EffectControl {
     this.mUpdateStrategyHolder.foreach(_.enableEyeBlink(isEnabled))
   }
 
-  def enableEyeGaze(isEnabled: Boolean): Unit = {
-    faceTrackingHolder.foreach(_.eyeGazeEnabled = isEnabled)
+  def enableSimulateEyeGaze(isEnabled: Boolean): Unit = {
+    faceTrackingHolder.foreach(_.simulateEyeGazeEnabled = isEnabled)
   }
 
+  def enablePupilGaze(isEnabled: Boolean): Unit = {
+    faceTrackingHolder.foreach(_.pupilGazeEnabled = isEnabled)
+  }
+  
   def enableTrackingEyeBlink(isEnabled: Boolean): Unit = {
     faceTrackingHolder.foreach(_.eyeBlinkEnabled = isEnabled)
   }

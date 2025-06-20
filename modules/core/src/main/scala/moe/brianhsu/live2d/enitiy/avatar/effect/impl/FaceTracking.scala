@@ -30,7 +30,8 @@ abstract class FaceTracking(protected val trackingTaps: TrackingTaps) extends Ef
 
   protected[impl] var trackingNoes: List[TrackingNode] = Nil
 
-  var eyeGazeEnabled: Boolean = true
+  var simulateEyeGazeEnabled: Boolean = true
+  var pupilGazeEnabled: Boolean = true
   var eyeBlinkEnabled: Boolean = true
 
   override def calculateOperations(model: Live2DModel, totalElapsedTimeInSeconds: Float, deltaTimeInSeconds: Float): List[UpdateOperation] = {
@@ -66,8 +67,9 @@ abstract class FaceTracking(protected val trackingTaps: TrackingTaps) extends Ef
     //  New: Average translation
     val transX = average(trackingNoes.map(_.transX))
     val transY = average(trackingNoes.map(_.transY))
-    val eyeBallX = if (eyeGazeEnabled) average(trackingNoes.map(_.eyeBallX)) else 0f
-    val eyeBallY = if (eyeGazeEnabled) average(trackingNoes.map(_.eyeBallY)) else 0f
+    val gazeEnabled = simulateEyeGazeEnabled || pupilGazeEnabled
+    val eyeBallX = if (gazeEnabled) average(trackingNoes.map(_.eyeBallX)) else 0f
+    val eyeBallY = if (gazeEnabled) average(trackingNoes.map(_.eyeBallY)) else 0f
 
     if (isFirst) {
       this.lastFaceXAngle = faceXAngle

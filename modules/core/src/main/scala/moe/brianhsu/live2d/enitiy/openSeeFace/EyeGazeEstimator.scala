@@ -25,10 +25,13 @@ object EyeGazeEstimator {
    * @param data OpenSeeFaceData that contains 3D landmarks
    * @return (x, y) offsets in range [-1, 1]
    */
-  def estimate(data: OpenSeeFaceData): (Float, Float) = {
-    val pupilOffsets = if (data.got3DPoints) {
-      val right = estimateSingle(data.points3D.slice(36, 42), data.points3D(66))
-      val left  = estimateSingle(data.points3D.slice(42, 48),  data.points3D(67))
+  def estimate(data: OpenSeeFaceData, useHead: Boolean, usePupil: Boolean): (Float, Float) = {
+    val pupilOffsets = if (usePupil && data.got3DPoints) {
+      // The gaze tracker appends two pupil points after the 68 facial landmarks
+      // in the 3D points array. They correspond to the right and left pupil
+      // positions and are used to estimate gaze direction.
+      val right = estimateSingle(data.points3D.slice(36, 42), data.points3D(68))
+      val left  = estimateSingle(data.points3D.slice(42, 48),  data.points3D(69))
       val avgX = (right._1 + left._1) / 2
       val avgY = (right._2 + left._2) / 2
       (avgX, avgY)
@@ -38,11 +41,13 @@ object EyeGazeEstimator {
 
     val yaw = Radian.radianToDegrees(data.rawEuler.y) / 30.0f
     val pitch = Radian.radianToDegrees(data.rawEuler.x) / 30.0f
-    val headX = clamp(yaw)
-    val headY = clamp(pitch)
+    val headX = if (useHead) clamp(yaw) else 0f
+    val headY = if (useHead) clamp(pitch) else 0f
 
-    val combinedX = pupilOffsets._1 * PupilWeight + headX * HeadWeight
-    val combinedY = pupilOffsets._2 * PupilWeight + headY * HeadWeight
+    val pupilWeight = if (useHead && usePupil) PupilWeight else 1.0f
+    val headWeight = if (useHead && usePupil) HeadWeight else 1.0f
+    val combinedX = pupilOffsets._1 * pupilWeight + headX * headWeight
+    val combinedY = pupilOffsets._2 * pupilWeight + headY * headWeight
 
     (clamp(combinedX * GazeScale), clamp(combinedY * GazeScale))
   }
