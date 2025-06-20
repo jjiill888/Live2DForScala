@@ -47,6 +47,10 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
   private val autoStartCheckBox = new JCheckBox("Auto Start")
   autoStartCheckBox.setSelected(DemoApp.loadAutoStart())
   autoStartCheckBox.addActionListener(_ => DemoApp.saveAutoStart(autoStartCheckBox.isSelected))
+  private val webcamResetButton = new JButton("Webcam reset")
+  webcamResetButton.addActionListener(_ =>
+    live2DWidget.demoAppHolder.foreach(_.resetWebcamCalibration())
+  )
   private val (startButton, stopButton, buttonPanel, buttonCardLayout) = createStartStopButton()
   private val outlinePanel = new OutlinePanel
   private val executor = new ScheduledThreadPoolExecutor(1)
@@ -115,9 +119,16 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
     gc4.anchor = GridBagConstraints.NORTHWEST
     this.add(buttonPanel, gc4)
 
+    val gcReset = new GridBagConstraints()
+    gcReset.gridx = 0
+    gcReset.gridy = 6
+    gcReset.gridwidth = 2
+    gcReset.anchor = GridBagConstraints.NORTHWEST
+    this.add(webcamResetButton, gcReset)
+
     val gc5 = new GridBagConstraints()
     gc5.gridx = 0
-    gc5.gridy = 6
+    gc5.gridy = 7
     gc5.gridwidth = 2
     gc5.fill = GridBagConstraints.BOTH
     gc5.weightx = 1

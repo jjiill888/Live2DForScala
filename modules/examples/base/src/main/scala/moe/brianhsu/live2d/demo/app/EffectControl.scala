@@ -68,6 +68,10 @@ trait EffectControl {
     faceDirectionCalculator.updateFaceTargetCoordinate(0, 0)
   }
 
+  def resetWebcamCalibration(): Unit = {
+    faceTrackingHolder.foreach(_.resetCalibration())
+  }
+
   def enableEyeBlink(isEnabled: Boolean): Unit = {
     this.mUpdateStrategyHolder.foreach(_.enableEyeBlink(isEnabled))
   }

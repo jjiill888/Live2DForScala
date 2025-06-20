@@ -50,6 +50,11 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
   private val autoStartButton = new Button(openSeeFaceGroup, SWT.CHECK)
   autoStartButton.setSelection(DemoApp.loadAutoStart())
   autoStartButton.addListener(SWT.Selection, (_: Event) => DemoApp.saveAutoStart(autoStartButton.getSelection))
+  private val webcamResetButton = new Button(openSeeFaceGroup, SWT.PUSH)
+  webcamResetButton.setText("Webcam reset")
+  webcamResetButton.addListener(SWT.Selection, (_: Event) => {
+    demoAppHolder.foreach(_.resetWebcamCalibration())
+  })
   private val (startButton, stopButton, buttonComposite, buttonStackLayout) = createStartStopButton(openSeeFaceGroup)
   private val outlineGroup = new Group(this, SWT.BORDER)
   private val canvas = new Canvas(outlineGroup, SWT.NONE)
@@ -101,6 +106,10 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
     autoData.horizontalSpan = 2
     autoStartButton.setLayoutData(autoData)
 
+    val resetData = new GridData()
+    resetData.horizontalSpan = 2
+    webcamResetButton.setLayoutData(resetData)
+    
     this.combo.addListener(SWT.Selection, onModeSelected)
     this.startButton.addListener(SWT.Selection, onStartSelected)
     this.stopButton.addListener(SWT.Selection, onStopSelected)

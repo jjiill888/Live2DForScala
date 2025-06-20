@@ -2,7 +2,7 @@ package moe.brianhsu.live2d.enitiy.avatar.effect.impl
 
 import moe.brianhsu.live2d.boundary.gateway.openSeeFace.OpenSeeFaceDataReader
 import moe.brianhsu.live2d.enitiy.avatar.effect.data.OpenSeeFaceDataConverter
-import moe.brianhsu.live2d.enitiy.avatar.effect.impl.FaceTracking.TrackingTaps
+import moe.brianhsu.live2d.enitiy.avatar.effect.impl.FaceTracking.{TrackingNode, TrackingTaps}
 import moe.brianhsu.live2d.enitiy.avatar.effect.impl.OpenSeeFaceTracking._
 
 import scala.util.Using
@@ -16,7 +16,13 @@ class OpenSeeFaceTracking(dataReader: OpenSeeFaceDataReader,
                           trackingTaps: TrackingTaps = DefaultTrackingTaps,
                           dataConverter: OpenSeeFaceDataConverter = new OpenSeeFaceDataConverter) extends FaceTracking(trackingTaps) {
 
+  private var baseNode: Option[TrackingNode] = None
+
   private[impl] val readerThread: ReaderThread = new ReaderThread
+
+  def resetCalibration(): Unit = synchronized {
+    baseNode = trackingNoes.headOption
+  }
 
   override def start(): Unit = {
     readerThread.start()
@@ -45,13 +51,24 @@ class OpenSeeFaceTracking(dataReader: OpenSeeFaceDataReader,
               val leftEyePreviousNodes = trackingNoes.take(trackingTaps.leftEyeOpenness)
               val rightEyePreviousNodes = trackingNoes.take(trackingTaps.rightEyeOpenness)
 
-              dataConverter.convert(
+              val rawNode = dataConverter.convert(
                 data,
                 leftEyePreviousNodes,
                 rightEyePreviousNodes,
                 simulateEyeGazeEnabled,
                 pupilGazeEnabled
               )
+              baseNode match {
+                case Some(base) =>
+                  rawNode.copy(
+                    faceXAngle = rawNode.faceXAngle - base.faceXAngle,
+                    faceYAngle = rawNode.faceYAngle - base.faceYAngle,
+                    faceZAngle = rawNode.faceZAngle - base.faceZAngle,
+                    transX = rawNode.transX - base.transX,
+                    transY = rawNode.transY - base.transY
+                  )
+                case None => rawNode
+              }
             }
 
           trackingNodeHolder.foreach { node =>
