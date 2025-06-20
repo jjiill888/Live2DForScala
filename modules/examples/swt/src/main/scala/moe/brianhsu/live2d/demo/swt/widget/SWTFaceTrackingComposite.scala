@@ -2,6 +2,7 @@ package moe.brianhsu.live2d.demo.swt.widget
 
 import moe.brianhsu.live2d.demo.app.DemoApp
 import moe.brianhsu.live2d.demo.openSeeFace.{CameraListing, ExternalOpenSeeFaceDataReader, OpenSeeFaceSetting}
+import moe.brianhsu.live2d.demo.swt.SWTWithLWJGLMain
 import moe.brianhsu.live2d.demo.swt.widget.faceTracking.{SWTOpenSeeFaceAdvance, SWTOpenSeeFaceBundle}
 import moe.brianhsu.live2d.enitiy.openSeeFace.OpenSeeFaceData
 import moe.brianhsu.live2d.enitiy.openSeeFace.OpenSeeFaceData.Point
@@ -246,6 +247,7 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
     this.stopButton.setEnabled(false)
     this.buttonStackLayout.topControl = this.startButton
     this.buttonComposite.layout(true)
+    SWTWithLWJGLMain.exitCaptureMode()
   }
 
   private def onStartSelected(@unused event: Event): Unit = {
@@ -269,6 +271,7 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
                 buttonComposite.layout(true)
                 canvas.redraw()
                 canvas.update()
+                SWTWithLWJGLMain.enterCaptureMode()
               }
             })
           }

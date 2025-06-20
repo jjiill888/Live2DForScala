@@ -7,7 +7,7 @@ import moe.brianhsu.live2d.adapter.util.WaylandSupport
 import org.eclipse.swt.SWT
 import org.eclipse.swt.custom.SashForm
 import org.eclipse.swt.layout.{GridData, GridLayout}
-import org.eclipse.swt.widgets.{Display, Shell}
+import org.eclipse.swt.widgets.{Display, Shell, Listener, Event}
 
 object SWTWithLWJGLMain {
 
@@ -20,6 +20,9 @@ object SWTWithLWJGLMain {
   private val avatarControl = new SWTAvatarControlPanel(sashForm)
   private val avatarArea = new SWTAvatarDisplayArea(sashForm)
   private val statusBar = new SWTStatusBar(shell)
+
+  private var hideTask: Runnable = _
+  private val uiListener: Listener = (_: Event) => showUIForTimeout()
 
   def main(args: Array[String]): Unit = {
     setupUILayout()
@@ -93,6 +96,46 @@ object SWTWithLWJGLMain {
     loadResult.failed.foreach { e =>
       System.err.println(s"[WARN] Cannot load default avatar: ${e.getMessage}")
     }
+  }
+
+  def enterCaptureMode(): Unit = {
+    hideUI()
+    avatarArea.glCanvas.addListener(SWT.MouseMove, uiListener)
+    avatarArea.glCanvas.addListener(SWT.MouseDown, uiListener)
+  }
+
+  def exitCaptureMode(): Unit = {
+    avatarArea.glCanvas.removeListener(SWT.MouseMove, uiListener)
+    avatarArea.glCanvas.removeListener(SWT.MouseDown, uiListener)
+    cancelHideTask()
+    showUI()
+  }
+
+  private def showUIForTimeout(): Unit = {
+    showUI()
+    cancelHideTask()
+    hideTask = () => hideUI()
+    display.timerExec(2000, hideTask)
+  }
+
+  private def cancelHideTask(): Unit = {
+    if (hideTask != null) display.timerExec(-1, hideTask)
+  }
+
+  private def hideUI(): Unit = {
+    toolbar.setVisible(false)
+    statusBar.setVisible(false)
+    avatarControl.setVisible(false)
+    sashForm.setSashWidth(0)
+    sashForm.setWeights(0, 1)
+  }
+
+  private def showUI(): Unit = {
+    toolbar.setVisible(true)
+    statusBar.setVisible(true)
+    avatarControl.setVisible(true)
+    sashForm.setSashWidth(5)
+    sashForm.setWeights(1, 4)
   }
 
 }
