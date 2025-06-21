@@ -74,6 +74,7 @@ object SWTWithLWJGLMain {
 
     val gridData1 = new GridData
     gridData1.horizontalAlignment = GridData.FILL
+    gridData1.verticalAlignment = GridData.FILL
     gridData1.grabExcessHorizontalSpace = true
     gridData1.grabExcessVerticalSpace = true
     sashForm.setLayoutData(gridData1)
@@ -126,16 +127,22 @@ object SWTWithLWJGLMain {
     toolbar.setVisible(false)
     statusBar.setVisible(false)
     avatarControl.setVisible(false)
+    toolbar.getLayoutData.asInstanceOf[GridData].exclude = true
+    statusBar.getLayoutData.asInstanceOf[GridData].exclude = true
     sashForm.setSashWidth(0)
     sashForm.setWeights(0, 1)
+    shell.layout()
   }
 
   private def showUI(): Unit = {
     toolbar.setVisible(true)
     statusBar.setVisible(true)
     avatarControl.setVisible(true)
+    toolbar.getLayoutData.asInstanceOf[GridData].exclude = false
+    statusBar.getLayoutData.asInstanceOf[GridData].exclude = false
     sashForm.setSashWidth(5)
     sashForm.setWeights(1, 4)
+    shell.layout()
   }
 
 }
