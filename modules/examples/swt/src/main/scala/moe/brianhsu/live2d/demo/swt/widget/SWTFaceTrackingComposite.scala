@@ -29,6 +29,9 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
   private val stackLayout = new StackLayout
   private val openSeeFacePanel = new Composite(openSeeFaceGroup, SWT.NONE)
   private val bundle = new SWTOpenSeeFaceBundle(openSeeFacePanel, CameraListing.createByOS())
+  bundle.webcamResetButton.addListener(SWT.Selection, (_: Event) => {
+    demoAppHolder.foreach(_.resetWebcamCalibration())
+  })
   private val advanced = new SWTOpenSeeFaceAdvance(openSeeFacePanel)
   private val disableEyeBlinkButton = new Button(openSeeFaceGroup, SWT.CHECK)
   disableEyeBlinkButton.setSelection(DemoApp.loadDisableEyeBlink())
@@ -51,11 +54,6 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
   private val autoStartButton = new Button(openSeeFaceGroup, SWT.CHECK)
   autoStartButton.setSelection(DemoApp.loadAutoStart())
   autoStartButton.addListener(SWT.Selection, (_: Event) => DemoApp.saveAutoStart(autoStartButton.getSelection))
-  private val webcamResetButton = new Button(openSeeFaceGroup, SWT.PUSH)
-  webcamResetButton.setText("Webcam reset")
-  webcamResetButton.addListener(SWT.Selection, (_: Event) => {
-    demoAppHolder.foreach(_.resetWebcamCalibration())
-  })
   private val (startButton, stopButton, buttonComposite, buttonStackLayout) = createStartStopButton(openSeeFaceGroup)
   private val outlineGroup = new Group(this, SWT.BORDER)
   private val canvas = new Canvas(outlineGroup, SWT.NONE)
@@ -75,12 +73,14 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
 
     val gridData1 = new GridData()
     gridData1.horizontalAlignment = GridData.FILL
+    gridData1.verticalAlignment = GridData.BEGINNING
     gridData1.grabExcessHorizontalSpace = true
     this.openSeeFaceGroup.setLayoutData(gridData1)
     this.outlineGroup.setLayoutData(gridData1)
 
     val gridData2 = new GridData()
     gridData2.horizontalAlignment = GridData.FILL
+    gridData2.verticalAlignment = GridData.BEGINNING
     gridData2.grabExcessHorizontalSpace = true
     gridData2.horizontalSpan = 2
 
@@ -106,10 +106,6 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
     val autoData = new GridData()
     autoData.horizontalSpan = 2
     autoStartButton.setLayoutData(autoData)
-
-    val resetData = new GridData()
-    resetData.horizontalSpan = 2
-    webcamResetButton.setLayoutData(resetData)
     
     this.combo.addListener(SWT.Selection, onModeSelected)
     this.startButton.addListener(SWT.Selection, onStartSelected)

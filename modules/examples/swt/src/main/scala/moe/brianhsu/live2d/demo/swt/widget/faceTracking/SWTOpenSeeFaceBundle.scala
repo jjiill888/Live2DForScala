@@ -3,10 +3,11 @@ package moe.brianhsu.live2d.demo.swt.widget.faceTracking
 import moe.brianhsu.live2d.demo.openSeeFace.{CameraListing, OpenSeeFaceSetting}
 import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.{GridData, GridLayout}
-import org.eclipse.swt.widgets.{Combo, Composite, Label}
+import org.eclipse.swt.widgets.{Button, Combo, Composite, Label}
 
 class SWTOpenSeeFaceBundle(parent: Composite, cameraListing: CameraListing) extends Composite(parent, SWT.NONE) with OpenSeeFaceSetting {
   private val cameraCombo = createComboField(this, "Camera:", cameraListing.listing.map(_.title), 0, "Select camera for face tracking")
+  val webcamResetButton = createResetButton(this)
   private val fpsCombo = createComboField(
     this, "FPS:", List("24", "30", "60", "120"), 2,
     "Set camera frames per second"
@@ -60,6 +61,19 @@ class SWTOpenSeeFaceBundle(parent: Composite, cameraListing: CameraListing) exte
     s"--capture $cameraId "
   }
 
+  private def createResetButton(parent: Composite): Button = {
+    val button = new Button(parent, SWT.PUSH)
+    button.setText("Webcam reset")
+
+    val gridData = new GridData
+    gridData.horizontalAlignment = GridData.END
+    gridData.grabExcessHorizontalSpace = true
+    gridData.horizontalSpan = 2
+    button.setLayoutData(gridData)
+
+    button
+  }
+  
   private def createComboField(parent: Composite, title: String, values: List[String], defaultIndex: Int, tooltip:String): Combo = {
     val titleLabel = new Label(parent, SWT.NONE)
     val comboBox = new Combo(parent, SWT.DROP_DOWN|SWT.READ_ONLY)
