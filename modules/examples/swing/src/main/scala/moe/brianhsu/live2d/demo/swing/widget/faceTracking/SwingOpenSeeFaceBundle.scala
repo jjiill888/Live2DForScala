@@ -22,8 +22,9 @@ class SwingOpenSeeFaceBundle(cameraListing: CameraListing) extends JPanel with O
     "Set camera resolution"
   )
 
+  private val portText = createTextField(this, 3, "Port:", "11573", "Set port for sending tracking data")
   private val modelCombo = createComboField(
-    this, 3, "Model:", List("-3", "-2", "-1", "0", "1", "2", "3", "4"), 7,
+    this, 4, "Model:", List("-3", "-2", "-1", "0", "1", "2", "3", "4"), 7,
     "This can be used to select the tracking model.\n" +
       "Higher numbers are models with better tracking quality, but slower speed, " +
       "except for model 4, which is wink optimized.\n" +
@@ -32,12 +33,12 @@ class SwingOpenSeeFaceBundle(cameraListing: CameraListing) extends JPanel with O
       "Model -3 is between models 0 and -1."
   )
   private val visualizeCombo = createComboField(
-    this, 4, "Visualize:", List("0", "1", "2", "3", "4"), 0,
+    this, 5, "Visualize:", List("0", "1", "2", "3", "4"), 0,
     "Set this to 1 to visualize the tracking, to 2 to also show face ids, " +
       "to 3 to add confidence values or to 4 to add numbers to the point display."
   )
 
-  @unused private val placeHolder = createPlaceHolder(this, 5)
+  @unused private val placeHolder = createPlaceHolder(this, 6)
 
   private def createPlaceHolder(parent: JPanel, row: Int): JPanel = {
     val placeHolder = new JPanel()
@@ -82,11 +83,35 @@ class SwingOpenSeeFaceBundle(cameraListing: CameraListing) extends JPanel with O
 
   }
 
+  private def createTextField(parent: JPanel, row: Int, title: String, default: String, tooltip: String = "") = {
+    val label = new JLabel(title)
+    val textField = new JTextField(default)
+
+    textField.setToolTipText(tooltip)
+
+    val gc1 = new GridBagConstraints()
+    gc1.gridx = 0
+    gc1.gridy = row
+    gc1.anchor = GridBagConstraints.NORTHWEST
+    parent.add(label, gc1)
+
+    val gc2 = new GridBagConstraints()
+    gc2.gridx = 1
+    gc2.gridy = row
+    gc2.anchor = GridBagConstraints.NORTHWEST
+    gc2.fill = GridBagConstraints.HORIZONTAL
+    gc2.weightx = 1
+    parent.add(textField, gc2)
+
+    textField
+  }
+
   override def getCommand: String = {
     s"${OpenSeeFaceSetting.bundleExecution} " +
       s"--model-dir ${OpenSeeFaceSetting.bundleModelDir} -M " +
       cameraIdSetting +
       cameraResolutionSetting +
+      Option(portText.getText).filter(_.nonEmpty).map("--port " + _ + " ").getOrElse("") +
       Option(fpsCombo.getSelectedItem.toString).filter(_.nonEmpty).map("--fps " + _ + " ").getOrElse("") +
       Option(modelCombo.getSelectedItem.toString).filter(_.nonEmpty).map("--model " + _ + " ").getOrElse("") +
       Option(visualizeCombo.getSelectedItem.toString).filter(_.nonEmpty).map("--visualize " + _ + " ").getOrElse("")
@@ -108,5 +133,5 @@ class SwingOpenSeeFaceBundle(cameraListing: CameraListing) extends JPanel with O
 
   override def getHostname: String = "127.0.0.1"
 
-  override def getPort: Int = 11573
+  override def getPort: Int = portText.getText.toInt
 }

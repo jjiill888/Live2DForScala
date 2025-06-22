@@ -3,7 +3,7 @@ package moe.brianhsu.live2d.demo.swt.widget.faceTracking
 import moe.brianhsu.live2d.demo.openSeeFace.{CameraListing, OpenSeeFaceSetting}
 import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.{GridData, GridLayout}
-import org.eclipse.swt.widgets.{Button, Combo, Composite, Label}
+import org.eclipse.swt.widgets.{Button, Combo, Composite, Label, Text}
 
 class SWTOpenSeeFaceBundle(parent: Composite, cameraListing: CameraListing) extends Composite(parent, SWT.NONE) with OpenSeeFaceSetting {
   private val cameraCombo = createComboField(this, "Camera:", cameraListing.listing.map(_.title), 0, "Select camera for face tracking")
@@ -17,6 +17,8 @@ class SWTOpenSeeFaceBundle(parent: Composite, cameraListing: CameraListing) exte
     this, "Resolution:", List("320x240", "640x480", "1024x768", "1280x720", "1920x1080"), 1,
     "Set camera resolution"
   )
+
+  private val portText = createTextField(this, "Port:", "11573", "Set port for sending tracking data")
 
   private val modelCombo = createComboField(
     this, "Model:", List("-3", "-2", "-1", "0", "1", "2", "3", "4"), 7,
@@ -42,6 +44,7 @@ class SWTOpenSeeFaceBundle(parent: Composite, cameraListing: CameraListing) exte
       s"--model-dir ${OpenSeeFaceSetting.bundleModelDir} -M " +
       cameraIdSetting +
       cameraResolutionSetting +
+      Option(portText.getText).filter(_.nonEmpty).map("--port " + _ + " ").getOrElse("") +
       Option(fpsCombo.getText).filter(_.nonEmpty).map("--fps " + _ + " ").getOrElse("") +
       Option(modelCombo.getText).filter(_.nonEmpty).map("--model " + _ + " ").getOrElse("") +
       Option(visualizeCombo.getText).filter(_.nonEmpty).map("--visualize " + _ + " ").getOrElse("")
@@ -91,7 +94,23 @@ class SWTOpenSeeFaceBundle(parent: Composite, cameraListing: CameraListing) exte
     comboBox
   }
 
+  private def createTextField(parent: Composite, title: String, default: String, tooltip: String = ""): Text = {
+    val titleLabel = new Label(parent, SWT.NONE)
+    val textField = new Text(parent, SWT.BORDER | SWT.SINGLE)
+
+    titleLabel.setText(title)
+    textField.setText(default)
+    textField.setToolTipText(tooltip)
+
+    val gridData = new GridData
+    gridData.horizontalAlignment = GridData.FILL
+    gridData.grabExcessHorizontalSpace = true
+    textField.setLayoutData(gridData)
+
+    textField
+  }
+
   override def getHostname: String = "127.0.0.1"
 
-  override def getPort: Int = 11573
+  override def getPort: Int = portText.getText.toInt
 }

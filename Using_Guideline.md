@@ -85,6 +85,11 @@ Extract the downloaded archive.
 
 ---
 
+##  Step 5. How to run two Avatar on the same computer
+You can run two face tracking instances simultaneously on one computer by setting different ports and assigning the correct camera for each in the Face Tracking panel.
+
+---
+
 ##  New Features in This Fork
 
 - **Expression Shortcut Keys (1–9)** – Instantly switch facial expressions
@@ -93,6 +98,7 @@ Extract the downloaded archive.
 - **OBS-Friendly Transparency** – For streaming with alpha channel
 - **Simulated Eye Gaze** – Natural idle gaze movement
 - **XWayland support** SWT version can working on XWayland
+- Run two Avatar on the same computer
 ---
 
 Happy streaming!
