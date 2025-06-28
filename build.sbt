@@ -310,7 +310,22 @@ import sbt._
 import java.io.{File, PrintWriter}
 import scala.sys.process._
 
+lazy val createStartScriptLinux = taskKey[Unit]("Create start.sh file with X11/Wayland detection")
 lazy val createDesktopEntrylinux = taskKey[Unit]("Create start.desktop file in release package")
+
+createStartScriptLinux := {
+  val dirPath = s"release-pkg/Live2DForScala-SWT-Linux-${version.value}"
+  val scriptFile = new File(dirPath, "start.sh")
+  IO.createDirectory(new File(dirPath))
+  val content = s"""#!/bin/sh
+                   |if [ \"$$XDG_SESSION_TYPE\" = \"wayland\" ] || [ -n \"$$WAYLAND_DISPLAY\" ]; then
+                   |  export GDK_BACKEND=x11
+                   |fi
+                   |exec java -Xms256m -Xmx600m -XX:+UseG1GC -Dsun.java2d.opengl=true -jar Live2DForScala-SWT-Linux-${version.value}.jar
+                   |""".stripMargin
+  IO.write(scriptFile, content)
+  scriptFile.setExecutable(true)
+}
 
 createDesktopEntrylinux := {
   val dirPath = s"release-pkg/Live2DForScala-SWT-Linux-${version.value}"
@@ -324,7 +339,7 @@ createDesktopEntrylinux := {
   val content = s"""
                     [Desktop Entry]
                    |Type=Application
-                   |Exec=java -Xms256m -Xmx600m -XX:+UseG1GC -Dsun.java2d.opengl=true -jar Live2DForScala-SWT-Linux-${version.value}.jar
+                   |Exec=sh start.sh
 """.stripMargin
 
   // Using Scala's file operations to write content
@@ -344,6 +359,7 @@ lazy val releaselinux = taskKey[Unit]("Performs both createReleasePackageTask an
 releaselinux := {
   createReleasePackageTasklinux.value
   moveTasklinux.value
+  createStartScriptLinux.value
   createDesktopEntrylinux.value
   println("Both tasks completed successfully.")
 }
