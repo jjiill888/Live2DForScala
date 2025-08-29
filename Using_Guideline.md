@@ -5,34 +5,34 @@ If you only want to use the program, you need to do the following:
 
 ---
 
-##  Step 1. Install OpenJDK 17
+##  Step 1. Install OpenJDK 21
 
 ### Linux
 
-Install OpenJDK 17 using your distribution’s package manager:
+Install OpenJDK 21 using your distribution's package manager:
 
 - **Ubuntu**:
   ```bash
-  sudo apt-get install openjdk-17-jre
+  sudo apt-get install openjdk-21-jre
   ```
 
 - **Arch Linux**:
   ```bash
-  sudo pacman -S jre17-openjdk
+  sudo pacman -S jre21-openjdk
   ```
 
 - **Gentoo**:
   ```bash
-  sudo emerge -pv virtual/jre:7
+  sudo emerge -pv virtual/jre:21
   ```
 
 ### Windows
 
-Download and install `microsoft-jdk-17.X.Y-windows-x64.msi` from [Microsoft Build of OpenJDK](https://learn.microsoft.com/en-us/java/openjdk/download).
+Download and install `microsoft-jdk-21.X.Y-windows-x64.msi` from [Microsoft Build of OpenJDK](https://learn.microsoft.com/en-us/java/openjdk/download).
 
  ###  MacOS
       Install Homebrew
-      Run brew install openjdk@17 to install
+      Run brew install openjdk@21 to install
           
 
 

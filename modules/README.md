@@ -15,8 +15,8 @@ Disclaimer
 Scala/Java version requirement
 ----------------------------
 
-1. It required JDK 11 to build.
-2. It required Scala 2.13.x to build.
+1. It required JDK 21 to build.
+2. It required Scala 3.3.x to build.
 
 Introduction
 -------------

@@ -1,11 +1,11 @@
-Step 1. Install Open JDK 11.
+Step 1. Install Open JDK 21.
 ================================
 
-- For Windows, download [Microsoft Build of OpenJDK](https://docs.microsoft.com/en-us/java/openjdk/download)
+- For Windows, download [Microsoft Build of OpenJDK](https://learn.microsoft.com/en-us/java/openjdk/download)
 - For Linux, install it through your distro's package manager.
 - For MacOS
     1. Install Homebrew
-    2. Run `brew install openjdk@11` to install
+    2. Run `brew install openjdk@21` to install
 
 Step 2. Download corresponding JAR files.
 ==========================================

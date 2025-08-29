@@ -1,14 +1,14 @@
-Step 1. Install Open JDK 11.
+Step 1. Install Open JDK 21.
 ================================
 
 - For Linux, install it through your distro's package manager.
-  - For Ubuntu, run `sudo apt-get install openjdk-11-jre`
-  - For ArchLinux, run `sudo pacman -S jre-11-openjdk`
-  - For Gentoo, run `sudo emerge -pv virtual/jre:11`
-- For Windows, download OpenJDK 11 (`microsoft-jdk-11.0.15-windows-x64.msi`) From [Microsoft Build of OpenJDK](https://docs.microsoft.com/en-us/java/openjdk/download)
+  - For Ubuntu, run `sudo apt-get install openjdk-21-jre`
+  - For ArchLinux, run `sudo pacman -S jre21-openjdk`
+  - For Gentoo, run `sudo emerge -pv virtual/jre:21`
+- For Windows, download OpenJDK 21 (`microsoft-jdk-21.X.Y-windows-x64.msi`) From [Microsoft Build of OpenJDK](https://learn.microsoft.com/en-us/java/openjdk/download)
 - For MacOS
     1. Install Homebrew
-    2. Run `brew install openjdk@11` to install
+    2. Run `brew install openjdk@21` to install
 
 Step 2. Download corresponding compressed files.
 ==========================================
