@@ -42,8 +42,8 @@ class SWTMixerSelector(parent: Composite, onMixerChanged: Option[Mixer] => Unit)
     forceLipSync.setLayoutData(layoutData3)
 
     deviceRefresh.addListener(SWT.Selection, (_: Event) => updateSoundDeviceSelector())
-    lipSyncDevice.addListener(SWT.Selection, onStatusChanged)
-    forceLipSync.addListener(SWT.Selection, onStatusChanged)
+    lipSyncDevice.addListener(SWT.Selection, { (event: Event) => onStatusChanged(event) })
+    forceLipSync.addListener(SWT.Selection, { (event: Event) => onStatusChanged(event) })
 
     updateSoundDeviceSelector()
     onMixerChanged(currentMixer)
@@ -62,7 +62,7 @@ class SWTMixerSelector(parent: Composite, onMixerChanged: Option[Mixer] => Unit)
     this.forceLipSync.setEnabled(enabled)
   }
 
-  private def onStatusChanged(@unused event: Event): Unit = {
+  private def onStatusChanged(event: Event): Unit = {
     onMixerChanged(currentMixer)
   }
 

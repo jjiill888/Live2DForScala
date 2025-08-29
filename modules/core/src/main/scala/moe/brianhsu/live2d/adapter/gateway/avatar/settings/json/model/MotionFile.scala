@@ -1,8 +1,33 @@
 package moe.brianhsu.live2d.adapter.gateway.avatar.settings.json.model
 
-import moe.brianhsu.live2d.adapter.RichPath.convertFromPath
+import moe.brianhsu.live2d.adapter.RichPath.given
+import moe.brianhsu.live2d.adapter.gateway.avatar.settings.json.model.Motion
 import org.json4s.native.JsonMethods.parse
 import org.json4s.{DefaultFormats, Formats}
+import org.json4s.MonadicJValue.jvalueToMonadic
+import org.json4s.jvalue2extractable
+import scala.reflect.ClassTag
+
+// ClassTag to Manifest bridge for json4s compatibility
+given [T](using ct: ClassTag[T]): scala.reflect.Manifest[T] = 
+  new scala.reflect.Manifest[T] {
+    override def runtimeClass: Class[_] = ct.runtimeClass
+    override def typeArguments: List[scala.reflect.Manifest[_]] = Nil
+    override def arrayManifest: scala.reflect.Manifest[Array[T]] = 
+      new scala.reflect.Manifest[Array[T]] {
+        override def runtimeClass: Class[_] = java.lang.reflect.Array.newInstance(ct.runtimeClass, 0).getClass
+        override def typeArguments: List[scala.reflect.Manifest[_]] = List(summon[scala.reflect.Manifest[T]])
+        override def arrayManifest: scala.reflect.Manifest[Array[Array[T]]] = 
+          new scala.reflect.Manifest[Array[Array[T]]] {
+            override def runtimeClass: Class[_] = java.lang.reflect.Array.newInstance(runtimeClass, 0).getClass
+            override def typeArguments: List[scala.reflect.Manifest[_]] = List(this)
+            override def arrayManifest: scala.reflect.Manifest[Array[Array[Array[T]]]] = ???
+            override def erasure: Class[_] = runtimeClass
+          }
+        override def erasure: Class[_] = runtimeClass
+      }
+    override def erasure: Class[_] = runtimeClass
+  }
 
 import java.nio.file.Paths
 import scala.util.Try
@@ -17,7 +42,7 @@ import scala.util.Try
  */
 private[json] case class MotionFile(file: String, fadeInTime: Option[Float], fadeOutTime: Option[Float], sound: Option[String]) {
 
-  private implicit val formats: Formats = DefaultFormats
+  private given formats: Formats = DefaultFormats
 
   /**
    * Load this motion from specified directory.

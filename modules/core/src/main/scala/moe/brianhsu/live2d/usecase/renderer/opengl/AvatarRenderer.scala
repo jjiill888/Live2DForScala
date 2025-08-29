@@ -9,25 +9,23 @@ import moe.brianhsu.live2d.usecase.renderer.opengl.clipping.{ClippingContext, Cl
 import moe.brianhsu.live2d.usecase.renderer.opengl.shader.ShaderRenderer
 import moe.brianhsu.live2d.usecase.renderer.viewport.matrix.ProjectionMatrix
 
-object AvatarRenderer {
+object AvatarRenderer:
 
-  def apply(model: Live2DModel)(implicit gl: OpenGLBinding, wrapper: OpenGLBinding => RichOpenGLBinding = RichOpenGLBinding.wrapOpenGLBinding): AvatarRenderer = {
-    val textureManager = TextureManager.getInstance(gl)
-    val shaderRenderer = ShaderRenderer.getInstance(gl)
-    val profile = Profile.getInstance(gl)
-    val clippingRenderer = new ClippingRenderer(model, textureManager, shaderRenderer)(gl, wrapper)
+  def apply(model: Live2DModel)(using gl: OpenGLBinding): AvatarRenderer =
+    val textureManager = TextureManager.getInstance
+    val shaderRenderer = ShaderRenderer.getInstance
+    val profile = Profile.getInstance
+    val clippingRenderer = new ClippingRenderer(model, textureManager, shaderRenderer)
 
     new AvatarRenderer(
       model, textureManager, shaderRenderer,
       profile, clippingRenderer
-    )(gl, wrapper)
-  }
-}
+    )
 
 class AvatarRenderer(model: Live2DModel,
                      textureManager: TextureManager, shaderRenderer: ShaderRenderer, profile: Profile,
                      clippingRenderer: ClippingRenderer)
-                    (implicit gl: OpenGLBinding, wrapper: OpenGLBinding => RichOpenGLBinding) {
+                    (using gl: OpenGLBinding):
 
   import gl.constants._
 
@@ -40,7 +38,7 @@ class AvatarRenderer(model: Live2DModel,
   private def drawModel(projection: ProjectionMatrix): Unit = {
     clippingRenderer.draw(profile)
 
-    gl.preDraw()
+    RichOpenGLBinding.wrapOpenGLBinding(gl).preDraw()
 
     val sortedDrawable = model.sortedDrawables
     for (drawable <- sortedDrawable.filter(_.dynamicFlags.isVisible)) {
@@ -69,7 +67,7 @@ class AvatarRenderer(model: Live2DModel,
                        multiplyColor: DrawableColor, screenColor: DrawableColor,
                        projection: ProjectionMatrix): Unit ={
 
-    gl.setCapabilityEnabled(GL_CULL_FACE, isCulling)
+    RichOpenGLBinding.wrapOpenGLBinding(gl).setCapabilityEnabled(GL_CULL_FACE, isCulling)
     gl.glFrontFace(GL_CCW)
 
     val modelColorRGBA = TextureColor(1.0f, 1.0f, 1.0f, opacity)
@@ -87,5 +85,3 @@ class AvatarRenderer(model: Live2DModel,
     gl.glDrawElements(GL_TRIANGLES, vertexInfo.numberOfTriangleIndex, GL_UNSIGNED_SHORT, vertexInfo.indexArrayDirectBuffer)
     gl.glUseProgram(0)
   }
-
-}

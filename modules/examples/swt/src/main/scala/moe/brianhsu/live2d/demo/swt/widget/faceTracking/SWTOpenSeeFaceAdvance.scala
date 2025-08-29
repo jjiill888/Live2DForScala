@@ -34,21 +34,21 @@ class SWTOpenSeeFaceAdvance(parent: Composite) extends Composite(parent, SWT.NON
   {
     this.setLayout(new GridLayout(2, true))
 
-    commandText.addListener(SWT.Modify, updateSegments)
-    ipText.addListener(SWT.Modify, updateSegments)
-    portText.addListener(SWT.Modify, updateSegments)
-    cameraIdText.addListener(SWT.Modify, updateSegments)
-    modelCombo.addListener(SWT.Selection, updateSegments)
-    visualizeCombo.addListener(SWT.Selection, updateSegments)
-    extraParameterText.addListener(SWT.Modify, updateSegments)
-    mirrorCheckbox.addListener(SWT.Selection, updateSegments)
+    commandText.addListener(SWT.Modify, { (event: Event) => updateSegments(event) })
+    ipText.addListener(SWT.Modify, { (event: Event) => updateSegments(event) })
+    portText.addListener(SWT.Modify, { (event: Event) => updateSegments(event) })
+    cameraIdText.addListener(SWT.Modify, { (event: Event) => updateSegments(event) })
+    modelCombo.addListener(SWT.Selection, { (event: Event) => updateSegments(event) })
+    visualizeCombo.addListener(SWT.Selection, { (event: Event) => updateSegments(event) })
+    extraParameterText.addListener(SWT.Modify, { (event: Event) => updateSegments(event) })
+    mirrorCheckbox.addListener(SWT.Selection, { (event: Event) => updateSegments(event) })
 
     updateCommandPreview()
   }
 
   override def getCommand: String = commandPreviewText.getText
 
-  private def updateSegments(@unused event: Event): Unit = {
+  private def updateSegments(event: Event): Unit = {
     updateCommandPreview()
   }
 

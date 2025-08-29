@@ -102,7 +102,7 @@ class JavaFXAvatarDisplayArea extends StackPane {
 
   private class CanvasGLEventListener extends GLEventListener {
     override def init(drawable: GLAutoDrawable): Unit = {
-      implicit val openGL: JavaOpenGLBinding = new JavaOpenGLBinding(drawable.getGL.getGL2)
+      given openGL: JavaOpenGLBinding = new JavaOpenGLBinding(drawable.getGL.getGL2)
       val app = new DemoApp(canvasInfo, runOnOpenGLThread) {
         override def onAvatarLoaded(live2DView: DemoApp): Unit =
           avatarListenerHolder.foreach(_.onAvatarLoaded(live2DView))

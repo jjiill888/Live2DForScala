@@ -75,7 +75,7 @@ class UDPOpenSeeFaceDataReaderFeature extends AnyFeatureSpec with GivenWhenThen 
         val inputStream = use(this.getClass.getResourceAsStream("/expectation/openSeeFaceDataExpectation.json"))
         val source = use(Source.fromInputStream(inputStream))
         val lines = source.getLines().toList
-        implicit val jsonFormats: DefaultFormats.type = DefaultFormats
+        given jsonFormats: DefaultFormats.type = DefaultFormats
         lines.map { line => JsonMethods.parse(line).extract[ExpectedData] }
       }.get
 

@@ -38,7 +38,7 @@ class SwingOpenSeeFaceBundle(cameraListing: CameraListing) extends JPanel with O
       "to 3 to add confidence values or to 4 to add numbers to the point display."
   )
 
-  @unused private val placeHolder = createPlaceHolder(this, 6)
+  private val placeHolder = createPlaceHolder(this, 6)
 
   private def createPlaceHolder(parent: JPanel, row: Int): JPanel = {
     val placeHolder = new JPanel()

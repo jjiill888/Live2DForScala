@@ -29,7 +29,7 @@ class SWTSliderControl(title: String, min: Int, max: Int, default: Int, parent: 
     scaleData.grabExcessVerticalSpace = false
     scaleData.grabExcessHorizontalSpace = true
     scale.setLayoutData(scaleData)
-    scale.addListener(SWT.Selection, { _: Event => updatePercentage(scale.getSelection) })
+    scale.addListener(SWT.Selection, { (_: Event) => updatePercentage(scale.getSelection) })
 
     val valueLabelData = new GridData
     titleLabelData.horizontalAlignment = GridData.BEGINNING

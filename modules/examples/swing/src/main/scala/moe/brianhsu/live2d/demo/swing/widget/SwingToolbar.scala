@@ -19,11 +19,11 @@ class SwingToolbar(live2DWidget: Live2DUI) extends JToolBar("Live 2D For Scala S
   transparentBackground.setSelected(DemoApp.loadTransparentBackground())
 
   {
-    this.loadAvatar.addActionListener(loadAvatarAction)
-    this.defaultBackground.addActionListener(switchToDefaultBackground)
-    this.pureBackground.addActionListener(switchToPureColor)
-    this.selectBackground.addActionListener(changeBackground)
-    this.transparentBackground.addActionListener(switchToTransparent)
+    this.loadAvatar.addActionListener { (event: ActionEvent) => loadAvatarAction(event) }
+    this.defaultBackground.addActionListener { (event: ActionEvent) => switchToDefaultBackground(event) }
+    this.pureBackground.addActionListener { (event: ActionEvent) => switchToPureColor(event) }
+    this.selectBackground.addActionListener { (event: ActionEvent) => changeBackground(event) }
+    this.transparentBackground.addActionListener { (event: ActionEvent) => switchToTransparent(event) }
     this.add(loadAvatar)
     this.add(defaultBackground)
     this.add(selectBackground)
@@ -31,7 +31,7 @@ class SwingToolbar(live2DWidget: Live2DUI) extends JToolBar("Live 2D For Scala S
     this.add(transparentBackground)
   }
 
-  private def changeBackground(@unused actionEvent: ActionEvent): Unit = {
+  private def changeBackground(actionEvent: ActionEvent): Unit = {
 
     val jpgFilter = new FileNameExtensionFilter("JPEG file", "jpg", "jpeg")
     val pngFilter = new FileNameExtensionFilter("PNG file", "png")
@@ -62,13 +62,13 @@ class SwingToolbar(live2DWidget: Live2DUI) extends JToolBar("Live 2D For Scala S
 
   }
 
-  private def switchToDefaultBackground(@unused actionEvent: ActionEvent): Unit = {
+  private def switchToDefaultBackground(actionEvent: ActionEvent): Unit = {
     live2DWidget.demoAppHolder.foreach(_.switchToDefaultBackground())
     transparentBackground.setSelected(false)
     DemoApp.saveTransparentBackground(false)
   }
 
-  private def switchToPureColor(@unused actionEvent: ActionEvent): Unit = {
+  private def switchToPureColor(actionEvent: ActionEvent): Unit = {
     for {
       live2d <- live2DWidget.demoAppHolder
       selectedColor <- Option(JColorChooser.showDialog(this.getParent, "Choose Background", new Color(0.0f, 1.0f, 0.0f)))
@@ -77,13 +77,13 @@ class SwingToolbar(live2DWidget: Live2DUI) extends JToolBar("Live 2D For Scala S
     }
   }
 
-  private def switchToTransparent(@unused actionEvent: ActionEvent): Unit = {
+  private def switchToTransparent(actionEvent: ActionEvent): Unit = {
     val enabled = transparentBackground.isSelected
     live2DWidget.demoAppHolder.foreach(_.setTransparentBackground(enabled))
     DemoApp.saveTransparentBackground(enabled)
   }
   
-  private def loadAvatarAction(@unused action: ActionEvent): Unit = {
+  private def loadAvatarAction(action: ActionEvent): Unit = {
     val fileChooser = new JFileChooser()
     fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY)
     val result = fileChooser.showOpenDialog(this.getParent)

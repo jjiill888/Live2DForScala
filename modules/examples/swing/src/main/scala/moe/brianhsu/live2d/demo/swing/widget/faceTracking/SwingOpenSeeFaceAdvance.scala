@@ -41,9 +41,9 @@ class SwingOpenSeeFaceAdvance extends JPanel with OpenSeeFaceSetting  {
     addUpdateListener(portText, updateCommandPreview)
     addUpdateListener(cameraIdText, updateCommandPreview)
     addUpdateListener(extraParameterText, updateCommandPreview)
-    modelCombo.addActionListener(updateCommandPreview)
-    visualizeCombo.addActionListener(updateCommandPreview)
-    mirrorCheckbox.addActionListener(updateCommandPreview)
+    modelCombo.addActionListener { (event: ActionEvent) => updateCommandPreview(event) }
+    visualizeCombo.addActionListener { (event: ActionEvent) => updateCommandPreview(event) }
+    mirrorCheckbox.addActionListener { (event: ActionEvent) => updateCommandPreview(event) }
     mirrorCheckbox.setSelected(true)
 
     updateCommandPreview()
@@ -57,7 +57,7 @@ class SwingOpenSeeFaceAdvance extends JPanel with OpenSeeFaceSetting  {
     })
   }
 
-  private def updateCommandPreview(@unused actionEvent: ActionEvent): Unit = {
+  private def updateCommandPreview(actionEvent: ActionEvent): Unit = {
     updateCommandPreview()
   }
 

@@ -35,11 +35,11 @@ class SWTEffectSelector(parent: Composite) extends Composite(parent, SWT.NONE) {
     lipSyncDevice.setEnabled(false)
     faceDirectionMode.setEnabled(false)
 
-    blink.addListener(SWT.Selection, onBlinkChanged)
-    breath.addListener(SWT.Selection, onBreathChanged)
-    faceDirection.addListener(SWT.Selection, updateFaceDirectionMode)
-    faceDirectionMode.addListener(SWT.Selection, updateFaceDirectionMode)
-    lipSyncFromMic.addListener(SWT.Selection, onLipSycFromMicChanged)
+    blink.addListener(SWT.Selection, { (event: Event) => onBlinkChanged(event) })
+    breath.addListener(SWT.Selection, { (event: Event) => onBreathChanged(event) })
+    faceDirection.addListener(SWT.Selection, { (event: Event) => updateFaceDirectionMode(event) })
+    faceDirectionMode.addListener(SWT.Selection, { (event: Event) => updateFaceDirectionMode(event) })
+    lipSyncFromMic.addListener(SWT.Selection, { (event: Event) => onLipSycFromMicChanged(event) })
     lipSyncDevice.sliderControl.addChangeListener(onMicLipSyncWeightChanged)
 
   }
@@ -85,7 +85,7 @@ class SWTEffectSelector(parent: Composite) extends Composite(parent, SWT.NONE) {
     dropdown
   }
 
-  private def updateFaceDirectionMode(@unused event: Event): Unit = {
+  private def updateFaceDirectionMode(event: Event): Unit = {
     this.faceDirectionMode.setEnabled(this.faceDirection.getSelection)
     demoAppHolder.foreach { live2D =>
       live2D.enableFaceDirection(false)
@@ -100,7 +100,7 @@ class SWTEffectSelector(parent: Composite) extends Composite(parent, SWT.NONE) {
     }
   }
 
-  private def onLipSycFromMicChanged(@unused event: Event): Unit = {
+  private def onLipSycFromMicChanged(event: Event): Unit = {
     lipSyncDevice.setEnabled(lipSyncFromMic.getSelection)
     demoAppHolder.foreach { demoApp =>
       if (lipSyncFromMic.getSelection) {
@@ -136,11 +136,11 @@ class SWTEffectSelector(parent: Composite) extends Composite(parent, SWT.NONE) {
     }
   }
 
-  private def onBreathChanged(@unused event: Event): Unit = {
+  private def onBreathChanged(event: Event): Unit = {
     demoAppHolder.foreach(_.enableBreath(this.breath.getSelection))
   }
 
-  private def onBlinkChanged(@unused event: Event): Unit = {
+  private def onBlinkChanged(event: Event): Unit = {
     demoAppHolder.foreach(_.enableEyeBlink(this.blink.getSelection))
   }
 }

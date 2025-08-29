@@ -4,7 +4,30 @@ import org.eclipse.swt.widgets.{Composite, TabFolder, TabItem, Button, FileDialo
 import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.{GridLayout, GridData}
 import org.json4s.native.JsonMethods.parse
+import org.json4s.jvalue2extractable
 import org.json4s.DefaultFormats
+import scala.reflect.ClassTag
+
+// ClassTag to Manifest bridge for json4s compatibility
+given [T](using ct: ClassTag[T]): scala.reflect.Manifest[T] = 
+  new scala.reflect.Manifest[T] {
+    override def runtimeClass: Class[_] = ct.runtimeClass
+    override def typeArguments: List[scala.reflect.Manifest[_]] = Nil
+    override def arrayManifest: scala.reflect.Manifest[Array[T]] = 
+      new scala.reflect.Manifest[Array[T]] {
+        override def runtimeClass: Class[_] = java.lang.reflect.Array.newInstance(ct.runtimeClass, 0).getClass
+        override def typeArguments: List[scala.reflect.Manifest[_]] = List(summon[scala.reflect.Manifest[T]])
+        override def arrayManifest: scala.reflect.Manifest[Array[Array[T]]] = 
+          new scala.reflect.Manifest[Array[Array[T]]] {
+            override def runtimeClass: Class[_] = java.lang.reflect.Array.newInstance(runtimeClass, 0).getClass
+            override def typeArguments: List[scala.reflect.Manifest[_]] = List(this)
+            override def arrayManifest: scala.reflect.Manifest[Array[Array[Array[T]]]] = ???
+            override def erasure: Class[_] = runtimeClass
+          }
+        override def erasure: Class[_] = runtimeClass
+      }
+    override def erasure: Class[_] = runtimeClass
+  }
 import scala.io.Source
 import java.io.File
 
@@ -42,7 +65,7 @@ class ModelControlPanel(parent: Composite) extends Composite(parent, SWT.NONE) {
 
     // Attempt to load default JSON from def_avatar folder
     val defaultJsonPath = "def_avatar"
-    val files = Option(new File(defaultJsonPath).listFiles).getOrElse(Array.empty)
+    val files = Option(new File(defaultJsonPath).listFiles).getOrElse(Array.empty[File])
     val defaultJsonFiles = files.filter(file => file.isFile && file.getName.endsWith("physics3.json"))
 
     if (defaultJsonFiles.isEmpty) {
@@ -69,7 +92,7 @@ class ModelControlPanel(parent: Composite) extends Composite(parent, SWT.NONE) {
   private def loadJsonFromFile(filePath: String): Option[ModelData] = {
     try {
       val jsonContent = Source.fromFile(filePath, "UTF-8").mkString
-      implicit val formats: DefaultFormats.type = DefaultFormats
+      given formats: DefaultFormats.type = DefaultFormats
       Some(parse(jsonContent).extract[ModelData])
     } catch {
       case ex: Exception =>

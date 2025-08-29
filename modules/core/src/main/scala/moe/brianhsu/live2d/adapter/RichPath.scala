@@ -25,7 +25,7 @@ object RichPath {
    * @param path  The original Java NIO Path object.
    * @return      A RichPath object.
    */
-  implicit def convertFromPath(path: Path): RichPath = new RichPath(path)
+  given Conversion[Path, RichPath] = new RichPath(_)
 }
 
 /**

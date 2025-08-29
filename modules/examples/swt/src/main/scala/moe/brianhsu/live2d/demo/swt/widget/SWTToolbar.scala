@@ -19,12 +19,12 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
 
   {
     this.setLayout(new FillLayout)
-    loadAvatar.addListener(SWT.Selection, openLoadAvatarDialog)
-    selectBackground.addListener(SWT.Selection, onSelectBackgroundSelected)
-    changeToDefaultBackground.addListener(SWT.Selection, onDefaultBackgroundSelected)
-    pureColorBackground.addListener(SWT.Selection, onPureColorBackground)
-    transparentBackground.addListener(SWT.Selection, onTransparentBackground)
-    defaultAvatar.addListener(SWT.Selection, onDefaultAvatarSelected)
+    loadAvatar.addListener(SWT.Selection, { (event: Event) => openLoadAvatarDialog(event) })
+    selectBackground.addListener(SWT.Selection, { (event: Event) => onSelectBackgroundSelected(event) })
+    changeToDefaultBackground.addListener(SWT.Selection, { (event: Event) => onDefaultBackgroundSelected(event) })
+    pureColorBackground.addListener(SWT.Selection, { (event: Event) => onPureColorBackground(event) })
+    transparentBackground.addListener(SWT.Selection, { (event: Event) => onTransparentBackground(event) })
+    defaultAvatar.addListener(SWT.Selection, { (event: Event) => onDefaultAvatarSelected(event) })
   }
 
   def setDemoApp(demoApp: DemoApp): Unit = {
@@ -33,7 +33,7 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
     demoApp.setTransparentBackground(enabled)
   }
 
-  private def onSelectBackgroundSelected(@unused event: Event): Unit = {
+  private def onSelectBackgroundSelected(event: Event): Unit = {
     val fileDialog = new FileDialog(parent.getShell, SWT.OPEN)
     fileDialog.setFilterExtensions(Array("*.png;*.PNG", "*.jpg;*.jpeg;*.JPG;*.JPEG"))
 
@@ -50,7 +50,7 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
     }
   }
 
-  private def onPureColorBackground(@unused event: Event): Unit = {
+  private def onPureColorBackground(event: Event): Unit = {
     val colorChooser = new ColorDialog(parent.getShell)
     colorChooser.setText("Select Background Color")
     colorChooser.setRGB(new RGB(0, 255, 0))
@@ -64,19 +64,19 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
     }
   }
 
-  private def onTransparentBackground(@unused event: Event): Unit = {
+  private def onTransparentBackground(event: Event): Unit = {
     val enabled = transparentBackground.getSelection
     demoAppHolder.foreach(_.setTransparentBackground(enabled))
     DemoApp.saveTransparentBackground(enabled)
   }
 
-  private def onDefaultBackgroundSelected(@unused event: Event): Unit = {
+  private def onDefaultBackgroundSelected(event: Event): Unit = {
     demoAppHolder.foreach(_.switchToDefaultBackground())
     transparentBackground.setSelection(false)
     DemoApp.saveTransparentBackground(false)
   }
 
-  private def openLoadAvatarDialog(@unused event: Event): Unit = {
+  private def openLoadAvatarDialog(event: Event): Unit = {
     val directoryDialog = new DirectoryDialog(parent.getShell, SWT.OPEN)
     val selectedDirectoryHolder = Option(directoryDialog.open())
     for {
@@ -92,7 +92,7 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
     }
   }
 
-  private def onDefaultAvatarSelected(@unused event: Event): Unit = {
+  private def onDefaultAvatarSelected(event: Event): Unit = {
     val defaultAvatarPath = "def_avatar" // jar包同目录
     demoAppHolder.foreach { demoApp =>
       demoApp.switchAvatar(defaultAvatarPath).failed.foreach { e =>

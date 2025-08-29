@@ -26,11 +26,11 @@ class SwingMotionSelector(live2DWidget: Live2DUI) extends JPanel {
     this.setLayout(new GridBagLayout)
 
     this.scroll.setViewportView(motionTree)
-    this.lipSync.addActionListener(handleLipSyncSelection)
+    this.lipSync.addActionListener { (event: ActionEvent) => handleLipSyncSelection(event) }
     this.lipSyncWeight.setEnabled(false)
-    this.lipSyncWeight.slider.addChangeListener(updateLipSyncWeight)
+    this.lipSyncWeight.slider.addChangeListener { (event: ChangeEvent) => updateLipSyncWeight(event) }
     this.lipSyncVolume.setEnabled(false)
-    this.lipSyncVolume.slider.addChangeListener(updateLipSyncVolume)
+    this.lipSyncVolume.slider.addChangeListener { (event: ChangeEvent) => updateLipSyncVolume(event) }
     this.motionTree.setCellRenderer(new DefaultTreeCellRenderer {
       private val soundIcon = new ImageIcon(this.getClass.getResource("/icons/sound.png"))
       override def getTreeCellRendererComponent(tree: JTree, value: Any, sel: Boolean, expanded: Boolean, leaf: Boolean, row: Int, hasFocus: Boolean): Component = {
@@ -110,15 +110,15 @@ class SwingMotionSelector(live2DWidget: Live2DUI) extends JPanel {
     }
   }
 
-  private def updateLipSyncWeight(@unused e: ChangeEvent): Unit = {
+  private def updateLipSyncWeight(e: ChangeEvent): Unit = {
     live2DWidget.demoAppHolder.foreach(_.updateMotionLipSyncWeight(lipSyncWeight.slider.getValue))
   }
 
-  private def updateLipSyncVolume(@unused e: ChangeEvent): Unit = {
+  private def updateLipSyncVolume(e: ChangeEvent): Unit = {
     live2DWidget.demoAppHolder.foreach(_.updateMotionLipSyncVolume(lipSyncVolume.slider.getValue))
   }
 
-  private def handleLipSyncSelection(@unused e: ActionEvent): Unit = {
+  private def handleLipSyncSelection(e: ActionEvent): Unit = {
     for {
       demoApp <- live2DWidget.demoAppHolder
     } {

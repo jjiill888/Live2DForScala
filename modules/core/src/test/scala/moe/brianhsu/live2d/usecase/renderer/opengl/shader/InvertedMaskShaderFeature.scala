@@ -13,7 +13,7 @@ class InvertedMaskShaderFeature extends AnyFeatureSpec with Matchers with GivenW
   Feature("Source code of Shader") {
     Scenario("Has main method in vertex shader") {
       Given("a implicit stubbed OpenGL binding")
-      implicit val openGLBinding: OpenGLBinding = createOpenGLStub()
+      given openGLBinding: OpenGLBinding = createOpenGLStub()
 
       When("create a InvertedMaskShader")
       val shader = new InvertedMaskedShader()
@@ -24,7 +24,7 @@ class InvertedMaskShaderFeature extends AnyFeatureSpec with Matchers with GivenW
 
     Scenario("Has main method in fragment shader") {
       Given("a implicit stubbed OpenGL binding")
-      implicit val openGLBinding: OpenGLBinding = createOpenGLStub()
+      given openGLBinding: OpenGLBinding = createOpenGLStub()
 
       When("create a InvertedMaskShader")
       val shader = new InvertedMaskedShader()

@@ -35,23 +35,20 @@ class CubismModelBackend(mocInfo: MocInfo, override val textureFiles: List[Strin
   private lazy val modelMemoryInfo: MemoryInfo = core.memoryAllocator.allocate(this.modelSize, ModelAlignment)
   protected lazy val cubismModel: CPointerToModel = createCubsimModel()
 
- private def createCubsimModel(): CPointerToModel = {
-  val model = core.cubismAPI.csmInitializeModelInPlace(
-    this.mocInfo.revivedMoc,
-    this.modelMemoryInfo.alignedMemory,
-    this.modelSize
-  )
+  private def createCubsimModel(): CPointerToModel =
+    val model = core.cubismAPI.csmInitializeModelInPlace(
+      this.mocInfo.revivedMoc,
+      this.modelMemoryInfo.alignedMemory,
+      this.modelSize
+    )
 
-  // Move the calculation of texture count outside of this method
-  val expectedTextureFileCount = calculateTextureCountFromModel(model)
+    // Move the calculation of texture count outside of this method
+    val expectedTextureFileCount = calculateTextureCountFromModel(model)
 
-  if (textureFiles.size != expectedTextureFileCount) {
-    throw new TextureSizeMismatchException(expectedTextureFileCount)
-  }
+    if (textureFiles.size != expectedTextureFileCount) then
+      throw new TextureSizeMismatchException(expectedTextureFileCount)
 
-  model
-}
-
+    model
 
 
   private def calculateTextureCountFromModel(model: CPointerToModel): Int = {
@@ -113,9 +110,6 @@ class CubismModelBackend(mocInfo: MocInfo, override val textureFiles: List[Strin
   this.modelSize
   this.modelMemoryInfo
   this.cubismModel
-  parameters
-  parts
-  drawables
   this
 }
 

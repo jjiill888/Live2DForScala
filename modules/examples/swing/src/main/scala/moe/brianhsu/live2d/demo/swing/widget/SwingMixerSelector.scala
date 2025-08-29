@@ -55,8 +55,8 @@ class SwingMixerSelector(onMixerChanged: Option[Mixer] => Unit) extends JCompone
     this.forceLipSync.setToolTipText("Force lip sync with ParamMouthOpenY even when the model does not declare support it")
 
     this.updateSoundDeviceSelector()
-    this.lipSyncDevice.addActionListener(onStatusChanged)
-    this.forceLipSync.addActionListener(onStatusChanged)
+    this.lipSyncDevice.addActionListener { (event: ActionEvent) => onStatusChanged(event) }
+    this.forceLipSync.addActionListener { (event: ActionEvent) => onStatusChanged(event) }
   }
 
   def isForceLipSync: Boolean = forceLipSync.isSelected
@@ -73,7 +73,7 @@ class SwingMixerSelector(onMixerChanged: Option[Mixer] => Unit) extends JCompone
     this.forceLipSync.setEnabled(enabled)
   }
 
-  private def onStatusChanged(@unused actionEvent: ActionEvent): Unit = {
+  private def onStatusChanged(actionEvent: ActionEvent): Unit = {
     onMixerChanged(currentMixer)
   }
 

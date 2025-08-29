@@ -7,12 +7,12 @@ import moe.brianhsu.live2d.enitiy.core.types.{CsmVersion, MocVersion}
 /**
  * Basic Cubism core library interface.
  */
-trait NativeCubismAPILoader {
+trait NativeCubismAPILoader:
 
   /**
    * The memory allocator used for manual memory allocation.
    */
-  implicit val memoryAllocator: MemoryAllocator
+  given MemoryAllocator = memoryAllocator
 
   /**
    * The underlying core Cubism API.
@@ -33,4 +33,7 @@ trait NativeCubismAPILoader {
    */
   lazy val latestSupportedMocVersion: MocVersion = MocVersion(cubismAPI.csmGetLatestMocVersion())
 
-}
+  /**
+   * The memory allocator instance.
+   */
+  def memoryAllocator: MemoryAllocator

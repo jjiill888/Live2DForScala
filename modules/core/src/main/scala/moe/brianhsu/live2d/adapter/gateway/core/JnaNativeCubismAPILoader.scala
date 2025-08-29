@@ -10,14 +10,11 @@ import moe.brianhsu.live2d.enitiy.core.types.CsmLogFunction
 import moe.brianhsu.live2d.exception.NativeLibraryNotFoundError
 import org.slf4j.LoggerFactory
 
-object JnaNativeCubismAPILoader {
-  object DefaultLogger extends CsmLogFunction {
+object JnaNativeCubismAPILoader:
+  object DefaultLogger extends CsmLogFunction:
     private val logger = LoggerFactory.getLogger(this.getClass)
-    override def invoke(message: String): Unit = {
+    override def invoke(message: String): Unit =
       logger.info(message)
-    }
-  }
-}
 
 /**
  * CubismCore implemented with JNA
@@ -27,8 +24,7 @@ object JnaNativeCubismAPILoader {
  * @param memoryAllocator   The memory allocator used during manually allocating memory.
  * @param logger            The logger that will log message from underlying C Cubism Library.
  */
-class JnaNativeCubismAPILoader(override val memoryAllocator: MemoryAllocator, logger: CsmLogFunction) extends NativeCubismAPILoader {
-
+class JnaNativeCubismAPILoader(override val memoryAllocator: MemoryAllocator, logger: CsmLogFunction) extends NativeCubismAPILoader:
 
   /**
    * Create an instance with [[moe.brianhsu.live2d.adapter.gateway.core.memory.JnaMemoryAllocator]], and log message into
@@ -44,13 +40,10 @@ class JnaNativeCubismAPILoader(override val memoryAllocator: MemoryAllocator, lo
    */
   def this(logger: CsmLogFunction) = this(JnaMemoryAllocator, logger)
 
-  override lazy val cubismAPI: NativeCubismAPI = {
-    try {
+  override val cubismAPI: NativeCubismAPI =
+    try
       val lib = Native.load("Live2DCubismCore", classOf[NativeCubismAPI])
       lib.csmSetLogFunction(logger)
       lib
-    } catch {
+    catch
       case error: UnsatisfiedLinkError => throw new NativeLibraryNotFoundError(error)
-    }
-  }
-}

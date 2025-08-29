@@ -12,7 +12,7 @@ import scala.io.Source
 import scala.util.Using
 
 class AudioDispatcherFeature extends AnyFeatureSpec with Matchers with GivenWhenThen with MockFactory {
-  private implicit val formats: Formats = Serialization.formats(NoTypeHints)
+  private given formats: Formats = Serialization.formats(NoTypeHints)
 
 
   Feature("Convert AudioInputStream to AudioEvent correctly") {

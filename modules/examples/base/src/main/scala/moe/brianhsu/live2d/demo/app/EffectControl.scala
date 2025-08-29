@@ -108,7 +108,7 @@ trait EffectControl {
     }
   }
 
-  def onMouseReleased(@unused x: Int, @unused y: Int): Unit = {
+  def onMouseReleased(x: Int, y: Int): Unit = {
     if (faceDirectionMode == ClickAndDrag) {
       resetFaceDirection()
     }

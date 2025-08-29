@@ -26,7 +26,7 @@ class BlendFunctionFeature extends AnyFeatureSpec with Matchers with GivenWhenTh
 
       forAll(testData) { case (blendMode, expectedBlending) =>
         Given("a implicit stubbed OpenGL binding")
-        implicit val openGLBinding: OpenGLBinding = createOpenGLStub()
+        given openGLBinding: OpenGLBinding = createOpenGLStub()
 
         When(s"create a Blending object from a BlendMode = $blendMode")
         val blending = BlendFunction(blendMode)

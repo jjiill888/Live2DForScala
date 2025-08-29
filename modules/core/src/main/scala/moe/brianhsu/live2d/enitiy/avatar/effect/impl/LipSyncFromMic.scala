@@ -65,5 +65,5 @@ class LipSyncFromMic(override val lipSyncIds: List[String],
     thread.join()
   }
 
-  override protected[live2d] var weight: Float = DefaultWeight
+  protected[live2d] var weight: Float = DefaultWeight
 }

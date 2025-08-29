@@ -55,8 +55,8 @@ class AvatarRendererFeature extends AnyFeatureSpec with Matchers with GivenWhenT
     Scenario("Create AvatarRenderer only from Live2D model and implicit OpenGL binding") {
       Given("stubbed OpenGL / RichOpenGL binding")
       val richOpenGLBinding = stub[RichOpenGLBinding]
-      implicit val binding: OpenGLBinding = createOpenGLStub()
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding }
+      given binding: OpenGLBinding = createOpenGLStub()
+      given wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding }
 
       And("a Live2D model without any drawables")
       val modelBackend = stub[ModelBackend]
@@ -76,8 +76,8 @@ class AvatarRendererFeature extends AnyFeatureSpec with Matchers with GivenWhenT
 
       Given("mocked OpenGL / RichOpenGL binding")
       val richOpenGLBinding = stub[RichOpenGLBinding]
-      implicit val binding: OpenGLBinding = createOpenGLStub()
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding }
+      given binding: OpenGLBinding = createOpenGLStub()
+      given wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding }
 
       And("a Live2D model without any drawables")
       val live2DModel = createStubbedLive2DModel(drawable = Nil)
@@ -114,8 +114,8 @@ class AvatarRendererFeature extends AnyFeatureSpec with Matchers with GivenWhenT
 
       And("mocked OpenGL / RichOpenGL binding")
       val richOpenGLBinding = stub[RichOpenGLBinding]
-      implicit val binding: OpenGLBinding = createOpenGLStub()
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding }
+      given binding: OpenGLBinding = createOpenGLStub()
+      given wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding }
 
       And("a Live2D model / textureManager handle with above drawables")
       val live2DModel = createStubbedLive2DModel(drawables)

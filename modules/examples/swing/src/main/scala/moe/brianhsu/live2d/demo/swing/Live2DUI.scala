@@ -42,9 +42,9 @@ class Live2DUI(val canvas: GLCanvas) extends MouseAdapter with GLEventListener w
   }
 
   private def createLive2DDemoApp(drawable: GLAutoDrawable): DemoApp = {
-    implicit val openGL: JavaOpenGLBinding = new JavaOpenGLBinding(drawable.getGL.getGL2)
+    given openGL: JavaOpenGLBinding = new JavaOpenGLBinding(drawable.getGL.getGL2)
 
-    val app = new DemoApp(canvasInfo, runOnOpenGLThread) {
+    val app = new DemoApp(canvasInfo, runOnOpenGLThread)(openGL) {
       override def onStatusUpdated(status: String): Unit = statusBar.setText(status)
       override def onAvatarLoaded(live2DView: DemoApp): Unit = {
         faceTrackingPane.enableStartButton()

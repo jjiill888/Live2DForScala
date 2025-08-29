@@ -16,7 +16,7 @@ trait SpriteControl {
 
   protected var sprites: List[Sprite] = Nil
 
-  protected val spriteRenderer = new SpriteRenderer(new SpriteShader)
+  protected val spriteRenderer = new SpriteRenderer(new SpriteShader(using openGL))(using openGL)
 
   def switchToDefaultBackground(): Unit = {
     switchToPureColorBackground(new Color(0, 255, 0))
@@ -36,7 +36,7 @@ trait SpriteControl {
     this.display(true)
   }
   
-def setTransparentBackground(enabled: Boolean): Unit =
+  def setTransparentBackground(enabled: Boolean): Unit =
     if (enabled) switchToTransparentBackground() else switchToDefaultBackground()
 
   def switchToTransparentBackground(): Unit = {

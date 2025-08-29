@@ -14,10 +14,10 @@ import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 
-class MocInfoFeature extends AnyFeatureSpec with GivenWhenThen with Matchers with MockFactory with TableDrivenPropertyChecks {
+class MocInfoFeature extends AnyFeatureSpec with GivenWhenThen with Matchers with MockFactory with TableDrivenPropertyChecks:
 
-  Feature("Error handling of uninitialized memory") {
-    Scenario("Try to access revivedMoc from an uninitialized memory") {
+  Feature("Error handling of uninitialized memory"):
+    Scenario("Try to access revivedMoc from an uninitialized memory"):
       Given("a MocInfo with an uninitialized memory")
       val core = new JnaNativeCubismAPILoader()
       val memoryInfo = JnaMemoryAllocator.allocate(1024, MocAlignment)
@@ -25,14 +25,11 @@ class MocInfoFeature extends AnyFeatureSpec with GivenWhenThen with Matchers wit
 
       When("access the revivedMoc field")
       Then("it should throw MocNotRevivedException")
-      a[MocNotRevivedException] shouldBe thrownBy {
+      a[MocNotRevivedException] shouldBe thrownBy:
         mocInfo.revivedMoc
-      }
-    }
-  }
 
-  Feature("Delegated the consistency check to core library") {
-    Scenario("Check consistency of a .moc") {
+  Feature("Delegated the consistency check to core library"):
+    Scenario("Check consistency of a .moc"):
 
       val table = Table(
         ("return value", "expected boolean"),
@@ -40,13 +37,12 @@ class MocInfoFeature extends AnyFeatureSpec with GivenWhenThen with Matchers wit
         (1,              true)
       )
 
-      forAll(table) { case (returnValue, expectedBoolean) =>
+      forAll(table): case (returnValue, expectedBoolean) =>
         Given(s"A mocked cubismAPI.csmHasMocConsistency always return $returnValue")
         val stubNativeAPI = stub[NativeCubismAPI]
-        val core = new NativeCubismAPILoader {
-          override implicit val memoryAllocator: MemoryAllocator = stub[MemoryAllocator]
+        val core = new NativeCubismAPILoader:
+          given MemoryAllocator = stub[MemoryAllocator]
           override val cubismAPI: NativeCubismAPI = stubNativeAPI
-        }
         (stubNativeAPI.csmHasMocConsistency _).when(*, *).returning(returnValue)
 
         And("a MocInfo based on that")
@@ -59,7 +55,3 @@ class MocInfoFeature extends AnyFeatureSpec with GivenWhenThen with Matchers wit
 
         Then(s"it should be $expectedBoolean")
         isConsistent shouldBe expectedBoolean
-      }
-    }
-  }
-}

@@ -27,7 +27,7 @@ class SpriteRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenThe
   Feature("Render sprite") {
     Scenario("Render a dummy sprite") {
       Given("a stubbed Sprite")
-      implicit val binding: OpenGLBinding = createOpenGLStub()
+      given binding: OpenGLBinding = createOpenGLStub()
 
       val stubbedTextureInfo = TextureInfo(StubbedTextureId, 24, 24)
       val stubbedShader = new SpriteShader() {

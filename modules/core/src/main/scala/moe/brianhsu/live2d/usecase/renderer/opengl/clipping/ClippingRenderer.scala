@@ -9,14 +9,14 @@ import moe.brianhsu.live2d.usecase.renderer.opengl.{OffscreenFrame, Profile}
 
 class ClippingRenderer(model: Live2DModel, textureManager: TextureManager, shaderRenderer: ShaderRenderer,
                        initClippingManager: Option[ClippingManager], val offscreenFrameHolder: Option[OffscreenFrame])
-                      (implicit gl: OpenGLBinding, wrapper: OpenGLBinding => RichOpenGLBinding) {
+                      (using gl: OpenGLBinding) {
 
   import gl.constants._
 
   private var clippingManagerHolder: Option[ClippingManager] = initClippingManager
 
   def this(model: Live2DModel, textureManager: TextureManager, shaderRenderer: ShaderRenderer)
-          (implicit gl: OpenGLBinding, wrapper: OpenGLBinding => RichOpenGLBinding = RichOpenGLBinding.wrapOpenGLBinding) = {
+          (using gl: OpenGLBinding) = {
 
     this(
       model, textureManager, shaderRenderer,
@@ -32,7 +32,7 @@ class ClippingRenderer(model: Live2DModel, textureManager: TextureManager, shade
 
   def this(model: Live2DModel, textureManager: TextureManager,
            shaderRenderer: ShaderRenderer, initClippingManager: Option[ClippingManager])
-          (implicit gl: OpenGLBinding, wrapper: OpenGLBinding => RichOpenGLBinding) = {
+          (using gl: OpenGLBinding) = {
 
     this(
       model, textureManager, shaderRenderer,
@@ -59,7 +59,7 @@ class ClippingRenderer(model: Live2DModel, textureManager: TextureManager, shade
 
   private def drawClipping(contextListForMask: List[ClippingContext], profile: Profile): Unit = {
     gl.glViewport(0, 0, ClippingManager.MaskBufferSize, ClippingManager.MaskBufferSize)
-    gl.preDraw()
+    RichOpenGLBinding.wrapOpenGLBinding(gl).preDraw()
 
     this.offscreenFrameHolder.foreach(_.beginDraw(profile.lastFrameBufferBinding))
 
@@ -76,7 +76,7 @@ class ClippingRenderer(model: Live2DModel, textureManager: TextureManager, shade
     }
 
     this.offscreenFrameHolder.foreach(_.endDraw())
-    gl.viewPort = profile.lastViewPort
+    RichOpenGLBinding.wrapOpenGLBinding(gl).viewPort = profile.lastViewPort
   }
 
   private def drawClippingMesh(clippingContextBufferForMask: ClippingContext,
@@ -84,7 +84,7 @@ class ClippingRenderer(model: Live2DModel, textureManager: TextureManager, shade
                                vertexInfo: VertexInfo,
                                multiplyColor: DrawableColor, screenColor: DrawableColor): Unit ={
 
-    gl.setCapabilityEnabled(GL_CULL_FACE, isCulling)
+    RichOpenGLBinding.wrapOpenGLBinding(gl).setCapabilityEnabled(GL_CULL_FACE, isCulling)
     gl.glFrontFace(GL_CCW)
 
     shaderRenderer.renderMask(

@@ -26,9 +26,9 @@ class ClippingRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenT
   Feature("Create offscreenFrameHolder") {
     Scenario("There is no clipping manager at all") {
       Given("a stubbed OpenGL binding / Live2D model / TextureManager / ShaderRenderer")
-      implicit val binding: OpenGLBinding = createOpenGLStub()
+      given binding: OpenGLBinding = createOpenGLStub()
       val richOpenGLBinding: RichOpenGLBinding = stub[RichOpenGLBinding]
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
+      given wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
       val live2DModel = new Live2DModel(stub[ModelBackend]) {
         override lazy val containMaskedDrawables: Boolean = false
       }
@@ -44,9 +44,9 @@ class ClippingRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenT
 
     Scenario("There is a clipping manager") {
       Given("a stubbed OpenGL binding / Live2D model / TextureManager / ShaderRenderer")
-      implicit val binding: OpenGLBinding = createOpenGLStub()
+      given binding: OpenGLBinding = createOpenGLStub()
       val richOpenGLBinding: RichOpenGLBinding = stub[RichOpenGLBinding]
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
+      given wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
       val textureManager = stub[TextureManager]
       val shaderRenderer = new ShaderRenderer(createShaderFactory())
       val clippingManager = stub[ClippingManager]
@@ -71,9 +71,9 @@ class ClippingRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenT
   Feature("Get ClippingContext for draw by drawable") {
     Scenario("There is no matched ClippingContext") {
       Given("a stubbed OpenGL binding / Live2D model / TextureManager / ShaderRenderer")
-      implicit val binding: OpenGLBinding = createOpenGLStub()
+      given binding: OpenGLBinding = createOpenGLStub()
       val richOpenGLBinding: RichOpenGLBinding = stub[RichOpenGLBinding]
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
+      given wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
       val textureManager = stub[TextureManager]
       val shaderRenderer = new ShaderRenderer(createShaderFactory())
       val live2DModel = new Live2DModel(stub[ModelBackend])
@@ -97,9 +97,9 @@ class ClippingRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenT
 
     Scenario("There is a matched ClippingContext") {
       Given("a stubbed OpenGL binding / Live2D model / TextureManager / ShaderRenderer")
-      implicit val binding: OpenGLBinding = createOpenGLStub()
+      given binding: OpenGLBinding = createOpenGLStub()
       val richOpenGLBinding: RichOpenGLBinding = stub[RichOpenGLBinding]
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
+      given wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
       val textureManager = stub[TextureManager]
       val shaderRenderer = new ShaderRenderer(createShaderFactory())
       val live2DModel = new Live2DModel(stub[ModelBackend])
@@ -128,9 +128,9 @@ class ClippingRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenT
   Feature("Draw clipping") {
     Scenario("There is no clipping manager at all") {
       Given("a mocked OpenGL binding / Live2D model / TextureManager / ShaderRenderer")
-      implicit val binding: OpenGLBinding = createOpenGLMock()
+      given binding: OpenGLBinding = createOpenGLMock()
       val richOpenGLBinding: RichOpenGLBinding = mock[RichOpenGLBinding]
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
+      given wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
       val textureManager = stub[TextureManager]
       val shaderRenderer = new ShaderRenderer(createShaderFactory())
       val live2DModel = new Live2DModel(stub[ModelBackend])
@@ -148,9 +148,9 @@ class ClippingRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenT
 
     Scenario("There is clipping manager but no clipping is in using") {
       Given("a mocked OpenGL binding / Live2D model / TextureManager / ShaderRenderer")
-      implicit val binding: OpenGLBinding = createOpenGLMock()
+      given binding: OpenGLBinding = createOpenGLMock()
       val richOpenGLBinding: RichOpenGLBinding = mock[RichOpenGLBinding]
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
+      given wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
       val textureManager = stub[TextureManager]
       val shaderRenderer = new ShaderRenderer(createShaderFactory())
       val live2DModel = new Live2DModel(stub[ModelBackend])
@@ -194,9 +194,9 @@ class ClippingRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenT
       (() => clippingManager.usingClipCount).when().returns(1)
 
       And("a mocked OpenGL binding / Live2D model / TextureManager / ShaderRenderer")
-      implicit val binding: OpenGLBinding = createOpenGLStub()
+      given binding: OpenGLBinding = createOpenGLStub()
       val richOpenGLBinding: RichOpenGLBinding = stub[RichOpenGLBinding]
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
+      given wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
       val shaderRenderer = stub[MockableShaderRenderer]
       val live2DModel = new Live2DModel(stub[ModelBackend]) {
         override val textureFiles: List[String] = List("0.png", "1.png" ,"2.png", "3.png")
@@ -274,9 +274,9 @@ class ClippingRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenT
       (() => clippingManager.usingClipCount).when().returns(1)
 
       And("a mocked OpenGL binding / Live2D model / TextureManager / ShaderRenderer")
-      implicit val binding: OpenGLBinding = createOpenGLStub()
+      given binding: OpenGLBinding = createOpenGLStub()
       val richOpenGLBinding: RichOpenGLBinding = stub[RichOpenGLBinding]
-      implicit val wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
+      given wrapper: OpenGLBinding => RichOpenGLBinding = { _ => richOpenGLBinding}
       val shaderRenderer = stub[MockableShaderRenderer]
       val live2DModel = new Live2DModel(stub[ModelBackend]) {
         override val textureFiles: List[String] = List("0.png", "1.png" ,"2.png", "3.png")

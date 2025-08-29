@@ -12,7 +12,7 @@ class SpriteShaderFeature extends AnyFeatureSpec with Matchers with GivenWhenThe
   Feature("Source code of Shader") {
     Scenario("Has main method in vertex shader") {
       Given("an implicit stubbed OpenGL binding")
-      implicit val openGLBinding: OpenGLBinding = createOpenGLStub()
+      given openGLBinding: OpenGLBinding = createOpenGLStub()
 
       When("create a SpriteShader")
       val shader = new SpriteShader()
@@ -23,7 +23,7 @@ class SpriteShaderFeature extends AnyFeatureSpec with Matchers with GivenWhenThe
 
     Scenario("Has main method in fragment shader") {
       Given("an implicit stubbed OpenGL binding")
-      implicit val openGLBinding: OpenGLBinding = createOpenGLStub()
+      given openGLBinding: OpenGLBinding = createOpenGLStub()
 
       When("create a SpriteShader")
       val shader = new SpriteShader()

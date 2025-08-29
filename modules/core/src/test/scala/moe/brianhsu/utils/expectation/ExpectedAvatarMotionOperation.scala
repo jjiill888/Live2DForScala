@@ -17,7 +17,7 @@ object ExpectedAvatarMotionOperation {
   }
 
   private def parseLog(line: String): ExpectedAvatarMotionOperation = parse(line).extract[ExpectedAvatarMotionOperation]
-  private implicit val formats: Formats = Serialization.formats(ShortTypeHints(
+  private given formats: Formats = Serialization.formats(ShortTypeHints(
     List(
       classOf[ParameterValueAdd],
       classOf[ParameterValueMultiply],

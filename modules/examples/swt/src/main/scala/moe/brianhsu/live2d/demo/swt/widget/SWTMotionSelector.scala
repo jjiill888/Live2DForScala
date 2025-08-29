@@ -61,7 +61,7 @@ class SWTMotionSelector(parent: Composite) extends Composite(parent, SWT.NONE) {
     treeLayoutData.grabExcessVerticalSpace = true
     treeLayoutData.grabExcessHorizontalSpace = true
 
-    lipSync.addListener(SWT.Selection, onLipSyncSelected)
+    lipSync.addListener(SWT.Selection, { (event: Event) => onLipSyncSelected(event) })
     lipSyncWeight.setEnabled(false)
     lipSyncWeight.addChangeListener(onWeightChanged)
     lipSyncVolume.setEnabled(false)
@@ -87,7 +87,7 @@ class SWTMotionSelector(parent: Composite) extends Composite(parent, SWT.NONE) {
   }
 
 
-  private def onLipSyncSelected(@unused event: Event): Unit = {
+  private def onLipSyncSelected(event: Event): Unit = {
     for {
       demoApp <- demoAppHolder
     } {

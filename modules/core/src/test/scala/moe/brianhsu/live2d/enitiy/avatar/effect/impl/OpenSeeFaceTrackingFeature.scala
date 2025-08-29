@@ -17,7 +17,7 @@ import scala.util.{Failure, Success, Try, Using}
 
 class OpenSeeFaceTrackingFeature extends AnyFeatureSpec with GivenWhenThen with Matchers with MockFactory{
 
-  private implicit val jsonFormats: DefaultFormats.type = DefaultFormats
+  private given jsonFormats: DefaultFormats.type = DefaultFormats
 
   Feature("Start the reader thread") {
     Scenario("Start the reader thread") {

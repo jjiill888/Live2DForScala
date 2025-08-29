@@ -6,8 +6,8 @@ import moe.brianhsu.live2d.enitiy.opengl.OpenGLBinding
 import moe.brianhsu.live2d.enitiy.opengl.texture.TextureManager
 
 abstract class OpenGLBase(protected val drawCanvasInfo: DrawCanvasInfoReader, protected val onOpenGLThread: OnOpenGLThread)
-                         (protected implicit val openGL: OpenGLBinding) {
+                         (protected val openGL: OpenGLBinding) {
 
-  protected val textureManager: TextureManager = TextureManager.getInstance
+  protected val textureManager: TextureManager = TextureManager.getInstance(using openGL)
   protected def display(isForceUpdate: Boolean = false): Unit
 }

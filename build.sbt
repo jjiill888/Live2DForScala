@@ -1,6 +1,13 @@
 ThisBuild / organization := "moe.brianhsu.live2d"
-ThisBuild / scalaVersion := "2.13.11"
-ThisBuild / scalacOptions := Seq("-deprecation", "-Ywarn-unused", "-feature")
+ThisBuild / scalaVersion := "3.3.2"
+ThisBuild / scalacOptions := Seq(
+  "-deprecation", 
+  "-feature",
+  "-unchecked",
+  "-Xfatal-warnings",
+  "-language:implicitConversions",
+  "-language:postfixOps"
+)
 ThisBuild / publishArtifact := false
 ThisBuild / Test / testOptions += Tests.Argument("-l", sys.env.get("EXCLUDE_TEST_TAG").getOrElse("noExclude"))
 
@@ -14,15 +21,12 @@ val swtPackageName = {
   }
 }
 
-val javafxVersion = "17.0.2"
-
 val swtFramework = "org.eclipse.platform" % swtPackageName % swtVersion exclude("org.eclipse.platform", "org.eclipse.swt")
 val swtWindows = "org.eclipse.platform" % "org.eclipse.swt.win32.win32.x86_64" % swtVersion exclude("org.eclipse.platform", "org.eclipse.swt")
 val swtLinux = "org.eclipse.platform" % "org.eclipse.swt.gtk.linux.x86_64" % swtVersion exclude("org.eclipse.platform", "org.eclipse.swt")
 
 val testFramework = Seq(
-  "org.scalatest" %% "scalatest" % "3.2.16" % Test,
-  "org.scalamock" %% "scalamock" % "5.2.0" % Test,
+  "org.scalatest" %% "scalatest" % "3.2.17" % Test,
   "com.vladsch.flexmark" % "flexmark-all" % "0.64.8" % Test
 )
 
@@ -84,31 +88,6 @@ lazy val exampleSwing = (project in file("modules/examples/swing"))
     publishArtifact := false,
     assembly / assemblyJarName := s"Live2DForScala-Swing-${version.value}.jar",
     sharedSettings
-  )
-
-
-lazy val exampleJavaFX = (project in file("modules/examples/javafx"))
-  .dependsOn(core, joglBinding, lwjglBinding, swtBinding, exampleBase)
-  .settings(
-    name := "Example JavaFX",
-    fork := true,
-    publishArtifact := false,
-    Compile / mainClass := Some("moe.brianhsu.live2d.demo.javafx.JavaFXMain"),
-    assembly / assemblyJarName := s"Live2DForScala-JavaFX-${version.value}.jar",
-    sharedSettings,
-
-    libraryDependencies ++= Seq(
-      "org.openjfx" % "javafx-controls" % javafxVersion classifier "linux",
-      "org.openjfx" % "javafx-graphics" % javafxVersion classifier "linux",
-      "org.openjfx" % "javafx-swing" % javafxVersion classifier "linux"
-    ),
-
-    run / javaOptions ++= Seq(
-      "--module-path", sys.props.getOrElse("javafx.module.path", ""),
-      "--add-modules", "javafx.controls,javafx.graphics,javafx.swing"
-        ),
-
-    Compile / resourceDirectories += baseDirectory.value / "src/main/resources"
   )
 
 lazy val exampleSWT = (project in file("modules/examples/swt"))
@@ -191,7 +170,7 @@ moveTaskwin := {
   val releaseTarget = releaseBaseDir + File.separator + releaseSubDir
 
 
-  val extraFilePath = s"modules/examples/swt-windows-bundle/target/scala-2.13/Live2DForScala-SWT-Windows-${version.value}.jar"
+  val extraFilePath = s"modules/examples/swt-windows-bundle/target/scala-3.3.2/Live2DForScala-SWT-Windows-${version.value}.jar"
   val extraFile = new File(extraFilePath)
   if (extraFile.exists()) {
     val targetExtraFile = new File(releaseTarget, s"Live2DForScala-SWT-Windows-${version.value}.jar")
@@ -288,7 +267,7 @@ moveTasklinux := {
   val releaseTarget = releaseBaseDir + File.separator + releaseSubDir
 
 
-  val extraFilePath = s"modules/examples/swt-linux-bundle/target/scala-2.13/Live2DForScala-SWT-Linux-${version.value}.jar"
+  val extraFilePath = s"modules/examples/swt-linux-bundle/target/scala-3.3.2/Live2DForScala-SWT-Linux-${version.value}.jar"
   val extraFile = new File(extraFilePath)
   if (extraFile.exists()) {
     val targetExtraFile = new File(releaseTarget, s"Live2DForScala-SWT-Linux-${version.value}.jar")
@@ -409,7 +388,7 @@ moveTaskswing := {
   val releaseTarget = releaseBaseDir + File.separator + releaseSubDir
 
 
-  val extraFilePath = s"modules/examples/swing/target/scala-2.13/Live2DForScala-Swing-${version.value}.jar"
+  val extraFilePath = s"modules/examples/swing/target/scala-3.3.2/Live2DForScala-Swing-${version.value}.jar"
   val extraFile = new File(extraFilePath)
   if (extraFile.exists()) {
     val targetExtraFile = new File(releaseTarget, s"Live2DForScala-Swing-${version.value}.jar")

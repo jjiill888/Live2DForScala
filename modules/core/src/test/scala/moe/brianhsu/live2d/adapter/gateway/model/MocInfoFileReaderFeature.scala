@@ -30,7 +30,7 @@ class MocInfoFileReaderFeature extends AnyFeatureSpec with GivenWhenThen with Ma
       val mockedAlignedMemory = mock[MockableMemory]
       val mockedMemoryInfo = MemoryInfo(mockedOriginalMemory, mockedAlignedMemory)
       val mockedMemoryAllocator = mock[MemoryAllocator]
-      implicit val core: NativeCubismAPILoader = createMockedCubismCore(mockedMemoryAllocator)
+      given core: NativeCubismAPILoader = createMockedCubismCore(mockedMemoryAllocator)
 
       (mockedMemoryAllocator.allocate _).expects(fileContent.size, MocAlignment).returning(mockedMemoryInfo).once()
       (mockedAlignedMemory.write: (Long, Array[Byte], Int, Int) => Unit).expects(0, *, 0, fileContent.size).once()
@@ -51,7 +51,7 @@ class MocInfoFileReaderFeature extends AnyFeatureSpec with GivenWhenThen with Ma
       val modelFile = "src/test/resources/models/Mao/Mao.moc3"
 
       When("read .moc file using MocInfoFileReader")
-      implicit val core: NativeCubismAPILoader = new JnaNativeCubismAPILoader()
+      given core: NativeCubismAPILoader = new JnaNativeCubismAPILoader()
       val mocInfoFileReader = new MocInfoFileReader(modelFile)
 
       Then("it should be a success")
@@ -64,7 +64,7 @@ class MocInfoFileReaderFeature extends AnyFeatureSpec with GivenWhenThen with Ma
     Scenario("Read non-exist .mocFile into mocInfo") {
       Given("a set of mocked memory")
       val mockedMemoryAllocator = mock[MemoryAllocator]
-      implicit val core: NativeCubismAPILoader = createMockedCubismCore(mockedMemoryAllocator)
+      given core: NativeCubismAPILoader = createMockedCubismCore(mockedMemoryAllocator)
 
       When("read .moc file using MocInfoFileReader")
       val mocInfoFileReader = new MocInfoFileReader("nonExistFile")
@@ -82,7 +82,7 @@ class MocInfoFileReaderFeature extends AnyFeatureSpec with GivenWhenThen with Ma
       val modelFile = "src/test/resources/models/corruptedModel/corruptedMoc3/haru_greeter_t03.moc3"
 
       When("read .moc file using MocInfoFileReader and enable consistent check")
-      implicit val core: NativeCubismAPILoader = new JnaNativeCubismAPILoader()
+      given core: NativeCubismAPILoader = new JnaNativeCubismAPILoader()
       val mocInfoFileReader = new MocInfoFileReader(modelFile, shouldCheckConsistent = true)
 
       Then("it should be a Failure[MocInconsistentException]")
@@ -95,7 +95,7 @@ class MocInfoFileReaderFeature extends AnyFeatureSpec with GivenWhenThen with Ma
       val modelFile = "src/test/resources/models/Mao/Mao.moc3"
 
       When("read .moc file using MocInfoFileReader and enable consistent check")
-      implicit val core: NativeCubismAPILoader = new JnaNativeCubismAPILoader()
+      given core: NativeCubismAPILoader = new JnaNativeCubismAPILoader()
       val mocInfoFileReader = new MocInfoFileReader(modelFile, shouldCheckConsistent = true)
 
       Then("it should be a Success[MocInfo]")
@@ -108,7 +108,7 @@ class MocInfoFileReaderFeature extends AnyFeatureSpec with GivenWhenThen with Ma
       val modelFile = "src/test/resources/models/corruptedModel/corruptedMoc3/haru_greeter_t03.moc3"
 
       When("read .moc file using MocInfoFileReader and disable consistent check")
-      implicit val core: NativeCubismAPILoader = new JnaNativeCubismAPILoader()
+      given core: NativeCubismAPILoader = new JnaNativeCubismAPILoader()
       val mocInfoFileReader = new MocInfoFileReader(modelFile, shouldCheckConsistent = false)
 
       Then("it should be a Success[MocInfo]")
@@ -121,7 +121,7 @@ class MocInfoFileReaderFeature extends AnyFeatureSpec with GivenWhenThen with Ma
       val modelFile = "src/test/resources/models/Mao/Mao.moc3"
 
       When("read .moc file using MocInfoFileReader and enable consistent check")
-      implicit val core: NativeCubismAPILoader = new JnaNativeCubismAPILoader()
+      given core: NativeCubismAPILoader = new JnaNativeCubismAPILoader()
       val mocInfoFileReader = new MocInfoFileReader(modelFile, shouldCheckConsistent = false)
 
       Then("it should be a Success[MocInfo]")
@@ -130,12 +130,10 @@ class MocInfoFileReaderFeature extends AnyFeatureSpec with GivenWhenThen with Ma
     }
   }
 
-  private def createMockedCubismCore(mockedMemoryAllocator: MemoryAllocator) = {
-    new NativeCubismAPILoader {
-      override implicit val memoryAllocator: MemoryAllocator = mockedMemoryAllocator
+  private def createMockedCubismCore(mockedMemoryAllocator: MemoryAllocator) =
+    new NativeCubismAPILoader:
+      given MemoryAllocator = mockedMemoryAllocator
       override val cubismAPI: NativeCubismAPI = stub[NativeCubismAPI]
-    }
-  }
 
   class MockableMemory extends Memory(1024)
 

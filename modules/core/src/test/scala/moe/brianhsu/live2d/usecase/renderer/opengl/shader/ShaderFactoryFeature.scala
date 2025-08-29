@@ -14,7 +14,7 @@ class ShaderFactoryFeature extends AnyFeatureSpec with Matchers with GivenWhenTh
   Feature("Create default shader factory") {
     Scenario("Create factory from stubbed OpenGL") {
       Given("a implicit stubbed OpenGL binding")
-      implicit val openGLBinding: OpenGLBinding = createOpenGLStub()
+      given openGLBinding: OpenGLBinding = createOpenGLStub()
 
       When("create a DefaultShaderFactory")
       val factory = new DefaultShaderFactory

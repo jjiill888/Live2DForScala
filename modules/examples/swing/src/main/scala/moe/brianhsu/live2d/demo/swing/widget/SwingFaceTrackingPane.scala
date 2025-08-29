@@ -136,9 +136,9 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
     gc5.anchor = GridBagConstraints.NORTHWEST
     this.add(outlinePanel, gc5)
 
-    this.openSeeFaceModeCombo.addActionListener(onModeSelected)
-    this.startButton.addActionListener(onStartSelected)
-    this.stopButton.addActionListener(onStopSelected)
+    this.openSeeFaceModeCombo.addActionListener { (event: ActionEvent) => onModeSelected(event) }
+    this.startButton.addActionListener { (event: ActionEvent) => onStartSelected(event) }
+    this.stopButton.addActionListener { (event: ActionEvent) => onStopSelected(event) }
 
   }
 
@@ -157,7 +157,7 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
     }
   }
 
-  private def onStartSelected(@unused event: ActionEvent): Unit = {
+  private def onStartSelected(event: ActionEvent): Unit = {
     live2DWidget.demoAppHolder.foreach(_.disableFaceTracking())
     this.openSeeFaceReaderHolder.foreach(_.close())
     this.openSeeFaceReaderHolder = None
@@ -184,7 +184,7 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
 
   }
 
-  private def onStopSelected(@unused event: ActionEvent): Unit = {
+  private def onStopSelected(event: ActionEvent): Unit = {
     this.live2DWidget.demoAppHolder.foreach(_.disableFaceTracking())
     this.openSeeFaceReaderHolder = None
     this.openSeeFaceReaderHolder.foreach(_.close())
@@ -298,7 +298,7 @@ class SwingFaceTrackingPane(live2DWidget: Live2DUI) extends JPanel {
 
   }
 
-  private def onModeSelected(@unused actionEvent: ActionEvent): Unit = {
+  private def onModeSelected(actionEvent: ActionEvent): Unit = {
     this.cardLayout.show(openSeeFacePanel, this.openSeeFaceModeCombo.getSelectedItem.toString)
   }
 

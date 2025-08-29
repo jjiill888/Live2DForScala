@@ -24,14 +24,14 @@ class SWTAvatarDisplayArea(parent: Composite) extends Composite(parent, SWT.NONE
   private var avatarListenerHolder: Option[AvatarListener] = None
 
   protected val canvas = createGLCanvas()
-  private implicit val openGLBinding: LWJGLBinding = new LWJGLBinding
+  private given openGLBinding: LWJGLBinding = new LWJGLBinding
   private val canvasInfo = new SWTOpenGLCanvasInfoReader(canvas)
   private val canvasUpdater: Runnable = new CanvasUpdater
 
   def glCanvas: GLCanvas = canvas
 
   val demoApp: DemoApp = {
-    val app = new DemoApp(canvasInfo, runOnOpenGLThread) {
+    val app = new DemoApp(canvasInfo, runOnOpenGLThread)(openGLBinding) {
       override def onAvatarLoaded(live2DView: DemoApp): Unit = {
         avatarListenerHolder.foreach(_.onAvatarLoaded(live2DView))
       }
@@ -66,7 +66,7 @@ class SWTAvatarDisplayArea(parent: Composite) extends Composite(parent, SWT.NONE
   }
 
   private def setupMouseListener(): Unit = {
-    this.canvas.addMouseWheelListener { e: MouseEvent =>
+    this.canvas.addMouseWheelListener { (e: MouseEvent) =>
       demoApp.zoom(e.count * 0.01f)
     }
     this.canvas.addMouseMoveListener(mouseEvent => {

@@ -1,12 +1,36 @@
 package moe.brianhsu.live2d.adapter.gateway.avatar.settings.json
 
-import moe.brianhsu.live2d.adapter.RichPath.convertFromPath
+import moe.brianhsu.live2d.adapter.RichPath.given
 import moe.brianhsu.live2d.enitiy.avatar.settings.Settings
 import moe.brianhsu.live2d.enitiy.avatar.settings.detail.{ExpressionSetting, MotionSetting, PhysicsSetting, PoseSetting}
 import moe.brianhsu.live2d.adapter.gateway.avatar.settings.json.model.{Group, ModelSetting}
 import moe.brianhsu.live2d.boundary.gateway.avatar.SettingsReader
 import org.json4s.native.JsonMethods.parse
 import org.json4s.{DefaultFormats, Formats}
+import org.json4s.MonadicJValue.jvalueToMonadic
+import org.json4s.jvalue2extractable
+import scala.reflect.ClassTag
+
+// ClassTag to Manifest bridge for json4s compatibility
+given [T](using ct: ClassTag[T]): scala.reflect.Manifest[T] = 
+  new scala.reflect.Manifest[T] {
+    override def runtimeClass: Class[_] = ct.runtimeClass
+    override def typeArguments: List[scala.reflect.Manifest[_]] = Nil
+    override def arrayManifest: scala.reflect.Manifest[Array[T]] = 
+      new scala.reflect.Manifest[Array[T]] {
+        override def runtimeClass: Class[_] = java.lang.reflect.Array.newInstance(ct.runtimeClass, 0).getClass
+        override def typeArguments: List[scala.reflect.Manifest[_]] = List(summon[scala.reflect.Manifest[T]])
+        override def arrayManifest: scala.reflect.Manifest[Array[Array[T]]] = 
+          new scala.reflect.Manifest[Array[Array[T]]] {
+            override def runtimeClass: Class[_] = java.lang.reflect.Array.newInstance(runtimeClass, 0).getClass
+            override def typeArguments: List[scala.reflect.Manifest[_]] = List(this)
+            override def arrayManifest: scala.reflect.Manifest[Array[Array[Array[T]]]] = ???
+            override def erasure: Class[_] = runtimeClass
+          }
+        override def erasure: Class[_] = runtimeClass
+      }
+    override def erasure: Class[_] = runtimeClass
+  }
 
 import java.io.FileNotFoundException
 import java.nio.file.{Files, Path, Paths}
@@ -21,7 +45,7 @@ import scala.util.{Failure, Success, Try}
  * @param directory Directory contains the avatar settings.
  */
 class JsonSettingsReader(directory: String) extends SettingsReader {
-  private implicit val formats: Formats = DefaultFormats
+  private given formats: Formats = DefaultFormats
 
   override def loadSettings(): Try[Settings] = {
     for {

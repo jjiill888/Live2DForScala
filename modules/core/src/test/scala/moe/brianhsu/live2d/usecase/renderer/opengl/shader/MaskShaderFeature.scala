@@ -13,7 +13,7 @@ class MaskShaderFeature extends AnyFeatureSpec with Matchers with GivenWhenThen 
   Feature("Source code of Shader") {
     Scenario("Has main method in vertex shader") {
       Given("an implicit stubbed OpenGL binding")
-      implicit val openGLBinding: OpenGLBinding = createOpenGLStub()
+      given openGLBinding: OpenGLBinding = createOpenGLStub()
 
       When("create a MaskedShader")
       val shader = new MaskedShader()
@@ -24,7 +24,7 @@ class MaskShaderFeature extends AnyFeatureSpec with Matchers with GivenWhenThen 
 
     Scenario("Has main method in fragment shader") {
       Given("an implicit stubbed OpenGL binding")
-      implicit val openGLBinding: OpenGLBinding = createOpenGLStub()
+      given openGLBinding: OpenGLBinding = createOpenGLStub()
 
       When("create a MaskedShader")
       val shader = new MaskedShader()

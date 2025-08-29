@@ -35,7 +35,7 @@ class SwingSliderControl(title: String, min: Int, max: Int, default: Int) extend
 
     this.add(percentageLabel, gc3)
 
-    this.slider.addChangeListener { _: ChangeEvent => updatePercentage(slider.getValue) }
+    this.slider.addChangeListener { (_: ChangeEvent) => updatePercentage(slider.getValue) }
   }
 
   override def setEnabled(isEnabled: Boolean): Unit = {

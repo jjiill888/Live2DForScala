@@ -20,7 +20,7 @@ import scala.io.Source
 import scala.util.Using
 
 class PhysicsFeature extends AnyFeatureSpec with GivenWhenThen with Matchers with TryValues with MockFactory with OptionValues {
-  private implicit val formats: Formats = Serialization.formats(ShortTypeHints(
+  private given formats: Formats = Serialization.formats(ShortTypeHints(
     List(
       classOf[ParameterValueAdd],
       classOf[ParameterValueMultiply],

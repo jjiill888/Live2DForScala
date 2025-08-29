@@ -107,9 +107,9 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
     autoData.horizontalSpan = 2
     autoStartButton.setLayoutData(autoData)
     
-    this.combo.addListener(SWT.Selection, onModeSelected)
-    this.startButton.addListener(SWT.Selection, onStartSelected)
-    this.stopButton.addListener(SWT.Selection, onStopSelected)
+    this.combo.addListener(SWT.Selection, { (event: Event) => onModeSelected(event) })
+    this.startButton.addListener(SWT.Selection, { (event: Event) => onStartSelected(event) })
+    this.stopButton.addListener(SWT.Selection, { (event: Event) => onStopSelected(event) })
     this.canvas.addPaintListener(onCanvasPaint)
   }
 
@@ -220,7 +220,7 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
     }
   }
 
-  private def onModeSelected(@unused event: Event): Unit = {
+  private def onModeSelected(event: Event): Unit = {
     val topControl = this.combo.getSelectionIndex match {
       case 0 => bundle
       case 1 => advanced
@@ -229,7 +229,7 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
     openSeeFacePanel.layout(true)
   }
 
-  private def onStopSelected(@unused event: Event): Unit = {
+  private def onStopSelected(event: Event): Unit = {
     this.demoAppHolder.foreach(_.disableFaceTracking())
     this.openSeeFaceReaderHolder.foreach(_.close())
     this.openSeeFaceReaderHolder = None
@@ -246,7 +246,7 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
     SWTWithLWJGLMain.exitCaptureMode()
   }
 
-  private def onStartSelected(@unused event: Event): Unit = {
+  private def onStartSelected(event: Event): Unit = {
     demoAppHolder.foreach(_.disableFaceTracking())
     this.openSeeFaceReaderHolder.foreach(_.close())
     this.openSeeFaceReaderHolder = None

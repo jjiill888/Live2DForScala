@@ -7,12 +7,20 @@ import moe.brianhsu.live2d.enitiy.avatar.effect.impl.{Breath, EyeBlink, FaceDire
 import moe.brianhsu.live2d.enitiy.avatar.settings.detail.MotionSetting
 import moe.brianhsu.live2d.usecase.updater.impl.GenericUpdateStrategy.EffectTiming.{AfterExpression, BeforeExpression}
 import moe.brianhsu.live2d.usecase.updater.impl.GenericUpdateStrategy.MotionListener
+import moe.brianhsu.live2d.enitiy.avatar.motion.impl.MotionWithTransition
 
 import javax.sound.sampled.Mixer
 
 class EasyUpdateStrategy(avatar: Avatar, eyeBlink: EyeBlink, breath: Breath,
                          lipSyncFromMotionSound: LipSyncFromMotionSound,
-                         faceDirection: FaceDirection) extends GenericUpdateStrategy(avatar.avatarSettings, avatar.model, None) {
+                         faceDirection: FaceDirection) extends GenericUpdateStrategy(
+    avatar.avatarSettings, 
+    avatar.model, 
+    Some((motion: MotionSetting) => {
+      // This will be called after the class is fully initialized
+      // We'll handle the motion listener logic in a different way
+    })
+  ) {
 
   def this(avatar: Avatar, faceDirectionCalculator: FaceDirectionCalculator) = this(
     avatar,
@@ -32,11 +40,18 @@ class EasyUpdateStrategy(avatar: Avatar, eyeBlink: EyeBlink, breath: Breath,
     physicsHolder, poseHolder
   ).flatten
 
-  override val motionListener: Option[MotionListener] = Some((motion: MotionSetting) => {
+  // Override the motion listener method instead of the val
+  override def startMotion(motionSetting: MotionSetting, isLoop: Boolean): MotionWithTransition = {
+    // Call the parent method first
+    val result = super.startMotion(motionSetting, isLoop)
+    
+    // Then handle our custom logic
     findEffects(_.isInstanceOf[LipSyncFromMotionSound], AfterExpression)
       .map(_.asInstanceOf[LipSyncFromMotionSound])
-      .foreach(_.startWith(motion.sound))
-  })
+      .foreach(_.startWith(motionSetting.sound))
+    
+    result
+  }
 
   this.appendAndStartEffects(beforeExpressionEffects, BeforeExpression)
   this.appendAndStartEffects(afterExpressionEffects, AfterExpression)

@@ -59,7 +59,7 @@ class ShaderRenderFeature extends AnyFeatureSpec with Matchers with GivenWhenThe
   Feature("Render mask") {
     Scenario("Render mask using ShaderRender") {
       Given("the following stubbed ShaderFactory")
-      implicit val openGLBinding: OpenGLBinding = createOpenGLStub()
+      given openGLBinding: OpenGLBinding = createOpenGLStub()
 
       import openGLBinding.constants._
 

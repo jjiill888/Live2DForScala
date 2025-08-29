@@ -48,6 +48,6 @@ object ExpectedCurves {
     }
   ))
 
-  private implicit val format: Formats = Serialization.formats(NoTypeHints) + TargetTypeSerializer + SegmentTypeSerializer
+  private given format: Formats = Serialization.formats(NoTypeHints) + TargetTypeSerializer + SegmentTypeSerializer
 
 }

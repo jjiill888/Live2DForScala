@@ -15,7 +15,7 @@ import scala.util.Using
 
 class OpenSeeFaceDataConverterFeature extends AnyFeatureSpec with GivenWhenThen with Matchers with TableDrivenPropertyChecks {
 
-  private implicit val jsonFormats: Formats = DefaultFormats
+  private given jsonFormats: Formats = DefaultFormats
 
   Feature("Convert the OpenSeeFaceData into TrackingNode") {
     Scenario("Convert the data with default settings") {

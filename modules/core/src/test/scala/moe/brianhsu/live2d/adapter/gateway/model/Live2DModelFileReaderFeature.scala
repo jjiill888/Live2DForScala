@@ -13,7 +13,7 @@ import scala.util.{Failure, Success}
 
 class Live2DModelFileReaderFeature extends AnyFeatureSpec with GivenWhenThen with Matchers with MockFactory with TryValues {
 
-  private implicit val core: NativeCubismAPILoader = new JnaNativeCubismAPILoader
+  private given core: NativeCubismAPILoader = new JnaNativeCubismAPILoader
 
   Feature("Load Live2D Model") {
     Scenario("Load a valid model") {

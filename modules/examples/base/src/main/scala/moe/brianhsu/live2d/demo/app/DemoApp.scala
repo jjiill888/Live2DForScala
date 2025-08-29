@@ -87,7 +87,7 @@ object DemoApp {
   }
 
   def loadAutoStart(): Boolean =
- readSettings().get("autoStart").flatMap(_.toBooleanOption).getOrElse(false)
+    readSettings().get("autoStart").flatMap(_.toBooleanOption).getOrElse(false)
 
   def saveEyeGaze(enabled: Boolean): Unit = {
     val settings = readSettings() + ("eyeGaze" -> enabled.toString)
@@ -124,7 +124,7 @@ object DemoApp {
 }
 
 abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnOpenGLThread)
-                      (override protected implicit val openGL: OpenGLBinding) extends OpenGLBase(drawCanvasInfo, onOpenGLThread) with SpriteControl with EffectControl {
+                      (protected override val openGL: OpenGLBinding) extends OpenGLBase(drawCanvasInfo, onOpenGLThread)(openGL) with SpriteControl with EffectControl {
 
   import openGL.constants._
 
@@ -132,10 +132,10 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
   protected lazy val projectionMatrixCalculator = new ProjectionMatrixCalculator(drawCanvasInfo)
   protected var mAvatarHolder: Option[Avatar] = None
   protected var modelHolder: Option[Live2DModel] = mAvatarHolder.map(_.model)
-  protected var rendererHolder: Option[AvatarRenderer] = modelHolder.map(model => AvatarRenderer(model))
+  protected var rendererHolder: Option[AvatarRenderer] = modelHolder.map(model => AvatarRenderer(model)(using openGL))
   protected var mUpdateStrategyHolder: Option[EasyUpdateStrategy] = None
 
-  private implicit val cubismCore: JnaNativeCubismAPILoader = new JnaNativeCubismAPILoader()
+  private given cubismCore: JnaNativeCubismAPILoader = new JnaNativeCubismAPILoader()
   private val frameTimeCalculator = new SystemNanoTimeBasedFrameInfo
 
   private var zoom: Float = 2.0f
@@ -179,7 +179,7 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
       renderer.draw(projection)
     }
 
-    def updateModelMatrix(model: Live2DModel)(@unused viewOrientation: ViewOrientation): Unit = {
+    def updateModelMatrix(model: Live2DModel)(viewOrientation: ViewOrientation): Unit = {
       model.modelMatrix = model.modelMatrix
         .scaleToHeight(zoom)
         .left(offsetX)
@@ -282,12 +282,12 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
 
 
       // Console outputs current mapping for debugging 
-       println("Expression shortcut mapping created:") 
- expressionKeyMap.foreach { case (k, v) => println(s" key '$k' -> expression '$v'") } 
+      println("Expression shortcut mapping created:") 
+      expressionKeyMap.foreach { case (k, v) => println(s" key '$k' -> expression '$v'") } 
  }
 
     onOpenGLThread {
-      this.rendererHolder = modelHolder.map(model => AvatarRenderer(model))
+      this.rendererHolder = modelHolder.map(model => AvatarRenderer(model)(using openGL))
       initOpenGL()
             // Render the first frame after the OpenGL context is initialized
       display()

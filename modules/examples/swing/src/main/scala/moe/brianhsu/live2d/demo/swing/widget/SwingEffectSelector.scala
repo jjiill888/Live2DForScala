@@ -70,21 +70,21 @@ class SwingEffectSelector(live2DWidget: Live2DUI) extends JPanel {
 
 
     this.blink.setSelected(false)
-    this.blink.addActionListener(updateBlinkEffect)
+    this.blink.addActionListener { (event: ActionEvent) => updateBlinkEffect(event) }
 
     this.breath.setSelected(false)
-    this.breath.addActionListener(updateBreathEffect)
+    this.breath.addActionListener { (event: ActionEvent) => updateBreathEffect(event) }
 
     this.faceDirection.setSelected(false)
-    this.faceDirection.addActionListener(updateFaceDirectionMode)
+    this.faceDirection.addActionListener { (event: ActionEvent) => updateFaceDirectionMode(event) }
 
     this.faceDirectionMode.setEnabled(false)
     this.faceDirectionMode.setSelectedIndex(0)
-    this.faceDirectionMode.addActionListener(updateFaceDirectionMode)
+    this.faceDirectionMode.addActionListener { (event: ActionEvent) => updateFaceDirectionMode(event) }
 
     this.lipSyncDevice.setEnabled(false)
-    this.lipSyncFromMic.addActionListener(onLipSycFromMicChanged)
-    this.lipSyncDevice.sliderControl.slider.addChangeListener { _: ChangeEvent =>
+    this.lipSyncFromMic.addActionListener { (event: ActionEvent) => onLipSycFromMicChanged(event) }
+    this.lipSyncDevice.sliderControl.slider.addChangeListener { (_: ChangeEvent) =>
       onMicLipSyncWeightChanged(lipSyncDevice.currentWeightPercentage)
     }
   }
@@ -105,15 +105,15 @@ class SwingEffectSelector(live2DWidget: Live2DUI) extends JPanel {
     }
   }
 
-  private def updateBlinkEffect(@unused actionEvent: ActionEvent): Unit = {
+  private def updateBlinkEffect(actionEvent: ActionEvent): Unit = {
     live2DWidget.demoAppHolder.foreach(_.enableEyeBlink(this.blink.isSelected))
   }
 
-  private def updateBreathEffect(@unused actionEvent: ActionEvent): Unit = {
+  private def updateBreathEffect(actionEvent: ActionEvent): Unit = {
     live2DWidget.demoAppHolder.foreach(_.enableBreath(this.breath.isSelected))
   }
 
-  private def updateFaceDirectionMode(@unused actionEvent: ActionEvent): Unit = {
+  private def updateFaceDirectionMode(actionEvent: ActionEvent): Unit = {
     this.faceDirectionMode.setEnabled(this.faceDirection.isSelected)
     live2DWidget.demoAppHolder.foreach { live2D =>
       live2D.enableFaceDirection(false)
@@ -141,7 +141,7 @@ class SwingEffectSelector(live2DWidget: Live2DUI) extends JPanel {
     }
   }
 
-  private def onLipSycFromMicChanged(@unused event: ActionEvent): Unit = {
+  private def onLipSycFromMicChanged(event: ActionEvent): Unit = {
     lipSyncDevice.setEnabled(lipSyncFromMic.isSelected)
     live2DWidget.demoAppHolder.foreach { demoApp =>
       if (lipSyncFromMic.isSelected) {

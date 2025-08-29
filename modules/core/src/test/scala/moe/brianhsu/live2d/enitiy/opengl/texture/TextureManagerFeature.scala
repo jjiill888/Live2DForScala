@@ -15,7 +15,7 @@ class TextureManagerFeature extends AnyFeatureSpec with GivenWhenThen with Match
   Feature("Singleton by OpenGL binding") {
     Scenario("get TextureManager twice by same OpenGL binding") {
       Given("an implicit stubbed OpenGL binding")
-      implicit val binding: OpenGLBinding = createOpenGLStub()
+      given binding: OpenGLBinding = createOpenGLStub()
 
       When("get TextureManager twice")
       val textureManager1 = TextureManager.getInstance
