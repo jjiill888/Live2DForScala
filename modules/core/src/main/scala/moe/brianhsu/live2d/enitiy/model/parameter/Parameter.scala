@@ -1,5 +1,7 @@
 package moe.brianhsu.live2d.enitiy.model.parameter
 
+import moe.brianhsu.live2d.enitiy.model.parameter.PerformanceOptimizations.*
+
 trait Parameter {
   /**
    * The parameter id.
@@ -57,15 +59,12 @@ trait Parameter {
    * @param value   The new value of this parameter.
    * @param weight  The weight of the assigned value.
    */
-  def update(value: Float, weight: Float = 1.0f): Unit = {
-    val valueFitInRange = value.max(this.min).min(this.max)
-
-    if (weight == 1) {
+  inline def update(value: Float, weight: Float = 1.0f): Unit =
+    val valueFitInRange = clamp(value, this.min, this.max)
+    if weight == 1.0f then
       doUpdateValue(valueFitInRange)
-    } else {
-      doUpdateValue((this.current * (1 - weight)) + (valueFitInRange * weight))
-    }
-  }
+    else
+      doUpdateValue(interpolate(this.current, valueFitInRange, weight))
 
   /**
    * Add a weighted value to the current value.
@@ -73,9 +72,8 @@ trait Parameter {
    * @param value   The value to added.
    * @param weight  The weight of `value`.
    */
-  def add(value: Float, weight: Float = 1.0f): Unit = {
+  inline def add(value: Float, weight: Float = 1.0f): Unit =
     update(this.current + (value * weight))
-  }
 
   /**
    * Multiply a weighted value to the current value.
@@ -83,7 +81,6 @@ trait Parameter {
    * @param value   The value to added.
    * @param weight  The weight of `value`.
    */
-  def multiply(value: Float, weight: Float = 1.0f): Unit = {
+  inline def multiply(value: Float, weight: Float = 1.0f): Unit =
     update(this.current * (1.0f + (value - 1.0f) * weight))
-  }
 }

@@ -1,6 +1,7 @@
 package moe.brianhsu.live2d.enitiy.math.matrix
 
 import moe.brianhsu.live2d.enitiy.math.matrix.Matrix4x4.{NumberOfColumns, NumberOfRows}
+import moe.brianhsu.live2d.enitiy.model.parameter.PerformanceOptimizations.*
 
 object Matrix4x4 {
 
@@ -78,28 +79,28 @@ trait Matrix4x4 {
    * @param source The source value of X.
    * @return The transformed value of X.
    */
-  def transformedX(source: Float): Float = xScalar * source + xOffset
+  inline def transformedX(source: Float): Float = xScalar * source + xOffset
 
   /**
    * Calculate the transformed Y using this matrix
    * @param source The source value of X.
    * @return The transformed value of X.
    */
-  def transformedY(source: Float): Float = yScalar * source + yOffset
+  inline def transformedY(source: Float): Float = yScalar * source + yOffset
 
   /**
    * Invert transformed X to original X using this matrix.
    * @param transformedX The transformed value of X.
    * @return The original value of X.
    */
-  def invertedTransformedX(transformedX: Float): Float = (transformedX - xOffset) / xScalar
+  inline def invertedTransformedX(transformedX: Float): Float = safeDivide(transformedX - xOffset, xScalar)
 
   /**
    * Invert transformed Y to original Y using this matrix.
    * @param transformedY The transformed value of Y.
    * @return The original value of Y.
    */
-  def invertedTransformedY(transformedY: Float): Float = (transformedY - yOffset) / yScalar
+  inline def invertedTransformedY(transformedY: Float): Float = safeDivide(transformedY - yOffset, yScalar)
 
 
   /**

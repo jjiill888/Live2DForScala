@@ -13,9 +13,10 @@ import moe.brianhsu.live2d.usecase.renderer.viewport.{ProjectionMatrixCalculator
 import moe.brianhsu.live2d.usecase.updater.impl.EasyUpdateStrategy
 
 import scala.annotation.unused
-import scala.util.Try
+import scala.util.{Try, Success, Failure}
 import java.io.{File, PrintWriter}
 import scala.io.Source
+import moe.brianhsu.live2d.enitiy.model.parameter.StartupOptimizations.*
 
 object DemoApp {
   type OnOpenGLThread = (=> Any) => Unit
@@ -81,43 +82,37 @@ object DemoApp {
       }
     } else None
 
-  def saveAutoStart(enabled: Boolean): Unit = {
+  def saveAutoStart(enabled: Boolean): Unit =
     val settings = readSettings() + ("autoStart" -> enabled.toString)
     writeSettings(settings)
-  }
 
   def loadAutoStart(): Boolean =
     readSettings().get("autoStart").flatMap(_.toBooleanOption).getOrElse(false)
 
-  def saveEyeGaze(enabled: Boolean): Unit = {
+  def saveEyeGaze(enabled: Boolean): Unit =
     val settings = readSettings() + ("eyeGaze" -> enabled.toString)
     writeSettings(settings)
-  }
 
   def loadEyeGaze(): Boolean =
     readSettings().get("eyeGaze").flatMap(_.toBooleanOption).getOrElse(false)
 
-  def savePupilGaze(enabled: Boolean): Unit = {
+  def savePupilGaze(enabled: Boolean): Unit =
     val settings = readSettings() + ("pupilGaze" -> enabled.toString)
     writeSettings(settings)
-  }
 
   def loadPupilGaze(): Boolean =
     readSettings().get("pupilGaze").flatMap(_.toBooleanOption).getOrElse(true)
 
-
-  def saveDisableEyeBlink(enabled: Boolean): Unit = {
+  def saveDisableEyeBlink(enabled: Boolean): Unit =
     val settings = readSettings() + ("disableEyeBlink" -> enabled.toString)
     writeSettings(settings)
-  }
 
   def loadDisableEyeBlink(): Boolean =
     readSettings().get("disableEyeBlink").flatMap(_.toBooleanOption).getOrElse(false)
     
-  def saveTransparentBackground(enabled: Boolean): Unit = {
+  def saveTransparentBackground(enabled: Boolean): Unit =
     val settings = readSettings() + ("transparentBackground" -> enabled.toString)
     writeSettings(settings)
-  }
 
   def loadTransparentBackground(): Boolean =
     readSettings().get("transparentBackground").flatMap(_.toBooleanOption).getOrElse(false)
@@ -146,7 +141,11 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
   private var expressionKeyMap: Map[Char, String] = Map()
 
   {
-    initOpenGL()
+    // 启动优化
+    profileStartup("DemoApp Initialization") {
+      optimizeSystemProperties()
+      initOpenGL()
+    }
   }
 
   def avatarHolder: Option[Avatar] = mAvatarHolder
@@ -156,19 +155,18 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
     modelHolder.foreach(_.reset())
   }
 
-  override def display(isForceUpdate: Boolean = false): Unit = {
+  override def display(isForceUpdate: Boolean = false): Unit =
     clearScreen()
 
     sprites.foreach(spriteRenderer.draw)
 
     this.frameTimeCalculator.updateFrameTime()
 
-    for {
+    for
       avatar <- mAvatarHolder
       model <- modelHolder
       renderer <- rendererHolder
-    } {
-
+    do
       val projection = projectionMatrixCalculator.calculate(
         viewPortMatrixCalculator.viewPortMatrix,
         isForceUpdate,
@@ -177,15 +175,12 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
 
       avatar.update(this.frameTimeCalculator)
       renderer.draw(projection)
-    }
 
-    def updateModelMatrix(model: Live2DModel)(viewOrientation: ViewOrientation): Unit = {
-      model.modelMatrix = model.modelMatrix
-        .scaleToHeight(zoom)
-        .left(offsetX)
-        .top(offsetY)
-    }
-  }
+  def updateModelMatrix(model: Live2DModel)(viewOrientation: ViewOrientation): Unit =
+    model.modelMatrix = model.modelMatrix
+      .scaleToHeight(zoom)
+      .left(offsetX)
+      .top(offsetY)
 
   def resize(): Unit = {
     viewPortMatrixCalculator.updateViewPort(
@@ -259,45 +254,52 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
   }
 
   def switchAvatar(directoryPath: String): Try[Avatar] = {
-    onStatusUpdated(s"Loading $directoryPath...")
+    profileStartup(s"Avatar Loading: $directoryPath") {
+      onStatusUpdated(s"Loading $directoryPath...")
 
-    this.disableMicLipSync()
-    this.enableLipSyncFromMotionSound(false)
+      this.disableMicLipSync()
+      this.enableLipSyncFromMotionSound(false)
 
-    val newAvatarHolder = new AvatarFileReader(directoryPath).loadAvatar()
+      val newAvatarHolder = new AvatarFileReader(directoryPath).loadAvatar()
 
-    this.mAvatarHolder = newAvatarHolder.toOption.orElse(this.mAvatarHolder)
-    this.modelHolder = mAvatarHolder.map(_.model)
-    this.mUpdateStrategyHolder = mAvatarHolder.map(avatar => new EasyUpdateStrategy(avatar, faceDirectionCalculator))
-    this.mAvatarHolder.foreach { avatar =>
-      avatar.updateStrategyHolder = this.mUpdateStrategyHolder
-      onStatusUpdated(s"$directoryPath loaded.")
-      avatar.model.parameters.keySet.foreach(println)
+      newAvatarHolder match
+        case Success(avatar) =>
+          this.mAvatarHolder = Some(avatar)
+          this.modelHolder = Some(avatar.model)
+          this.mUpdateStrategyHolder = Some(new EasyUpdateStrategy(avatar, faceDirectionCalculator))
+          
+          avatar.updateStrategyHolder = this.mUpdateStrategyHolder
+          onStatusUpdated(s"$directoryPath loaded successfully.")
+          avatar.model.parameters.keySet.foreach(println)
 
-      // Emoji Shortcut Binding Update
-      this.expressionKeyMap = avatar.avatarSettings.expressions.toSeq.zipWithIndex
-      .take(9)
-      .map { case ((expressionName, _), i) => ((i + '1').toChar, expressionName) }
-      .toMap
+          // Emoji Shortcut Binding Update - Optimized with view for better performance
+          this.expressionKeyMap = avatar.avatarSettings.expressions.view
+            .take(9)
+            .zipWithIndex
+            .map { case ((expressionName, _), i) => ((i + '1').toChar, expressionName) }
+            .toMap
 
+          // Console outputs current mapping for debugging 
+          println("Expression shortcut mapping created:") 
+          expressionKeyMap.foreach { case (k, v) => println(s" key '$k' -> expression '$v'") }
 
-      // Console outputs current mapping for debugging 
-      println("Expression shortcut mapping created:") 
-      expressionKeyMap.foreach { case (k, v) => println(s" key '$k' -> expression '$v'") } 
- }
-
-    onOpenGLThread {
-      this.rendererHolder = modelHolder.map(model => AvatarRenderer(model)(using openGL))
-      initOpenGL()
+          onOpenGLThread {
+            this.rendererHolder = Some(AvatarRenderer(avatar.model)(using openGL))
+            initOpenGL()
             // Render the first frame after the OpenGL context is initialized
-      display()
-    }
+            display()
+          }
 
-     newAvatarHolder.foreach { _ =>
-      DemoApp.saveLastAvatar(directoryPath)
-      onAvatarLoaded(this)
+          DemoApp.saveLastAvatar(directoryPath)
+          onAvatarLoaded(this)
+          
+        case Failure(e) =>
+          onStatusUpdated(s"Failed to load $directoryPath: ${e.getMessage}")
+          println(s"Avatar loading failed: ${e.getMessage}")
+          e.printStackTrace()
+
+      newAvatarHolder
     }
-    newAvatarHolder
   }
 
   def move(offsetX: Float, offsetY: Float): Unit = {
@@ -307,7 +309,7 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
   }
 
   def zoom(level: Float): Unit = {
-    this.zoom = (level + zoom).max(0.5f)
+    this.zoom = (this.zoom + level).max(0.5f)
     this.display(true)
   }
 
@@ -318,6 +320,7 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
       case 'c' => switchAvatar("src/main/resources/Rice")
       case 'v' => switchAvatar("src/main/resources/Natori")
       case 'b' => switchAvatar("src/main/resources/Hiyori")
+      case 'r' => switchAvatar("runtime")  // 添加runtime模型加载
       case _ =>
         //  Check if it is a numeric key to perform expression switching
         expressionKeyMap.get(key).foreach { expressionName =>
@@ -327,6 +330,6 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
     }
   }
 
-  def onAvatarLoaded(live2DView: DemoApp): Unit
-  def onStatusUpdated(status: String): Unit
+  def onAvatarLoaded(live2DView: DemoApp): Unit = {}
+  def onStatusUpdated(status: String): Unit = {}
 }

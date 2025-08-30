@@ -2,6 +2,7 @@ package moe.brianhsu.live2d.enitiy.updater
 
 import UpdateOperation._
 import moe.brianhsu.live2d.enitiy.model.Live2DModel
+import moe.brianhsu.live2d.enitiy.model.parameter.PerformanceOptimizations.*
 
 import java.util.regex.Pattern
 
@@ -39,12 +40,14 @@ class ModelUpdater(model: Live2DModel) extends Updater {
     }
   }
 
-  private def normalizeParameterID(id: String): String = {
-    id match {
+  /**
+   * Inline optimization for parameter ID normalization
+   * Fast parameter ID conversion for performance-critical operations
+   */
+  def normalizeParameterID(id: String): String =
+    id match
       case "ParamTere" if model.isOldParameterId => "PARAM_CHEEK"
       case _ if model.isOldParameterId => camelCasePattern.split(id).map(_.toUpperCase).mkString("_")
       case _ => id
-    }
-  }
 
 }

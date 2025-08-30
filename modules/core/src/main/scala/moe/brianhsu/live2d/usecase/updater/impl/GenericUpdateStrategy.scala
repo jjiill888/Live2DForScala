@@ -11,19 +11,16 @@ import moe.brianhsu.live2d.enitiy.updater.{FrameTimeInfo, ModelUpdater, UpdateSt
 import moe.brianhsu.live2d.usecase.updater.impl.GenericUpdateStrategy.EffectTiming.{AfterExpression, BeforeExpression}
 import moe.brianhsu.live2d.usecase.updater.impl.GenericUpdateStrategy.{EffectTiming, MotionListener}
 
-object GenericUpdateStrategy {
+object GenericUpdateStrategy:
 
   sealed trait EffectTiming
 
-  object EffectTiming {
+  object EffectTiming:
     case object BeforeExpression extends EffectTiming
     case object AfterExpression extends EffectTiming
-  }
 
-  trait MotionListener {
+  trait MotionListener:
     def onMotionStart(motion: MotionSetting): Unit
-  }
-}
 
 class GenericUpdateStrategy(val avatarSettings: Settings,
                             val model: Live2DModel,
@@ -49,30 +46,24 @@ class GenericUpdateStrategy(val avatarSettings: Settings,
     )
   }
 
-  def effects(timing: EffectTiming) = timing match {
+  def effects(timing: EffectTiming) = timing match
     case BeforeExpression => this.beforeExpressionEffects
     case AfterExpression => this.afterExpressionEffects
-  }
 
-  def findEffects(predicate: Effect => Boolean, timing: EffectTiming = BeforeExpression): List[Effect] = {
-    timing match {
-      case BeforeExpression => beforeExpressionEffects.filter(predicate)
-      case AfterExpression => afterExpressionEffects.filter(predicate)
-    }
-  }
+  def findEffects(predicate: Effect => Boolean, timing: EffectTiming = BeforeExpression): List[Effect] =
+    timing match
+      case BeforeExpression => beforeExpressionEffects.view.filter(predicate).toList
+      case AfterExpression => afterExpressionEffects.view.filter(predicate).toList
 
-  def appendAndStartEffects(effect: List[Effect], timing: EffectTiming = BeforeExpression): Unit = {
-
-    timing match {
+  def appendAndStartEffects(effect: List[Effect], timing: EffectTiming = BeforeExpression): Unit =
+    timing match
       case BeforeExpression => this.beforeExpressionEffects ++= effect
       case AfterExpression => this.afterExpressionEffects ++= effect
-    }
 
     effect.foreach(_.start())
-  }
 
-  def stopAndRemoveEffects(predicate: Effect => Boolean, timing: EffectTiming = BeforeExpression): List[Effect] = {
-    val removed = timing match {
+  def stopAndRemoveEffects(predicate: Effect => Boolean, timing: EffectTiming = BeforeExpression): List[Effect] =
+    val removed = timing match
       case BeforeExpression =>
         val (removed, remains) = this.beforeExpressionEffects.partition(predicate)
         this.beforeExpressionEffects = remains
@@ -82,73 +73,60 @@ class GenericUpdateStrategy(val avatarSettings: Settings,
         val (removed, remains) = this.afterExpressionEffects.partition(predicate)
         this.afterExpressionEffects = remains
         removed
-    }
     removed.foreach(_.stop())
     removed
-  }
 
-  def startMotion(motionSetting: MotionSetting, isLoop: Boolean): MotionWithTransition = {
+  def startMotion(motionSetting: MotionSetting, isLoop: Boolean): MotionWithTransition =
     val avatarMotionDataReader = new AvatarMotionDataReader(motionSetting)
     val motion = AvatarMotion(
-  avatarMotionDataReader, 
-  motionSetting, 
-  avatarSettings.eyeBlinkParameterIds, 
-  avatarSettings.lipSyncParameterIds,  
-  isLoop
-)
+      avatarMotionDataReader, 
+      motionSetting, 
+      avatarSettings.eyeBlinkParameterIds, 
+      avatarSettings.lipSyncParameterIds,  
+      isLoop
+    )
 
     motionListener.foreach(_.onMotionStart(motionSetting))
 
-    if (isLoop) {
+    if isLoop then
       val callbackHolder: Option[RepeatedCallback] = motionListener.map(c => (_: MotionWithTransition) => c.onMotionStart(motionSetting))
       motionManager.repeatedCallbackHolder = callbackHolder
-    } else {
+    else
       motionManager.repeatedCallbackHolder = None
-    }
 
     motionManager.startMotion(motion)
-  }
 
-  def startMotion(motionGroupName: String, indexInsideGroup: Int, isLoop: Boolean): Option[MotionWithTransition] = {
-    for {
-      motionGroup <- avatarSettings.motionGroups.get(motionGroupName) if motionGroup.size > indexInsideGroup && indexInsideGroup >= 0
+  def startMotion(motionGroupName: String, indexInsideGroup: Int, isLoop: Boolean): Option[MotionWithTransition] =
+    // Use improved for expression syntax
+    for
+      motionGroup <- avatarSettings.motionGroups.get(motionGroupName) 
+      if motionGroup.size > indexInsideGroup && indexInsideGroup >= 0
       motionSetting = motionGroup(indexInsideGroup)
-    } yield {
-      startMotion(motionSetting, isLoop)
-    }
-  }
+    yield startMotion(motionSetting, isLoop)
 
-  def startExpression(expression: Expression): MotionWithTransition = {
+  def startExpression(expression: Expression): MotionWithTransition =
     expressionManager.startMotion(expression)
-  }
 
-  def startExpression(name: String): Option[MotionWithTransition] = {
+  def startExpression(name: String): Option[MotionWithTransition] =
     expressions.get(name).map(startExpression)
-  }
 
-  private def executeMotionOperations(frameTimeInfo: FrameTimeInfo): Unit = {
+  private def executeMotionOperations(frameTimeInfo: FrameTimeInfo): Unit =
     val operations = motionManager.calculateOperations(model, frameTimeInfo.totalElapsedTimeInSeconds, frameTimeInfo.deltaTimeInSeconds, 1)
     updater.executeOperations(operations)
-  }
 
-  private def executeExpressionOperations(frameTimeInfo: FrameTimeInfo): Unit = {
+  private def executeExpressionOperations(frameTimeInfo: FrameTimeInfo): Unit =
     val operations = expressionManager.calculateOperations(model, frameTimeInfo.totalElapsedTimeInSeconds, frameTimeInfo.deltaTimeInSeconds, 1)
     updater.executeOperations(operations)
-  }
 
-  private def executeEffectsOperations(effects: List[Effect], frameTimeInfo: FrameTimeInfo): Unit = {
-    val operations = for {
-      effect <- effects
-      operation <- effect.calculateOperations(model, frameTimeInfo.totalElapsedTimeInSeconds, frameTimeInfo.deltaTimeInSeconds)
-    } yield {
-      operation
-    }
+  private def executeEffectsOperations(effects: List[Effect], frameTimeInfo: FrameTimeInfo): Unit =
+    // Use optimized collection operations with view for better performance
+    val operations = effects.view
+      .flatMap(effect => effect.calculateOperations(model, frameTimeInfo.totalElapsedTimeInSeconds, frameTimeInfo.deltaTimeInSeconds))
+      .toList
 
     updater.executeOperations(operations)
-  }
 
-  override def update(frameTimeInfo: FrameTimeInfo): Unit = {
-
+  override def update(frameTimeInfo: FrameTimeInfo): Unit =
     model.restoreParameters()
     executeMotionOperations(frameTimeInfo)
     model.snapshotParameters()
@@ -158,5 +136,4 @@ class GenericUpdateStrategy(val avatarSettings: Settings,
     executeEffectsOperations(afterExpressionEffects, frameTimeInfo)
 
     model.update()
-  }
 }

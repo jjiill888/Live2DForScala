@@ -1,5 +1,9 @@
 package moe.brianhsu.live2d.adapter.gateway.avatar.settings.json.model
 
+import org.json4s.{JValue, JObject, JArray, JString, DefaultFormats}
+import org.json4s.MonadicJValue.jvalueToMonadic
+import org.json4s.jvalue2extractable
+
 /**
  * Represent the FileReference object in JSON file.
  *
@@ -16,7 +20,9 @@ private[json] case class FileReferences(
   textures: List[String],
   physics: Option[String],
   pose: Option[String],
-  expressions: List[ExpressionFile],
-  motions: Map[String, List[MotionFile]],
-  userData: Option[String]
+  expressions: List[ExpressionFile] = List.empty,
+  motions: Map[String, List[MotionFile]] = Map.empty,
+  userData: Option[String] = None
 )
+
+

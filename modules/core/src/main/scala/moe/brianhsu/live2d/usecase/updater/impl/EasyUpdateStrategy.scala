@@ -20,7 +20,7 @@ class EasyUpdateStrategy(avatar: Avatar, eyeBlink: EyeBlink, breath: Breath,
       // This will be called after the class is fully initialized
       // We'll handle the motion listener logic in a different way
     })
-  ) {
+  ):
 
   def this(avatar: Avatar, faceDirectionCalculator: FaceDirectionCalculator) = this(
     avatar,
@@ -41,7 +41,7 @@ class EasyUpdateStrategy(avatar: Avatar, eyeBlink: EyeBlink, breath: Breath,
   ).flatten
 
   // Override the motion listener method instead of the val
-  override def startMotion(motionSetting: MotionSetting, isLoop: Boolean): MotionWithTransition = {
+  override def startMotion(motionSetting: MotionSetting, isLoop: Boolean): MotionWithTransition =
     // Call the parent method first
     val result = super.startMotion(motionSetting, isLoop)
     
@@ -51,16 +51,14 @@ class EasyUpdateStrategy(avatar: Avatar, eyeBlink: EyeBlink, breath: Breath,
       .foreach(_.startWith(motionSetting.sound))
     
     result
-  }
 
   this.appendAndStartEffects(beforeExpressionEffects, BeforeExpression)
   this.appendAndStartEffects(afterExpressionEffects, AfterExpression)
 
-
   def isBreathEnabled: Boolean = this.findEffects(_ == breath, AfterExpression).nonEmpty
 
-  def enableBreath(isEnabled: Boolean): Unit = {
-    isEnabled match {
+  def enableBreath(isEnabled: Boolean): Unit =
+    isEnabled match
       case true if !isBreathEnabled =>
         this.appendAndStartEffects(breath :: Nil, AfterExpression)
 
@@ -68,34 +66,26 @@ class EasyUpdateStrategy(avatar: Avatar, eyeBlink: EyeBlink, breath: Breath,
         this.stopAndRemoveEffects(_ == breath, AfterExpression)
 
       case _ =>
-      // Do nothing since no changes
-    }
-  }
+        // Do nothing since no changes
 
-  def updateMicLipSyncWeight(weight: Int): Unit = {
+  def updateMicLipSyncWeight(weight: Int): Unit =
     this.lipSyncFromMicHolder.foreach(_.weight = weight / 10.0f)
-  }
 
-  def enableMicLipSync(mixer: Mixer, weight: Int, forceEvenNoSetting: Boolean): Unit = {
+  def enableMicLipSync(mixer: Mixer, weight: Int, forceEvenNoSetting: Boolean): Unit =
     disableMicLipSync()
     val lipSyncFromMic = LipSyncFromMic(avatar.avatarSettings, mixer, weight / 10.0f, forceEvenNoSetting)
     lipSyncFromMic.failed.foreach(_.printStackTrace())
     lipSyncFromMic.foreach(effect => this.appendAndStartEffects(effect :: Nil, AfterExpression))
     this.lipSyncFromMicHolder = lipSyncFromMic.toOption
-  }
 
-  def disableMicLipSync(): Unit = {
-    for {
-      lipSyncFromMic <- lipSyncFromMicHolder
-    } {
+  def disableMicLipSync(): Unit =
+    for lipSyncFromMic <- lipSyncFromMicHolder do
       this.stopAndRemoveEffects(_ == lipSyncFromMic, AfterExpression)
-    }
-  }
 
   def isLipSyncFromMotionEnabled: Boolean = this.findEffects(_ == lipSyncFromMotionSound, AfterExpression).nonEmpty
 
-  def enableLipSyncFromMotion(isEnabled: Boolean): Unit = {
-    isEnabled match {
+  def enableLipSyncFromMotion(isEnabled: Boolean): Unit =
+    isEnabled match
       case true if !isLipSyncFromMotionEnabled =>
         this.appendAndStartEffects(lipSyncFromMotionSound :: Nil, AfterExpression)
 
@@ -103,22 +93,18 @@ class EasyUpdateStrategy(avatar: Avatar, eyeBlink: EyeBlink, breath: Breath,
         this.stopAndRemoveEffects(_ == lipSyncFromMotionSound, AfterExpression)
 
       case _ =>
-      // Do nothing since no changes
-    }
-  }
+        // Do nothing since no changes
 
-  def updateLipSyncFromMotionVolume(volume: Int): Unit = {
+  def updateLipSyncFromMotionVolume(volume: Int): Unit =
     this.lipSyncFromMotionSound.volume = volume
-  }
 
-  def updateLipSyncFromMotionWeight(weight: Int): Unit = {
+  def updateLipSyncFromMotionWeight(weight: Int): Unit =
     this.lipSyncFromMotionSound.weight = weight / 10.0f
-  }
 
   def isFaceDirectionEnabled: Boolean = this.findEffects(_ == faceDirection, AfterExpression).nonEmpty
 
-  def enableFaceDirection(isEnabled: Boolean): Unit = {
-    isEnabled match {
+  def enableFaceDirection(isEnabled: Boolean): Unit =
+    isEnabled match
       case true if !isFaceDirectionEnabled =>
         this.appendAndStartEffects(faceDirection :: Nil, AfterExpression)
 
@@ -126,14 +112,12 @@ class EasyUpdateStrategy(avatar: Avatar, eyeBlink: EyeBlink, breath: Breath,
         this.stopAndRemoveEffects(_ == faceDirection, AfterExpression)
 
       case _ =>
-      // Do nothing since no changes
-    }
-  }
+        // Do nothing since no changes
 
   def isEyeBlinkEnabled: Boolean = this.findEffects(_ == eyeBlink, BeforeExpression).nonEmpty
 
-  def enableEyeBlink(isEnabled: Boolean): Unit = {
-    isEnabled match {
+  def enableEyeBlink(isEnabled: Boolean): Unit =
+    isEnabled match
       case true if !isEyeBlinkEnabled =>
         this.appendAndStartEffects(eyeBlink :: Nil, BeforeExpression)
 
@@ -142,8 +126,3 @@ class EasyUpdateStrategy(avatar: Avatar, eyeBlink: EyeBlink, breath: Breath,
 
       case _ =>
         // Do nothing since no changes
-    }
-  }
-}
-
-

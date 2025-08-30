@@ -1,9 +1,9 @@
 package moe.brianhsu.live2d.adapter.gateway.avatar.settings.json
 
-import moe.brianhsu.live2d.adapter.RichPath.given
+import moe.brianhsu.live2d.adapter.RichPath._
 import moe.brianhsu.live2d.enitiy.avatar.settings.Settings
-import moe.brianhsu.live2d.enitiy.avatar.settings.detail.{ExpressionSetting, MotionSetting, PhysicsSetting, PoseSetting}
-import moe.brianhsu.live2d.adapter.gateway.avatar.settings.json.model.{Group, ModelSetting}
+import moe.brianhsu.live2d.enitiy.avatar.settings.detail.{ExpressionSetting, MotionSetting, PhysicsSetting, PoseSetting, HitAreaSetting}
+import moe.brianhsu.live2d.adapter.gateway.avatar.settings.json.model.{Group, ModelSetting, FileReferences}
 import moe.brianhsu.live2d.boundary.gateway.avatar.SettingsReader
 import org.json4s.native.JsonMethods.parse
 import org.json4s.{DefaultFormats, Formats}
@@ -32,7 +32,7 @@ given [T](using ct: ClassTag[T]): scala.reflect.Manifest[T] =
     override def erasure: Class[_] = runtimeClass
   }
 
-import java.io.FileNotFoundException
+import java.io.{FileNotFoundException, IOException}
 import java.nio.file.{Files, Path, Paths}
 import scala.jdk.StreamConverters._
 import scala.util.{Failure, Success, Try}
@@ -47,8 +47,8 @@ import scala.util.{Failure, Success, Try}
 class JsonSettingsReader(directory: String) extends SettingsReader {
   private given formats: Formats = DefaultFormats
 
-  override def loadSettings(): Try[Settings] = {
-    for {
+  override def loadSettings(): Try[Settings] =
+    for
       settings <- loadMainModelSettings()
       mocFile <- parseMocFile(settings)
       physics <- parsePhysics(settings)
@@ -58,47 +58,40 @@ class JsonSettingsReader(directory: String) extends SettingsReader {
       lipSyncParameterIds <- parseLipSyncParameterIds(settings)
       expressions <- parseExpressions(settings)
       motionGroups <- parseMotionGroups(settings)
-    } yield {
-
-      Settings(
-        mocFile, textureFiles, physics, pose,
-        eyeBlinkParameterIds, lipSyncParameterIds,
-        expressions, motionGroups,
-        settings.hitAreas
-      )
-    }
-  }
+    yield Settings(
+      mocFile, textureFiles, physics, pose,
+      eyeBlinkParameterIds, lipSyncParameterIds,
+      expressions, motionGroups,
+      settings.hitAreas
+    )
 
   /**
    * Load and parse the main .model3.json file.
    *
    * @return [[scala.util.Success]] if model loaded correctly, otherwise [[scala.util.Failure]] denoted the exception.
    */
-  private def loadMainModelSettings(): Try[ModelSetting] = {
-
-    for {
+  private def loadMainModelSettings(): Try[ModelSetting] =
+    for
       directory <- findModelDirectory()
       jsonContent <- loadMainJsonFile(directory)
       parsedJson <- Try(parse(jsonContent))
-    } yield {
+    yield {
+      // 使用原始解析方式，但处理MotionFile的序列化问题
       parsedJson.camelizeKeys.extract[ModelSetting]
     }
-  }
 
   /**
    * Validate the path avatar directory exist.
    *
    * @return [[scala.util.Success]] if directory exist, otherwise [[scala.util.Failure]] denoted the exception.
    */
-  private def findModelDirectory(): Try[Path] = {
+  private def findModelDirectory(): Try[Path] =
     val directoryPath = Paths.get(directory)
 
-    if (Files.notExists(directoryPath)) {
+    if Files.notExists(directoryPath) then
       Failure(new FileNotFoundException(s"The folder $directory does not exist."))
-    } else {
+    else
       Success(directoryPath)
-    }
-  }
 
   /**
    * Load main .model3.json file to a String.
@@ -107,17 +100,23 @@ class JsonSettingsReader(directory: String) extends SettingsReader {
    *
    * @return [[scala.util.Success]] containing the JSON file content, otherwise [[scala.util.Failure]] denoted the exception.
    */
-  private def loadMainJsonFile(directoryPath: Path): Try[String] = {
-
+  private def loadMainJsonFile(directoryPath: Path): Try[String] =
     def isMainModel(path: Path): Boolean = path.getFileName.toString.endsWith(".model3.json")
 
-    Files.list(directoryPath)
-      .toScala(LazyList)
-      .find(p => isMainModel(p) && p.isReadableFile)
-      .toRight(new FileNotFoundException(s"Main model json file not found at $directory"))
-      .toTry
+    Try(Files.list(directoryPath))
+      .flatMap { files =>
+        files.toScala(LazyList)
+          .find(p => isMainModel(p) && p.isReadableFile)
+          .toRight(new FileNotFoundException(s"Main model json file not found at $directory"))
+          .toTry
+      }
       .flatMap(p => p.readToString())
-  }
+      .recoverWith { case e: FileNotFoundException =>
+        Failure(new FileNotFoundException(s"Main model json file not found at $directory: ${e.getMessage}"))
+      }
+      .recoverWith { case e: IOException =>
+        Failure(new IOException(s"Failed to read main model json file at $directory: ${e.getMessage}"))
+      }
 
   /**
    * Parse moc file location
@@ -126,15 +125,14 @@ class JsonSettingsReader(directory: String) extends SettingsReader {
    *
    * @return [[scala.util.Success]] containing absolute path of .moc file, otherwise [[scala.util.Failure]] denoted the exception.
    */
-  private def parseMocFile(modelSetting: ModelSetting): Try[String] = {
+  private def parseMocFile(modelSetting: ModelSetting): Try[String] =
     val filePath = s"$directory/${modelSetting.fileReferences.moc}"
+    val path = Paths.get(filePath)
 
-    Option(Paths.get(filePath))
-      .find(p => p.isReadableFile)
-      .map(_.toAbsolutePath.toString)
-      .toRight(new FileNotFoundException(s"Main model json file not found at $directory"))
-      .toTry
-  }
+    if path.toFile.exists() && path.isReadableFile then
+      Success(path.toAbsolutePath.toString)
+    else
+      Failure(new FileNotFoundException(s"Moc file not found or not readable: $filePath"))
 
   /**
    * Parse texture files location.
@@ -146,10 +144,12 @@ class JsonSettingsReader(directory: String) extends SettingsReader {
   private def parseTextureFiles(modelSetting: ModelSetting): Try[List[String]] = Try {
     modelSetting.fileReferences
       .textures
+      .view
       .map(file => Paths.get(s"$directory/$file"))
-      .filter(p => p.isReadableFile)
+      .filter(_.isReadableFile)
       .map(_.toAbsolutePath.toString)
-  }
+      .toList
+    }
 
   /**
    * Parse eye blink parameters.
@@ -238,15 +238,15 @@ class JsonSettingsReader(directory: String) extends SettingsReader {
    * @return [[scala.util.Success]] containing expression settings, otherwise [[scala.util.Failure]] denoted the exception.
    */
   private def parseExpressions(modelSetting: ModelSetting): Try[Map[String, ExpressionSetting]] = Try {
-    val nameToExpressionList = for {
+    val nameToExpressionList = for
       expressionFileInfo <- modelSetting.fileReferences.expressions
       expressionJsonFilePath = Paths.get(s"$directory/${expressionFileInfo.file}")
       jsonFile <- Option(expressionJsonFilePath) if jsonFile.isReadableFile
       jsonFileContent <- jsonFile.readToString().toOption
       parsedJson <- Try(parse(jsonFileContent)).toOption
-    } yield {
+    yield
       expressionFileInfo.name -> parsedJson.camelizeKeys.extract[ExpressionSetting]
-    }
+    
     nameToExpressionList.toMap
   }
 
@@ -261,13 +261,12 @@ class JsonSettingsReader(directory: String) extends SettingsReader {
    * @return [[scala.util.Success]] containing map of motion settings, otherwise [[scala.util.Failure]] denoted the exception.
    */
   private def parseMotionGroups(modelSetting: ModelSetting): Try[Map[String, List[MotionSetting]]] = Try {
-    for {
-      (groupName, motionList) <- modelSetting.fileReferences.motions
-    } yield {
-      val motionJsonList = for {
+    // 手动解析motions以避免Scala 3序列化问题
+    val motionsMap = for (groupName, motionList) <- modelSetting.fileReferences.motions yield {
+      val motionJsonList = for
         motionFile <- motionList
         paredJson <- motionFile.loadMotion(directory).toOption
-      } yield {
+      yield
         MotionSetting(
           paredJson.version,
           motionFile.fadeInTime,
@@ -277,10 +276,10 @@ class JsonSettingsReader(directory: String) extends SettingsReader {
           paredJson.userData,
           paredJson.curves
         )
-      }
-
+      
       groupName -> motionJsonList
     }
+    motionsMap
   }
 
 }

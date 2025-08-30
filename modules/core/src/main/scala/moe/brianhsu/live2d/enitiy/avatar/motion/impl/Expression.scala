@@ -6,18 +6,17 @@ import moe.brianhsu.live2d.enitiy.model.Live2DModel
 import moe.brianhsu.live2d.enitiy.updater.UpdateOperation
 import moe.brianhsu.live2d.enitiy.updater.UpdateOperation.{ParameterValueAdd, ParameterValueMultiply, ParameterValueUpdate}
 
-object Expression {
+object Expression:
   sealed trait BlendType
   case object Add extends BlendType
   case object Multiply extends BlendType
   case object Overwrite extends BlendType
 
   case class Parameter(parameterId: String, blendType: BlendType, value: Float)
-}
 
 case class Expression(fadeInTimeInSeconds: Option[Float],
                       fadeOutTimeInSeconds: Option[Float],
-                      parameters: List[Expression.Parameter]) extends Motion {
+                      parameters: List[Expression.Parameter]) extends Motion:
 
   override val isLoop: Boolean = false
   override val isLoopFadeIn: Boolean = false
@@ -30,14 +29,11 @@ case class Expression(fadeInTimeInSeconds: Option[Float],
                                    weight: Float,
                                    startTimeInSeconds: Float,
                                    fadeInStartTimeInSeconds: Float,
-                                   endTimeInSeconds: Option[Float]): List[UpdateOperation] = {
-
+                                   endTimeInSeconds: Option[Float]): List[UpdateOperation] =
+    // Use improved pattern matching with Scala 3 syntax
     parameters.map { parameter =>
-      parameter.blendType match {
-        case Add       => ParameterValueAdd(parameter.parameterId, parameter.value, weight)
-        case Multiply  => ParameterValueMultiply(parameter.parameterId, parameter.value, weight)
+      parameter.blendType match
+        case Add => ParameterValueAdd(parameter.parameterId, parameter.value, weight)
+        case Multiply => ParameterValueMultiply(parameter.parameterId, parameter.value, weight)
         case Overwrite => ParameterValueUpdate(parameter.parameterId, parameter.value, weight)
-      }
     }
-  }
-}

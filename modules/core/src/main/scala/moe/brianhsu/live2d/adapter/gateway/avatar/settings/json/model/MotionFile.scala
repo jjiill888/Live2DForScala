@@ -1,9 +1,9 @@
 package moe.brianhsu.live2d.adapter.gateway.avatar.settings.json.model
 
-import moe.brianhsu.live2d.adapter.RichPath.given
+import moe.brianhsu.live2d.adapter.RichPath._
 import moe.brianhsu.live2d.adapter.gateway.avatar.settings.json.model.Motion
 import org.json4s.native.JsonMethods.parse
-import org.json4s.{DefaultFormats, Formats}
+import org.json4s.{DefaultFormats, Formats, JValue, JObject, JString, JDouble, JNothing}
 import org.json4s.MonadicJValue.jvalueToMonadic
 import org.json4s.jvalue2extractable
 import scala.reflect.ClassTag
@@ -40,7 +40,7 @@ import scala.util.Try
  * @param fadeOutTime Optional fade out time, in seconds.
  * @param sound       Sound of this motion, in relative path.
  */
-private[json] case class MotionFile(file: String, fadeInTime: Option[Float], fadeOutTime: Option[Float], sound: Option[String]) {
+private[json] case class MotionFile(file: String, fadeInTime: Option[Float] = None, fadeOutTime: Option[Float] = None, sound: Option[String] = None) {
 
   private given formats: Formats = DefaultFormats
 
@@ -60,3 +60,5 @@ private[json] case class MotionFile(file: String, fadeInTime: Option[Float], fad
     }
   }
 }
+
+
