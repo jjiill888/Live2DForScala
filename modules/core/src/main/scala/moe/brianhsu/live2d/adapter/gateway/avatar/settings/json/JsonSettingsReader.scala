@@ -3,10 +3,10 @@ package moe.brianhsu.live2d.adapter.gateway.avatar.settings.json
 import moe.brianhsu.live2d.adapter.RichPath._
 import moe.brianhsu.live2d.enitiy.avatar.settings.Settings
 import moe.brianhsu.live2d.enitiy.avatar.settings.detail.{ExpressionSetting, MotionSetting, PhysicsSetting, PoseSetting, HitAreaSetting}
-import moe.brianhsu.live2d.adapter.gateway.avatar.settings.json.model.{Group, ModelSetting, FileReferences}
+import moe.brianhsu.live2d.adapter.gateway.avatar.settings.json.model.{Group, ModelSetting, FileReferences, MotionFile}
 import moe.brianhsu.live2d.boundary.gateway.avatar.SettingsReader
 import org.json4s.native.JsonMethods.parse
-import org.json4s.{DefaultFormats, Formats}
+import org.json4s.{DefaultFormats, Formats, JArray}
 import org.json4s.MonadicJValue.jvalueToMonadic
 import org.json4s.jvalue2extractable
 import scala.reflect.ClassTag
@@ -45,7 +45,7 @@ import scala.util.{Failure, Success, Try}
  * @param directory Directory contains the avatar settings.
  */
 class JsonSettingsReader(directory: String) extends SettingsReader {
-  private given formats: Formats = DefaultFormats
+ private given formats: Formats = DefaultFormats + MotionFile.motionFileSerializer
 
   override def loadSettings(): Try[Settings] =
     for
@@ -205,8 +205,25 @@ class JsonSettingsReader(directory: String) extends SettingsReader {
       pose <- modelSetting.fileReferences.pose
       jsonFile <- Option(Paths.get(s"$directory/$pose")) if jsonFile.isReadableFile
       jsonFileContent <- jsonFile.readToString().toOption
+      json <- Try(parse(jsonFileContent)).toOption
     } yield {
-      parse(jsonFileContent).camelizeKeys.extract[PoseSetting]
+      val camelized = json.camelizeKeys
+      val fadeInTime = (camelized \ "fadeInTime").extractOpt[Double].map(_.toFloat)
+      val groups = (camelized \ "groups") match {
+        case JArray(groupList) =>
+          groupList.map {
+            case JArray(parts) =>
+              parts.map { partJson =>
+                val partCamel = partJson.camelizeKeys
+                val id = (partCamel \ "id").extract[String]
+                val links = (partCamel \ "link").extractOpt[List[String]].getOrElse(Nil)
+                PoseSetting.Part(id, links)
+              }
+            case _ => Nil
+          }
+        case _ => Nil
+      }
+      PoseSetting(fadeInTime, groups)
     }
   }
 
@@ -245,7 +262,7 @@ class JsonSettingsReader(directory: String) extends SettingsReader {
       jsonFileContent <- jsonFile.readToString().toOption
       parsedJson <- Try(parse(jsonFileContent)).toOption
     yield
-      expressionFileInfo.name -> parsedJson.camelizeKeys.extract[ExpressionSetting]
+      expressionFileInfo.name -> ExpressionSetting.fromJson(parsedJson)
     
     nameToExpressionList.toMap
   }

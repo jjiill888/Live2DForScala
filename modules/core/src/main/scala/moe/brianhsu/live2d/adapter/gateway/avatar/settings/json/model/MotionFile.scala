@@ -3,7 +3,7 @@ package moe.brianhsu.live2d.adapter.gateway.avatar.settings.json.model
 import moe.brianhsu.live2d.adapter.RichPath._
 import moe.brianhsu.live2d.adapter.gateway.avatar.settings.json.model.Motion
 import org.json4s.native.JsonMethods.parse
-import org.json4s.{DefaultFormats, Formats, JValue, JObject, JString, JDouble, JNothing}
+import org.json4s.{CustomSerializer, DefaultFormats, Formats, JValue, JObject, JString, JDouble, JNothing}
 import org.json4s.MonadicJValue.jvalueToMonadic
 import org.json4s.jvalue2extractable
 import scala.reflect.ClassTag
@@ -61,4 +61,35 @@ private[json] case class MotionFile(file: String, fadeInTime: Option[Float] = No
   }
 }
 
+private[json] object MotionFile {
 
+  private given formats: Formats = DefaultFormats
+
+  def fromJson(json: JValue): MotionFile = {
+    // Support both PascalCase and camelCase keys by camelizing before extraction
+    val camelized = json.camelizeKeys
+    val file = (camelized \ "file").extract[String]
+    val fadeInTime = (camelized \ "fadeInTime").extractOpt[Double].map(_.toFloat)
+    val fadeOutTime = (camelized \ "fadeOutTime").extractOpt[Double].map(_.toFloat)
+    val sound = (camelized \ "sound").extractOpt[String]
+    MotionFile(file, fadeInTime, fadeOutTime, sound)
+  }
+
+  given motionFileSerializer: CustomSerializer[MotionFile] =
+    new CustomSerializer[MotionFile](_ => (
+      {
+        case obj: JObject => fromJson(obj)
+      },
+      {
+        case MotionFile(file, fadeIn, fadeOut, sound) =>
+          JObject(
+            List(
+              "File" -> JString(file),
+              "FadeInTime" -> fadeIn.map(JDouble(_)).getOrElse(JNothing),
+              "FadeOutTime" -> fadeOut.map(JDouble(_)).getOrElse(JNothing),
+              "Sound" -> sound.map(JString(_)).getOrElse(JNothing)
+            )
+          )
+      }
+    ))
+}
