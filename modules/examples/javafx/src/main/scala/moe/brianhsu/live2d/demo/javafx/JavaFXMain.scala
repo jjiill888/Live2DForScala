@@ -14,6 +14,9 @@ import moe.brianhsu.live2d.demo.javafx.widget.{JavaFXAvatarControlPanel, JavaFXS
 /** Simple JavaFX entry point that will later host the Live2D view. */
 class JavaFXMain extends Application {
   override def start(primaryStage: Stage): Unit = {
+    // Load window settings on startup
+    loadWindowSettings(primaryStage)
+    
     val avatarArea = new JavaFXAvatarDisplayArea
     val toolbar = new JavaFXToolbar
     val controlPanel = new JavaFXAvatarControlPanel
@@ -52,6 +55,10 @@ class JavaFXMain extends Application {
     scene.getStylesheets.add(getClass.getResource("/style/dark-theme.css").toExternalForm)
     primaryStage.setTitle("Live2D Scala Demo (JavaFX)")
     primaryStage.setScene(scene)
+    
+    // Add window close listener to save settings
+    primaryStage.setOnCloseRequest(_ => saveWindowSettings(primaryStage))
+    
     primaryStage.show()
   }
 
@@ -63,6 +70,37 @@ class JavaFXMain extends Application {
         app.switchAvatar("def_avatar")
     }
     loadResult.failed.foreach(e => System.err.println(s"[WARN] Cannot load default avatar: ${e.getMessage}"))
+  }
+
+  // Load window settings from saved configuration
+  private def loadWindowSettings(stage: Stage): Unit = {
+    import moe.brianhsu.live2d.demo.app.DemoApp.loadWindowSettings
+    loadWindowSettings() match {
+      case Some((x, y, width, height, maximized)) =>
+        stage.setX(x)
+        stage.setY(y)
+        stage.setWidth(width)
+        stage.setHeight(height)
+        if (maximized) {
+          stage.setMaximized(true)
+        }
+      case None =>
+        // Use default size if no settings found
+        stage.setWidth(800)
+        stage.setHeight(600)
+        stage.centerOnScreen()
+    }
+  }
+
+  // Save current window settings
+  private def saveWindowSettings(stage: Stage): Unit = {
+    import moe.brianhsu.live2d.demo.app.DemoApp.saveWindowSettings
+    val x = stage.getX.toInt
+    val y = stage.getY.toInt
+    val width = stage.getWidth.toInt
+    val height = stage.getHeight.toInt
+    val maximized = stage.isMaximized
+    saveWindowSettings(x, y, width, height, maximized)
   }
 }
 

@@ -29,8 +29,18 @@ object SWTWithLWJGLMain {
     setupAvatarEventListener()
 
     shell.setText("Live 2D Scala Demo (SWT+LWJGL)")
-    shell.setSize(1080, 720)
+    
+    // Load window settings on startup
+    loadWindowSettings()
+    
     shell.open()
+    
+    // Add window listener to save settings on close
+    shell.addListener(SWT.Close, new Listener {
+      override def handleEvent(event: Event): Unit = {
+        saveWindowSettings()
+      }
+    })
     
     display.asyncExec(() => loadInitialAvatar())
 
@@ -143,6 +153,28 @@ object SWTWithLWJGLMain {
     sashForm.setSashWidth(5)
     sashForm.setWeights(1, 4)
     shell.layout()
+  }
+
+  // Load window settings from saved configuration
+  private def loadWindowSettings(): Unit = {
+    moe.brianhsu.live2d.demo.app.DemoApp.loadWindowSettings() match {
+      case Some((x, y, width, height, maximized)) =>
+        shell.setBounds(x, y, width, height)
+        if (maximized) {
+          shell.setMaximized(true)
+        }
+      case None =>
+        // Use default size if no settings found
+        shell.setSize(1080, 720)
+        shell.setLocation(100, 100)
+    }
+  }
+
+  // Save current window settings
+  private def saveWindowSettings(): Unit = {
+    val bounds = shell.getBounds()
+    val maximized = shell.getMaximized()
+    moe.brianhsu.live2d.demo.app.DemoApp.saveWindowSettings(bounds.x, bounds.y, bounds.width, bounds.height, maximized)
   }
 
 }

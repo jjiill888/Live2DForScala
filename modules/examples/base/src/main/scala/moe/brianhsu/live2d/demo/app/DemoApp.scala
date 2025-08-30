@@ -27,6 +27,7 @@ object DemoApp {
 
   private val LastAvatarFile = new File("last_avatar")
   private val AutoStartFile = new File("auto_start.txt")
+  private val WindowSettingsFile = new File("window_settings.txt")
 
   private def readSettings(): Map[String, String] =
     if (AutoStartFile.exists()) {
@@ -116,6 +117,50 @@ object DemoApp {
 
   def loadTransparentBackground(): Boolean =
     readSettings().get("transparentBackground").flatMap(_.toBooleanOption).getOrElse(false)
+
+  // Window settings management methods
+  def saveWindowSettings(x: Int, y: Int, width: Int, height: Int, maximized: Boolean = false): Unit =
+    try {
+      val writer = new PrintWriter(WindowSettingsFile, "UTF-8")
+      try {
+        writer.println(s"x=$x")
+        writer.println(s"y=$y")
+        writer.println(s"width=$width")
+        writer.println(s"height=$height")
+        writer.println(s"maximized=$maximized")
+      } finally writer.close()
+    } catch {
+      case e: Exception =>
+        System.err.println(s"[WARN] Cannot save window settings: ${e.getMessage}")
+    }
+
+  def loadWindowSettings(): Option[(Int, Int, Int, Int, Boolean)] =
+    if (WindowSettingsFile.exists()) {
+      try {
+        val src = Source.fromFile(WindowSettingsFile, "UTF-8")
+        try {
+          val settings = src.getLines().toList.map(_.trim).filter(_.nonEmpty)
+            .flatMap { line =>
+              line.split("=", 2) match {
+                case Array(k, v) => Some(k -> v)
+                case _ => None
+              }
+            }.toMap
+          
+          val x = settings.get("x").flatMap(_.toIntOption).getOrElse(100)
+          val y = settings.get("y").flatMap(_.toIntOption).getOrElse(100)
+          val width = settings.get("width").flatMap(_.toIntOption).getOrElse(1080)
+          val height = settings.get("height").flatMap(_.toIntOption).getOrElse(720)
+          val maximized = settings.get("maximized").flatMap(_.toBooleanOption).getOrElse(false)
+          
+          Some((x, y, width, height, maximized))
+        } finally src.close()
+      } catch {
+        case e: Exception =>
+          System.err.println(s"[WARN] Cannot read window settings: ${e.getMessage}")
+          None
+      }
+    } else None
 }
 
 abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnOpenGLThread)

@@ -4,6 +4,7 @@ import com.jogamp.opengl.awt.GLCanvas
 import com.jogamp.opengl.{GLCapabilities, GLProfile}
 
 import java.awt._
+import java.awt.event._
 import javax.swing._
 
 object SwingMain {
@@ -17,10 +18,20 @@ object SwingMain {
   def main(args: Array[String]): Unit = {
 
     System.setProperty("sun.awt.noerasebackground", "true")
+    
+    // Load window settings on startup
+    loadWindowSettings()
+    
     frame.setVisible(true)
     frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE)
     frame.getContentPane.setLayout(new GridBagLayout)
-    frame.setSize(Toolkit.getDefaultToolkit.getScreenSize)
+    
+    // Add window listener to save settings on close
+    frame.addWindowListener(new WindowAdapter {
+      override def windowClosing(e: WindowEvent): Unit = {
+        saveWindowSettings()
+      }
+    })
 
     val gc1 = new GridBagConstraints()
     gc1.gridx = 0
@@ -113,5 +124,27 @@ object SwingMain {
     canvas.addKeyListener(live2DUI)
 
     live2DUI
+  }
+
+  // Load window settings from saved configuration
+  private def loadWindowSettings(): Unit = {
+    moe.brianhsu.live2d.demo.app.DemoApp.loadWindowSettings() match {
+      case Some((x, y, width, height, maximized)) =>
+        frame.setBounds(x, y, width, height)
+        if (maximized) {
+          frame.setExtendedState(Frame.MAXIMIZED_BOTH)
+        }
+      case None =>
+        // Use default size if no settings found
+        frame.setSize(1080, 720)
+        frame.setLocationRelativeTo(null) // Center on screen
+    }
+  }
+
+  // Save current window settings
+  private def saveWindowSettings(): Unit = {
+    val bounds = frame.getBounds()
+    val maximized = frame.getExtendedState() == Frame.MAXIMIZED_BOTH
+    moe.brianhsu.live2d.demo.app.DemoApp.saveWindowSettings(bounds.x, bounds.y, bounds.width, bounds.height, maximized)
   }
 }
