@@ -109,7 +109,8 @@ lazy val exampleSWTLinux = (project in file("modules/examples/swt-linux-bundle")
     Compile / mainClass := Some("moe.brianhsu.live2d.demo.swt.SWTWithLWJGLMain"),
     sharedSettings,
     assembly / assemblyJarName := s"Live2DForScala-SWT-Linux-${version.value}.jar",
-    libraryDependencies += swtLinux
+    libraryDependencies += swtLinux,
+    jlinkImageName := "jre-linux"
   )
 
 lazy val exampleSWTWin = (project in file("modules/examples/swt-windows-bundle"))
@@ -121,8 +122,11 @@ lazy val exampleSWTWin = (project in file("modules/examples/swt-windows-bundle")
     Compile / mainClass := Some("moe.brianhsu.live2d.demo.swt.SWTWithLWJGLMain"),
     sharedSettings,
     assembly / assemblyJarName := s"Live2DForScala-SWT-Windows-${version.value}.jar",
-    libraryDependencies += swtWindows
+    libraryDependencies += swtWindows,
+    jlinkImageName := "jre-windows"
   )
+
+// JLink plugin is provided via project/JLinkPlugin.scala
 
 // win-pkg
 
@@ -130,7 +134,7 @@ import sbt.IO
 import java.io.File
 import sys.process._
 
-lazy val createReleasePackageTaskwin = taskKey[Unit]("Creates a release package with openSeeFace and XX.JAR")
+lazy val createReleasePackageTaskwin = taskKey[Unit]("Creates a release package with openSeeFace, JRE and XX.JAR")
 
 createReleasePackageTaskwin := {
   val releaseBaseDir = "release-pkg"
@@ -145,7 +149,7 @@ createReleasePackageTaskwin := {
     println(s"Directory '$releaseTarget' already exists.")
   }
 
-
+  // Copy openSeeFace directory
   val sourceOpenSeeFace = new File("openSeeFace")
   if (sourceOpenSeeFace.exists()) {
     val targetOpenSeeFace = new File(releaseTarget, "openSeeFace")
@@ -158,6 +162,21 @@ createReleasePackageTaskwin := {
     }
   } else {
     println("'openSeeFace' directory does not exist.")
+  }
+  
+  // Copy custom JRE
+  val sourceJRE = new File(s"modules/examples/swt-windows-bundle/target/jlink/jre-windows")
+  if (sourceJRE.exists()) {
+    val targetJRE = new File(releaseTarget, "jre")
+    val cpCmdJRE = Seq("cp", "-r", sourceJRE.getAbsolutePath, targetJRE.getAbsolutePath)
+    val resultJRE = cpCmdJRE.!!
+    if (resultJRE != 0) {
+      throw new RuntimeException(s"Failed to copy JRE directory: exit code $resultJRE")
+    } else {
+      println(s"Copied custom JRE into '$releaseTarget'")
+    }
+  } else {
+    println("Custom JRE directory does not exist. Please run 'jlink' task first.")
   }
 }
 
@@ -202,16 +221,18 @@ createStartFile := {
   IO.createDirectory(new File(dirPath))
 
   // Run shell commands to create and rename the file
-  Seq("sh", "-c", s"echo 'java -Xms256m -Xmx600m -XX:+UseG1GC -Dsun.java2d.opengl=true -jar Live2DForScala-SWT-Windows-${version.value}.jar' > $filePath && mv $filePath $renamedFilePath").!!
+  Seq("sh", "-c", s"echo '@echo off' > $filePath && echo 'jre\\\\bin\\\\java.exe -Xms256m -Xmx600m -XX:+UseG1GC -Dsun.java2d.opengl=true -jar Live2DForScala-SWT-Windows-${version.value}.jar' >> $filePath && echo 'pause' >> $filePath && mv $filePath $renamedFilePath").!!
 }
 
-lazy val releasewin = taskKey[Unit]("Performs both createReleasePackageTask and moveTxtTaskwin in order")
+lazy val releasewin = taskKey[Unit]("Performs jlink, createReleasePackageTask and moveTxtTaskwin in order")
 
 releasewin := {
+  // Build custom JRE first
+  (exampleSWTWin / jlink).value
   createReleasePackageTaskwin.value
   moveTaskwin.value
   createStartFile.value
-  println("Both tasks completed successfully.")
+  println("All tasks completed successfully.")
 }
 
 
@@ -228,7 +249,7 @@ import sbt.IO
 import java.io.File
 import sys.process._
 
-lazy val createReleasePackageTasklinux = taskKey[Unit]("Creates a release package with openSeeFace and XX.JAR")
+lazy val createReleasePackageTasklinux = taskKey[Unit]("Creates a release package with openSeeFace")
 
 createReleasePackageTasklinux := {
   val releaseBaseDir = "release-pkg"
@@ -243,11 +264,12 @@ createReleasePackageTasklinux := {
     println(s"Directory '$releaseTarget' already exists.")
   }
 
+  // Copy openSeeFace directory
   val sourceOpenSeeFace = new File("openSeeFace")
   if (sourceOpenSeeFace.exists()) {
     val targetOpenSeeFace = new File(releaseTarget, "openSeeFace")
     val cpCmdOpenSeeFace = Seq("cp", "-r", sourceOpenSeeFace.getAbsolutePath, targetOpenSeeFace.getAbsolutePath)
-    val resultOpenSeeFace = cpCmdOpenSeeFace.!!
+    val resultOpenSeeFace = cpCmdOpenSeeFace.!
     if (resultOpenSeeFace != 0) {
       throw new RuntimeException(s"Failed to copy openSeeFace directory: exit code $resultOpenSeeFace")
     } else {
@@ -255,6 +277,32 @@ createReleasePackageTasklinux := {
     }
   } else {
     println("'openSeeFace' directory does not exist.")
+  }
+}
+
+lazy val copyJRELinux = taskKey[Unit]("Copies custom JRE to release package")
+
+copyJRELinux := {
+  // Ensure jlink task is completed
+  (exampleSWTLinux / jlink).value
+  
+  val releaseBaseDir = "release-pkg"
+  val releaseSubDir = s"Live2DForScala-SWT-Linux-${version.value}"
+  val releaseTarget = releaseBaseDir + File.separator + releaseSubDir
+  
+  // Copy custom JRE
+  val sourceJRE = new File(s"modules/examples/swt-linux-bundle/target/jlink/jre-linux")
+  if (sourceJRE.exists()) {
+    val targetJRE = new File(releaseTarget, "jre")
+    val cpCmdJRE = Seq("cp", "-r", sourceJRE.getAbsolutePath, targetJRE.getAbsolutePath)
+    val resultJRE = cpCmdJRE.!
+    if (resultJRE != 0) {
+      throw new RuntimeException(s"Failed to copy JRE directory: exit code $resultJRE")
+    } else {
+      println(s"Copied custom JRE into '$releaseTarget'")
+    }
+  } else {
+    throw new RuntimeException("Custom JRE directory does not exist. Please run 'jlink' task first.")
   }
 }
 
@@ -272,7 +320,7 @@ moveTasklinux := {
   if (extraFile.exists()) {
     val targetExtraFile = new File(releaseTarget, s"Live2DForScala-SWT-Linux-${version.value}.jar")
     val cpCmdExtraFile = Seq("cp", extraFilePath, targetExtraFile.getAbsolutePath)
-    val resultExtraFile = cpCmdExtraFile.!!
+    val resultExtraFile = cpCmdExtraFile.!
     if (resultExtraFile != 0) {
       throw new RuntimeException(s"Failed to copy extra file: exit code $resultExtraFile")
     } else {
@@ -300,7 +348,8 @@ createStartScriptLinux := {
                    |if [ \"$$XDG_SESSION_TYPE\" = \"wayland\" ] || [ -n \"$$WAYLAND_DISPLAY\" ]; then
                    |  export GDK_BACKEND=x11
                    |fi
-                   |exec java -Xms256m -Xmx600m -XX:+UseG1GC -Dsun.java2d.opengl=true -jar Live2DForScala-SWT-Linux-${version.value}.jar
+                   |# Use bundled JRE
+                   |exec ./jre/bin/java -Xms256m -Xmx600m -XX:+UseG1GC -Dsun.java2d.opengl=true -jar Live2DForScala-SWT-Linux-${version.value}.jar
                    |""".stripMargin
   IO.write(scriptFile, content)
   scriptFile.setExecutable(true)
@@ -333,14 +382,15 @@ createDesktopEntrylinux := {
 }
 
 
-lazy val releaselinux = taskKey[Unit]("Performs both createReleasePackageTask and moveTask in order")
+lazy val releaselinux = taskKey[Unit]("Performs jlink, createReleasePackageTask and moveTask in order")
 
 releaselinux := {
   createReleasePackageTasklinux.value
+  copyJRELinux.value
   moveTasklinux.value
   createStartScriptLinux.value
   createDesktopEntrylinux.value
-  println("Both tasks completed successfully.")
+  println("All tasks completed successfully.")
 }
 
 /// swing-pkg
