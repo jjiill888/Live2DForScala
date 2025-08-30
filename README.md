@@ -28,6 +28,7 @@ I would like to express sincere gratitude to the original author of [brianhsu/Li
 - Default Avatar
 - XWayland support
 - Run two Avatar on the same computer
+- window position and size saving functionality
 - upgrade scala2 to scala3
 
 ###  Screenshots
