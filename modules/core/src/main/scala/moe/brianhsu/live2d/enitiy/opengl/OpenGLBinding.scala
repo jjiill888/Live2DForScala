@@ -111,5 +111,6 @@ trait OpenGLBinding {
 
   def glViewport(x: Int, y: Int, w: Int, h: Int): Unit
 
+  def glCheckFramebufferStatus(target: Int): Int
 }
 

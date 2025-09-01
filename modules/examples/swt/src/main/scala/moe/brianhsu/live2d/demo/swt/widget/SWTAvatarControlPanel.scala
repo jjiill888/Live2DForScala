@@ -20,11 +20,11 @@ class SWTAvatarControlPanel(parent: Composite) extends Composite(parent, SWT.NON
 
   val normalComposite = new Composite(tabFolder, SWT.NONE)
   val faceTrackingComposite = new SWTFaceTrackingComposite(tabFolder)
-  val modelControlPanel = new ModelControlPanel(tabFolder) // 创建 ModelControlPanel 实例
+  val modelControlPanel = new ModelControlPanel(tabFolder) // Create ModelControlPanel instance
 
   tabItemNormal.setControl(normalComposite)
   tabItemFaceTracking.setControl(faceTrackingComposite)
-  tabItemModelControl.setControl(modelControlPanel) // 将 ModelControlPanel 添加到选项卡中
+  tabItemModelControl.setControl(modelControlPanel) // Add ModelControlPanel to the tab
 
   val effectSelector = new SWTEffectSelector(normalComposite)
   val motionSelector = new SWTMotionSelector(normalComposite)

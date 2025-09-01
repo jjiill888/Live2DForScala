@@ -186,7 +186,7 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
   private var expressionKeyMap: Map[Char, String] = Map()
 
   {
-    // 启动优化
+    // Startup optimization
     profileStartup("DemoApp Initialization") {
       optimizeSystemProperties()
       initOpenGL()
@@ -365,7 +365,7 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
       case 'c' => switchAvatar("src/main/resources/Rice")
       case 'v' => switchAvatar("src/main/resources/Natori")
       case 'b' => switchAvatar("src/main/resources/Hiyori")
-      case 'r' => switchAvatar("runtime")  // 添加runtime模型加载
+              case 'r' => switchAvatar("runtime")  // Add runtime model loading
       case _ =>
         //  Check if it is a numeric key to perform expression switching
         expressionKeyMap.get(key).foreach { expressionName =>

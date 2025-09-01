@@ -93,7 +93,7 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
   }
 
   private def onDefaultAvatarSelected(event: Event): Unit = {
-    val defaultAvatarPath = "def_avatar" // jar包同目录
+    val defaultAvatarPath = "def_avatar" // Same directory as jar package
     demoAppHolder.foreach { demoApp =>
       demoApp.switchAvatar(defaultAvatarPath).failed.foreach { e =>
         val messageBox = new MessageBox(parent.getShell, SWT.OK | SWT.ICON_ERROR)

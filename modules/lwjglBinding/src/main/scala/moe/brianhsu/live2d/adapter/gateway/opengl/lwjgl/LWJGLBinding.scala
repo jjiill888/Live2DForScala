@@ -221,6 +221,10 @@ class LWJGLBinding extends OpenGLBinding {
     GL11.glDrawArrays(mode, first, count)
   }
 
+  override def glCheckFramebufferStatus(target: Int): Int = {
+    GL30.glCheckFramebufferStatus(target)
+  }
+
   override def newDirectFloatBuffer(floats: Array[Float]): FloatBuffer = {
     ByteBuffer.allocateDirect(floats.length * 4)
       .order(ByteOrder.nativeOrder())

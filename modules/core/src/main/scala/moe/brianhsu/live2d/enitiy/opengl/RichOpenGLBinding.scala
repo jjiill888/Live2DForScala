@@ -128,9 +128,38 @@ class RichOpenGLBinding(binding: OpenGLBinding):
     binding.glEnableVertexAttribArray(2)
     binding.glEnableVertexAttribArray(3)
 
-  def preDraw(): Unit =
+  def preDraw(): Unit = {
+    // Disable unnecessary tests
+    binding.glDisable(GL_SCISSOR_TEST)
+    binding.glDisable(GL_STENCIL_TEST)
+    binding.glDisable(GL_DEPTH_TEST)
+    
+    // Enable blending
     binding.glEnable(GL_BLEND)
     binding.glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA)
+    
+    // Set color mask
+    binding.glColorMask(true, true, true, true)
+    
+    // Unbind buffers
+    binding.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+    binding.glBindBuffer(GL_ARRAY_BUFFER, 0)
+  }
+
+  def postDraw(): Unit = {
+    // Restore default state
+    binding.glEnable(GL_DEPTH_TEST)
+    binding.glDisable(GL_BLEND)
+    
+    // Clean up texture bindings
+    binding.glActiveTexture(GL_TEXTURE0)
+    binding.glBindTexture(GL_TEXTURE_2D, 0)
+    binding.glActiveTexture(GL_TEXTURE1)
+    binding.glBindTexture(GL_TEXTURE_2D, 0)
+    
+    // Clean up program
+    binding.glUseProgram(0)
+  }
 
   def setCapabilityEnabled(capability: Int, enabled: Boolean): Unit =
     if enabled then binding.glEnable(capability) else binding.glDisable(capability)

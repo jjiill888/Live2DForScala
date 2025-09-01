@@ -60,6 +60,7 @@ object OpenGLMock {
     override val GL_SRC_ALPHA: Int = 51
     override val GL_DEPTH_BUFFER_BIT: Int = 52
     override val GL_TRIANGLE_FAN: Int = 53
+    override val GL_FRAMEBUFFER_COMPLETE: Int = 54
   }
 
 }

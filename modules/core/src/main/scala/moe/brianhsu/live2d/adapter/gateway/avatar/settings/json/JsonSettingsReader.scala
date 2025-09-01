@@ -76,7 +76,7 @@ class JsonSettingsReader(directory: String) extends SettingsReader {
       jsonContent <- loadMainJsonFile(directory)
       parsedJson <- Try(parse(jsonContent))
     yield {
-      // 使用原始解析方式，但处理MotionFile的序列化问题
+      // Use original parsing method, but handle MotionFile serialization issues
       parsedJson.camelizeKeys.extract[ModelSetting]
     }
 
@@ -278,7 +278,7 @@ class JsonSettingsReader(directory: String) extends SettingsReader {
    * @return [[scala.util.Success]] containing map of motion settings, otherwise [[scala.util.Failure]] denoted the exception.
    */
   private def parseMotionGroups(modelSetting: ModelSetting): Try[Map[String, List[MotionSetting]]] = Try {
-    // 手动解析motions以避免Scala 3序列化问题
+    // Manually parse motions to avoid Scala 3 serialization issues
     val motionsMap = for (groupName, motionList) <- modelSetting.fileReferences.motions yield {
       val motionJsonList = for
         motionFile <- motionList

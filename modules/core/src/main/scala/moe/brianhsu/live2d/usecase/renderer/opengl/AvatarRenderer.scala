@@ -59,6 +59,9 @@ class AvatarRenderer(model: Live2DModel,
         projection,
       )
     }
+    
+            // Call postDraw to ensure OpenGL state is correctly restored
+    RichOpenGLBinding.wrapOpenGLBinding(gl).postDraw()
   }
 
   private def drawMesh(clippingContextBufferForDraw: Option[ClippingContext],

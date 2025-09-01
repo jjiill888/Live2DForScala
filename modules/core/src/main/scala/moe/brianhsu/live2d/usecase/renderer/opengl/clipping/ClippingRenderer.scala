@@ -58,25 +58,37 @@ class ClippingRenderer(model: Live2DModel, textureManager: TextureManager, shade
   }
 
   private def drawClipping(contextListForMask: List[ClippingContext], profile: Profile): Unit = {
-    gl.glViewport(0, 0, ClippingManager.MaskBufferSize, ClippingManager.MaskBufferSize)
-    RichOpenGLBinding.wrapOpenGLBinding(gl).preDraw()
+    // Save current OpenGL state
+    val originalViewport = new Array[Int](4)
+    gl.glGetIntegerv(gl.constants.GL_VIEWPORT, originalViewport)
+    
+    try {
+      gl.glViewport(0, 0, ClippingManager.MaskBufferSize, ClippingManager.MaskBufferSize)
+      RichOpenGLBinding.wrapOpenGLBinding(gl).preDraw()
 
-    this.offscreenFrameHolder.foreach(_.beginDraw(profile.lastFrameBufferBinding))
+      this.offscreenFrameHolder.foreach(_.beginDraw(profile.lastFrameBufferBinding))
 
-    for (clipContext <- contextListForMask) {
-      for (maskDrawable <- clipContext.vertexPositionChangedMaskDrawable) {
-        val textureFile = model.textureFiles(maskDrawable.textureIndex)
-        val textureInfo = textureManager.loadTexture(textureFile)
-        this.drawClippingMesh(
-          clipContext, textureInfo.textureId,
-          maskDrawable.isCulling, maskDrawable.vertexInfo,
-          maskDrawable.multiplyColorFetcher(), maskDrawable.screenColorFetcher()
-        )
+      for (clipContext <- contextListForMask) {
+        for (maskDrawable <- clipContext.vertexPositionChangedMaskDrawable) {
+          val textureFile = model.textureFiles(maskDrawable.textureIndex)
+          val textureInfo = textureManager.loadTexture(textureFile)
+          this.drawClippingMesh(
+            clipContext, textureInfo.textureId,
+            maskDrawable.isCulling, maskDrawable.vertexInfo,
+            maskDrawable.multiplyColorFetcher(), maskDrawable.screenColorFetcher()
+          )
+        }
       }
-    }
 
-    this.offscreenFrameHolder.foreach(_.endDraw())
-    RichOpenGLBinding.wrapOpenGLBinding(gl).viewPort = profile.lastViewPort
+      this.offscreenFrameHolder.foreach(_.endDraw())
+      
+      // Call postDraw to ensure OpenGL state is correctly restored
+      RichOpenGLBinding.wrapOpenGLBinding(gl).postDraw()
+    } finally {
+              // Restore original viewport
+      gl.glViewport(originalViewport(0), originalViewport(1), originalViewport(2), originalViewport(3))
+      RichOpenGLBinding.wrapOpenGLBinding(gl).viewPort = profile.lastViewPort
+    }
   }
 
   private def drawClippingMesh(clippingContextBufferForMask: ClippingContext,

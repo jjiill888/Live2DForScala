@@ -122,6 +122,10 @@ class JavaOpenGLBinding(gl: GL, gl2: GL2, gl2es1: GL2ES1, gl2es2: GL2ES2) extend
     gl2es1.glDrawElements(mode, count, `type`, indices)
   }
 
+  override def glCheckFramebufferStatus(target: Int): Int = {
+    gl.glCheckFramebufferStatus(target)
+  }
+
   override def glUseProgram(program: Int): Unit = {
     gl2es2.glUseProgram(program)
   }

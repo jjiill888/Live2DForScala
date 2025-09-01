@@ -57,5 +57,5 @@ object LWJGLConstants extends OpenGLConstants {
   override val GL_SRC_ALPHA: Int = GL11.GL_SRC_ALPHA
   override val GL_DEPTH_BUFFER_BIT: Int = GL11.GL_DEPTH_BUFFER_BIT
   override val GL_TRIANGLE_FAN: Int = GL11.GL_TRIANGLE_FAN
-
+  override val GL_FRAMEBUFFER_COMPLETE: Int = GL30.GL_FRAMEBUFFER_COMPLETE
 }

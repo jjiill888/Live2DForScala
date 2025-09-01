@@ -54,4 +54,5 @@ trait OpenGLConstants {
   val GL_SRC_ALPHA: Int
   val GL_DEPTH_BUFFER_BIT: Int
   val GL_TRIANGLE_FAN: Int
+  val GL_FRAMEBUFFER_COMPLETE: Int
 }
