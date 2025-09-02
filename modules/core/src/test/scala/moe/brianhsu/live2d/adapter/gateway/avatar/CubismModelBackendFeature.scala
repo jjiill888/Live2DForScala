@@ -473,7 +473,7 @@ class CubismModelBackendFeature extends AnyFeatureSpec with GivenWhenThen
         (mockedCLibrary.csmGetDrawableDynamicFlags _).expects(*).returning(dFlags)
         (mockedCLibrary.csmGetDrawableTextureIndices _).expects(*).returning(textureIndex)
         (mockedCLibrary.csmGetDrawableDrawOrders _).expects(*).returning(drawOrder)
-        (mockedCLibrary.csmGetDrawableRenderOrders _).expects(*).returning(renderOrder)
+        (mockedCLibrary.csmGetDrawableDrawOrders _).expects(*).returning(renderOrder)
         (mockedCLibrary.csmGetDrawableOpacities _).expects(*).returning(opacities)
         (mockedCLibrary.csmGetDrawableParentPartIndices _).expects(*).returning(parentPartIndices)
 

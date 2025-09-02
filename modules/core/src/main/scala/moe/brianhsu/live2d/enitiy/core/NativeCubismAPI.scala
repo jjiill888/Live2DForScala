@@ -306,16 +306,16 @@ trait NativeCubismAPI extends Library {
    * @param  model  Model to query.
    * @return        Valid pointer on success; '0' otherwise.
    */
-  def csmGetDrawableDrawOrders(model: CPointerToModel): CArrayOfInt
+    def csmGetDrawableDrawOrders(model: CPointerToModel): CArrayOfInt
 
   /**
-   * Gets drawable render orders.
+   * Gets render orders.
    * The higher the order, the more up front a drawable is.
    *
    * @param  model  Model to query.
-   * @return        Valid pointer on success; '0'otherwise.
+   * @return        Valid pointer on success; '0' otherwise.
    */
-  def csmGetDrawableRenderOrders(model: CPointerToModel): CArrayOfInt
+  def csmGetRenderOrders(model: CPointerToModel): CArrayOfInt
 
   /**
    * Gets drawable opacities.

@@ -213,7 +213,7 @@ class CubismModelBackend(mocInfo: MocInfo, override val textureFiles: List[Strin
     val dynamicFlagsList = core.cubismAPI.csmGetDrawableDynamicFlags(this.cubismModel)
     val textureIndexList = core.cubismAPI.csmGetDrawableTextureIndices(this.cubismModel)
     val drawOrderList = core.cubismAPI.csmGetDrawableDrawOrders(this.cubismModel)
-    val renderOrderList = core.cubismAPI.csmGetDrawableRenderOrders(this.cubismModel)
+    val renderOrderList = core.cubismAPI.csmGetRenderOrders(this.cubismModel)
     val opacityList = core.cubismAPI.csmGetDrawableOpacities(this.cubismModel)
     val parentPartIndices = core.cubismAPI.csmGetDrawableParentPartIndices(this.cubismModel)
 
