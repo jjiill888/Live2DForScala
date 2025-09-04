@@ -1,7 +1,7 @@
 ThisBuild / organization := "moe.brianhsu.live2d"
 ThisBuild / scalaVersion := "3.3.2"
 
-// JDK 24 配置
+// JDK 24 configuration
 ThisBuild / javacOptions ++= Seq(
   "--enable-preview",
   "--release", "24",
@@ -16,6 +16,13 @@ ThisBuild / scalacOptions := Seq(
   "-language:implicitConversions",
   "-language:postfixOps",
   "-Wconf:cat=deprecation&msg=Manifest.*:silent"
+)
+
+// JDK 24 compatibility settings
+ThisBuild / javaOptions ++= Seq(
+  "--enable-native-access=ALL-UNNAMED",
+  "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+  "--add-opens", "java.base/java.util=ALL-UNNAMED"
 )
 ThisBuild / publishArtifact := false
 ThisBuild / Test / testOptions += Tests.Argument("-l", sys.env.get("EXCLUDE_TEST_TAG").getOrElse("noExclude"))

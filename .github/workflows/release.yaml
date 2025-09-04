@@ -1,9 +1,11 @@
-name: Release
+name: Test and Coverage
 
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the "master" branch
   push:
+    branches: [ "master" ]
+  pull_request:
     branches: [ "master" ]
 
   # Allows you to run this workflow manually from the Actions tab
@@ -11,27 +13,31 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  release:
+  # This workflow contains a single job called "test"
+  test:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       EXCLUDE_TEST_TAG: moe.brianhsu.AudioOutputTest
-    container:
-      image: openjdk:17-slim-bullseye
     steps:
       - uses: actions/checkout@v3
+      - name: Setup Java 24
+        uses: actions/setup-java@v4
+        with:
+          java-version: '24'
+          distribution: 'temurin'
+
       - name: Install packages
         run: |
-          apt-get update -yqq
-          apt-get install -yqq apt-transport-https curl gnupg
-          echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | tee /etc/apt/sources.list.d/sbt.list
-          echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | tee /etc/apt/sources.list.d/sbt_old.list
-          curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | apt-key add
-          apt-get update
-          apt-get -y install sbt
-          apt-get -y install xorg-dev libglu1-mesa libgl1-mesa-dev xvfb libxinerama1 libxcursor1 libswt-gtk-4-java libswt-gtk-4-jni libxml2-utils bc zip gnupg
+          sudo apt-get update -yqq
+          sudo apt-get install -yqq apt-transport-https curl gnupg
+          echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | sudo tee /etc/apt/sources.list.d/sbt.list
+          echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | sudo tee /etc/apt/sources.list.d/sbt_old.list
+          curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | sudo apt-key add
+          sudo apt-get update
+          sudo apt-get -y install sbt
+          sudo apt-get -y install xorg-dev libglu1-mesa libgl1-mesa-dev xvfb libxinerama1 libxcursor1 libswt-gtk-4-java libswt-gtk-4-jni libxml2-utils bc zip gnupg
 
       - name: Setup Git Information
         run: |
@@ -41,6 +47,7 @@ jobs:
       - name: Test and Coverage
         run: |
           ./distclean
+          export SBT_OPTS="--enable-native-access=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED"
           xvfb-run --auto-servernum sbt coverage test coverageAggregate
 
       - name: Archive Test Results
@@ -55,75 +62,11 @@ jobs:
         run: |
           echo "COVERAGE_RATE=$(xmllint --xpath "string(/scoverage/@branch-rate)" target/scala-3.3.2/scoverage-report/scoverage.xml)" >> $GITHUB_OUTPUT
 
-      - name: Release
-        run: |
-          ./distclean
-          sbt "release with-defaults"
-
-      - name: Export Version
-        id: VersionExport
-        run: |
-          echo "CURRENT_VERSION=$(git tag | tail -n1)" >> $GITHUB_OUTPUT
-
-      - name: Prepare mvn repository
-        run: |
-          git clone https://github.com/brianhsu/mavenRepository.git mavenToUpload
-          cp -rvf mavenRepository/* mavenToUpload
-
-      - name: Push to maven repository
-        id: push_directory
-        uses: cpina/github-action-push-to-another-repository@ssh-deploy-key
-        env:
-          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
-        with:
-          source-directory: mavenToUpload
-          destination-github-username: 'brianhsu'
-          destination-repository-name: 'mavenRepository'
-          user-email: brianhsu.hsu@gmail.com
-          commit-message: See ORIGIN_COMMIT from $GITHUB_REF
-          target-branch: master
-
-      - name: Update Coverage / Version badges
+      - name: Update Coverage badges
         run: |
           ./doc/images/generateCoverageBadage.sh ${{ steps.CoverageExport.outputs.COVERAGE_RATE }}
-          ./doc/images/generateVersionBadage.sh
 
       - uses: EndBug/add-and-commit@v9
         with:
           add: 'doc/images/'
-          message: Update badages for ${{ steps.VersionExport.outputs.CURRENT_VERSION }}
-
-      - name: Assembly JAR
-        run: |
-          apt-get -y install xorg-dev libglu1-mesa libgl1-mesa-dev xvfb libxinerama1 libxcursor1 libswt-gtk-4-java libswt-gtk-4-jni libxml2-utils bc
-          ./distclean
-          sbt clean assembly
-
-      - name: Package runnable JAR files
-        run: |
-          ./scripts/packageBundles.sh
-
-
-      - name: Upload Swing Version
-        uses: actions/upload-artifact@v4
-        with:
-          name: Live2DForScala-Swing
-          path: Live2DForScala-Swing-${{ steps.VersionExport.outputs.CURRENT_VERSION }}.zip
-
-      - name: Upload SWT Linux Version
-        uses: actions/upload-artifact@v4
-        with:
-          name: Live2DForScala-SWT-Linux
-          path: Live2DForScala-SWT-Linux-${{ steps.VersionExport.outputs.CURRENT_VERSION }}.tar.gz
-
-      - name: Upload SWT Windows Version
-        uses: actions/upload-artifact@v4
-        with:
-          name: Live2DForScala-SWT-Windows
-          path: Live2DForScala-SWT-Windows-${{ steps.VersionExport.outputs.CURRENT_VERSION }}.zip
-
-      - name: Push release change to original GitHub repository
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+          message: Update coverage badge
