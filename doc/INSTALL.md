@@ -1,14 +1,16 @@
-Step 1. Install Open JDK 21.
+Step 1. Install Open JDK 24.
 ================================
 
 - For Linux, install it through your distro's package manager.
-  - For Ubuntu, run `sudo apt-get install openjdk-21-jre`
-  - For ArchLinux, run `sudo pacman -S jre21-openjdk`
-  - For Gentoo, run `sudo emerge -pv virtual/jre:21`
-- For Windows, download OpenJDK 21 (`microsoft-jdk-21.X.Y-windows-x64.msi`) From [Microsoft Build of OpenJDK](https://learn.microsoft.com/en-us/java/openjdk/download)
+  - For Ubuntu, run `sudo apt-get install openjdk-24-jre`
+  - For ArchLinux, run `sudo pacman -S jre24-openjdk`
+  - For Gentoo, run `sudo emerge -pv virtual/jre:24`
+- For Windows, download OpenJDK 24 (`microsoft-jdk-24.X.Y-windows-x64.msi`) From [Microsoft Build of OpenJDK](https://learn.microsoft.com/en-us/java/openjdk/download)
 - For MacOS
     1. Install Homebrew
-    2. Run `brew install openjdk@21` to install
+    2. Run `brew install openjdk@24` to install
+
+**注意**: 项目已升级到JDK 24以获得最佳性能，包括紧凑对象头、G1垃圾收集器优化和向量API支持。
 
 Step 2. Download corresponding compressed files.
 ==========================================

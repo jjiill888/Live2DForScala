@@ -1,5 +1,13 @@
 ThisBuild / organization := "moe.brianhsu.live2d"
 ThisBuild / scalaVersion := "3.3.2"
+
+// JDK 24 配置
+ThisBuild / javacOptions ++= Seq(
+  "--enable-preview",
+  "--release", "24",
+  "--add-modules", "jdk.incubator.vector"
+)
+
 ThisBuild / scalacOptions := Seq(
   "-deprecation", 
   "-feature",
@@ -221,7 +229,7 @@ createStartFile := {
   IO.createDirectory(new File(dirPath))
 
   // Run shell commands to create and rename the file
-  Seq("sh", "-c", s"echo '@echo off' > $filePath && echo 'jre\\\\bin\\\\java.exe -Xms256m -Xmx600m -XX:+UseG1GC -Dsun.java2d.opengl=true -jar Live2DForScala-SWT-Windows-${version.value}.jar' >> $filePath && echo 'pause' >> $filePath && mv $filePath $renamedFilePath").!!
+  Seq("sh", "-c", s"echo '@echo off' > $filePath && echo 'jre\\\\bin\\\\java.exe -Xms512m -Xmx1024m -XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+UseStringDeduplication --enable-preview --add-modules jdk.incubator.vector -Dsun.java2d.opengl=true -Dsun.java2d.d3d=false -Dfile.encoding=UTF-8 -jar Live2DForScala-SWT-Windows-${version.value}.jar' >> $filePath && echo 'pause' >> $filePath && mv $filePath $renamedFilePath").!!
 }
 
 lazy val releasewin = taskKey[Unit]("Performs jlink, createReleasePackageTask and moveTxtTaskwin in order")
@@ -349,7 +357,7 @@ createStartScriptLinux := {
                    |  export GDK_BACKEND=x11
                    |fi
                    |# Use bundled JRE
-                   |exec ./jre/bin/java -Xms256m -Xmx600m -XX:+UseG1GC -Dsun.java2d.opengl=true -jar Live2DForScala-SWT-Linux-${version.value}.jar
+                   |exec ./jre/bin/java -Xms512m -Xmx1024m -XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+UseStringDeduplication --enable-preview --add-modules jdk.incubator.vector -Dsun.java2d.opengl=true -Dsun.java2d.d3d=false -Dfile.encoding=UTF-8 -jar Live2DForScala-SWT-Linux-${version.value}.jar
                    |""".stripMargin
   IO.write(scriptFile, content)
   scriptFile.setExecutable(true)

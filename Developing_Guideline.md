@@ -6,10 +6,10 @@ This guide describes how to build, test, and contribute to the Live2D For Scala 
 
 ##  Prerequisites
 
-- **Java Development Kit (JDK) 21**
+- **Java Development Kit (JDK) 24**
   - Windows: [Microsoft Build of OpenJDK](https://learn.microsoft.com/en-us/java/openjdk/download)
   - Linux: Install via your distro's package manager
-  - macOS: `brew install openjdk@21`
+  - macOS: `brew install openjdk@24`
 
 - **SBT (Scala Build Tool)**
   - Installation guide: [https://www.scala-sbt.org/download.html](https://www.scala-sbt.org/download.html)
@@ -103,7 +103,7 @@ modules/
 
 ##  Notes
 
-- Make sure your JDK version is 21 (some modules may not run correctly on older versions).
+- Make sure your JDK version is 24 (some modules may not run correctly on older versions).
 - First SBT run may take a while as it downloads dependencies.
 
 For more details, see: [`Old_README.md`](./Old_README.md)

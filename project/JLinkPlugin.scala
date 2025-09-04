@@ -24,7 +24,8 @@ object JLinkPlugin extends AutoPlugin {
       "java.naming",
       "java.security.jgss",
       "java.sql",
-      "jdk.unsupported"
+      "jdk.unsupported",
+      "jdk.incubator.vector"
     ),
     jlinkOptions := Seq(
       "--no-header-files",
