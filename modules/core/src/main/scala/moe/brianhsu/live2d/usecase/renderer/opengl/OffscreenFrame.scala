@@ -1,9 +1,11 @@
 package moe.brianhsu.live2d.usecase.renderer.opengl
 
 import moe.brianhsu.live2d.enitiy.opengl.{OpenGLBinding, RichOpenGLBinding}
+import moe.brianhsu.live2d.usecase.renderer.opengl.cache.OffscreenRenderCache
 
 object OffscreenFrame:
   private var offscreenFrame: Map[OpenGLBinding, OffscreenFrame] = Map.empty
+  private var renderCache: Map[OpenGLBinding, OffscreenRenderCache] = Map.empty
 
   def getInstance(displayBufferWidth: Int, displayBufferHeight: Int)(using gl: OpenGLBinding): OffscreenFrame =
     offscreenFrame.get(gl) match
@@ -12,6 +14,35 @@ object OffscreenFrame:
         val (colorTextureBufferId, frameBufferId) = createColorTextureBufferAndFrameBuffer(displayBufferWidth, displayBufferHeight)
         offscreenFrame += (gl -> new OffscreenFrame(colorTextureBufferId, frameBufferId))
         offscreenFrame(gl)
+
+  /**
+   * 获取优化的OffscreenFrame实例（使用缓存）
+   */
+  def getCachedInstance(displayBufferWidth: Int, displayBufferHeight: Int)(using gl: OpenGLBinding): OffscreenFrame = {
+    val cache = getOrCreateRenderCache
+    cache.getOrCreateFBO(displayBufferWidth, displayBufferHeight)
+  }
+
+  /**
+   * 获取或创建渲染缓存
+   */
+  def getOrCreateRenderCache(using gl: OpenGLBinding): OffscreenRenderCache = {
+    renderCache.get(gl) match
+      case Some(cache) => cache
+      case None =>
+        val cache = new OffscreenRenderCache
+        renderCache += (gl -> cache)
+        cache
+  }
+
+  /**
+   * 清理所有缓存
+   */
+  def clearAllCaches(): Unit = {
+    renderCache.values.foreach(_.clearCache())
+    renderCache = Map.empty
+    offscreenFrame = Map.empty
+  }
 
   protected def createColorTextureBufferAndFrameBuffer(displayBufferWidth: Int, displayBufferHeight: Int)(using gl: OpenGLBinding): (Int, Int) =
     import gl.constants._

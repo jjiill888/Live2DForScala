@@ -30,7 +30,7 @@ I would like to express sincere gratitude to the original author of [brianhsu/Li
 - Run two Avatar on the same computer
 - window position and size saving functionality
 - upgrade scala2 to scala3
-- **🚀 Upgraded to JDK 24 for enhanced performance with compact object headers, G1 GC optimizations, and vector API support**
+- ** Upgraded to JDK 24 for enhanced performance with compact object headers, G1 GC optimizations, and vector API support**
 
 ###  Screenshots
 
