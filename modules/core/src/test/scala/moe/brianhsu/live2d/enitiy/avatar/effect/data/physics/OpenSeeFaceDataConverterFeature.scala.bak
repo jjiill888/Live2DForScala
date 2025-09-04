@@ -5,6 +5,8 @@ import moe.brianhsu.live2d.enitiy.avatar.effect.impl.FaceTracking.TrackingNode
 import moe.brianhsu.live2d.enitiy.openSeeFace.OpenSeeFaceData
 import org.json4s.native.JsonMethods
 import org.json4s.{DefaultFormats, Formats}
+import org.json4s.jvalue2extractable
+import scala.reflect.ClassTag
 import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
@@ -28,7 +30,9 @@ class OpenSeeFaceDataConverterFeature extends AnyFeatureSpec with GivenWhenThen 
         val trackingNode = converter.convert(
           expectation.currentData,
           expectation.previousLeftEyeNodes,
-          expectation.previousRightEyeNodes
+          expectation.previousRightEyeNodes,
+          simulateGaze = false,
+          pupilGaze = false
         )
 
         Then("it should have correct data")
@@ -66,7 +70,7 @@ class OpenSeeFaceDataConverterFeature extends AnyFeatureSpec with GivenWhenThen 
         val converter = new OpenSeeFaceDataConverter(settings)
 
         Then("it should have correct converted values")
-        val trackingNode = converter.convert(data.currentData, data.previousLeftEyeNodes, data.previousRightEyeNodes)
+        val trackingNode = converter.convert(data.currentData, data.previousLeftEyeNodes, data.previousRightEyeNodes, simulateGaze = false, pupilGaze = false)
         trackingNode.leftEyeSmile shouldBe expectedEyeSmile
         trackingNode.rightEyeSmile shouldBe expectedEyeSmile
       }

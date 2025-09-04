@@ -9,7 +9,7 @@ trait ShaderFactoryMock {
   protected val stubbedInvertedMaskShader: InvertedMaskedShader = createInvertedMaskShader()
   protected val stubbedNormalShader: NormalShader = createNormalShader()
 
-  class MockableShaderRenderer(implicit gl: OpenGLBinding, wrapper: OpenGLBinding => RichOpenGLBinding) extends ShaderRenderer(createShaderFactory())(gl, wrapper)
+  class MockableShaderRenderer(using gl: OpenGLBinding) extends ShaderRenderer(createShaderFactory())
 
   def createShaderFactory(): ShaderFactory = {
 

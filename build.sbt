@@ -14,7 +14,8 @@ ThisBuild / scalacOptions := Seq(
   "-unchecked",
   "-Xfatal-warnings",
   "-language:implicitConversions",
-  "-language:postfixOps"
+  "-language:postfixOps",
+  "-Wconf:cat=deprecation&msg=Manifest.*:silent"
 )
 ThisBuild / publishArtifact := false
 ThisBuild / Test / testOptions += Tests.Argument("-l", sys.env.get("EXCLUDE_TEST_TAG").getOrElse("noExclude"))
@@ -162,7 +163,7 @@ createReleasePackageTaskwin := {
   if (sourceOpenSeeFace.exists()) {
     val targetOpenSeeFace = new File(releaseTarget, "openSeeFace")
     val cpCmdOpenSeeFace = Seq("cp", "-r", sourceOpenSeeFace.getAbsolutePath, targetOpenSeeFace.getAbsolutePath)
-    val resultOpenSeeFace = cpCmdOpenSeeFace.!!
+    val resultOpenSeeFace = cpCmdOpenSeeFace.!
     if (resultOpenSeeFace != 0) {
       throw new RuntimeException(s"Failed to copy openSeeFace directory: exit code $resultOpenSeeFace")
     } else {
@@ -177,7 +178,7 @@ createReleasePackageTaskwin := {
   if (sourceJRE.exists()) {
     val targetJRE = new File(releaseTarget, "jre")
     val cpCmdJRE = Seq("cp", "-r", sourceJRE.getAbsolutePath, targetJRE.getAbsolutePath)
-    val resultJRE = cpCmdJRE.!!
+    val resultJRE = cpCmdJRE.!
     if (resultJRE != 0) {
       throw new RuntimeException(s"Failed to copy JRE directory: exit code $resultJRE")
     } else {
@@ -202,7 +203,7 @@ moveTaskwin := {
   if (extraFile.exists()) {
     val targetExtraFile = new File(releaseTarget, s"Live2DForScala-SWT-Windows-${version.value}.jar")
     val cpCmdExtraFile = Seq("cp", extraFilePath, targetExtraFile.getAbsolutePath)
-    val resultExtraFile = cpCmdExtraFile.!!
+    val resultExtraFile = cpCmdExtraFile.!
     if (resultExtraFile != 0) {
       throw new RuntimeException(s"Failed to copy extra file: exit code $resultExtraFile")
     } else {
@@ -229,7 +230,7 @@ createStartFile := {
   IO.createDirectory(new File(dirPath))
 
   // Run shell commands to create and rename the file
-  Seq("sh", "-c", s"echo '@echo off' > $filePath && echo 'jre\\\\bin\\\\java.exe -Xms512m -Xmx1024m -XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+UseStringDeduplication --enable-preview --add-modules jdk.incubator.vector -Dsun.java2d.opengl=true -Dsun.java2d.d3d=false -Dfile.encoding=UTF-8 -jar Live2DForScala-SWT-Windows-${version.value}.jar' >> $filePath && echo 'pause' >> $filePath && mv $filePath $renamedFilePath").!!
+  Seq("sh", "-c", s"echo '@echo off' > $filePath && echo 'jre\\\\bin\\\\java.exe -Xms512m -Xmx1024m -XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+UseStringDeduplication --enable-preview --add-modules jdk.incubator.vector -Dsun.java2d.opengl=true -Dsun.java2d.d3d=false -Dfile.encoding=UTF-8 -jar Live2DForScala-SWT-Windows-${version.value}.jar' >> $filePath && echo 'pause' >> $filePath && mv $filePath $renamedFilePath").!
 }
 
 lazy val releasewin = taskKey[Unit]("Performs jlink, createReleasePackageTask and moveTxtTaskwin in order")
@@ -426,7 +427,7 @@ createReleasePackageTaskswing := {
   if (sourceOpenSeeFace.exists()) {
     val targetOpenSeeFace = new File(releaseTarget, "openSeeFace")
     val cpCmdOpenSeeFace = Seq("cp", "-r", sourceOpenSeeFace.getAbsolutePath, targetOpenSeeFace.getAbsolutePath)
-    val resultOpenSeeFace = cpCmdOpenSeeFace.!!
+    val resultOpenSeeFace = cpCmdOpenSeeFace.!
     if (resultOpenSeeFace != 0) {
       throw new RuntimeException(s"Failed to copy openSeeFace directory: exit code $resultOpenSeeFace")
     } else {
@@ -451,7 +452,7 @@ moveTaskswing := {
   if (extraFile.exists()) {
     val targetExtraFile = new File(releaseTarget, s"Live2DForScala-Swing-${version.value}.jar")
     val cpCmdExtraFile = Seq("cp", extraFilePath, targetExtraFile.getAbsolutePath)
-    val resultExtraFile = cpCmdExtraFile.!!
+    val resultExtraFile = cpCmdExtraFile.!
     if (resultExtraFile != 0) {
       throw new RuntimeException(s"Failed to copy extra file: exit code $resultExtraFile")
     } else {

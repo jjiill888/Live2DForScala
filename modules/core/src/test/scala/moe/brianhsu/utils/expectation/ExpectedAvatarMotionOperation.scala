@@ -6,6 +6,8 @@ import moe.brianhsu.utils.expectation.ExpectedAvatarMotionOperation.{Input, Outp
 import org.json4s.{Formats, ShortTypeHints}
 import org.json4s.native.JsonMethods.parse
 import org.json4s.native.Serialization
+import org.json4s.jvalue2extractable
+import scala.reflect.ClassTag
 
 import scala.io.Source
 import scala.util.Using

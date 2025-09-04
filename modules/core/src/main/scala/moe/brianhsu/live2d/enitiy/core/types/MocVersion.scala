@@ -38,6 +38,11 @@ case object MocVersion42 extends MocVersion("4.2.00", "*")
  */
 case object MocVersion50 extends MocVersion("5.0.00", "*")
 
+/**
+ * Version above 6.0.00
+ */
+case object MocVersion60 extends MocVersion("6.0.00", "*")
+
 object MocVersion {
   def apply(version: Int): MocVersion = {
     version match {
@@ -47,6 +52,7 @@ object MocVersion {
       case 3 => MocVersion40
       case 4 => MocVersion42
       case 5 => MocVersion50
+      case 6 => MocVersion60
       }
   }
 }

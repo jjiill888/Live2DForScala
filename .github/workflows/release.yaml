@@ -7,7 +7,6 @@ on:
     branches: [ "master" ]
 
   # Allows you to run this workflow manually from the Actions tab
-    branches: ["master"]
   workflow_dispatch:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -54,7 +53,7 @@ jobs:
       - name: Set Coverage rate for badges
         id: CoverageExport
         run: |
-          echo "COVERAGE_RATE=$(xmllint --xpath "string(/scoverage/@branch-rate)" target/scala-2.13/scoverage-report/scoverage.xml)" >> $GITHUB_OUTPUT
+          echo "COVERAGE_RATE=$(xmllint --xpath "string(/scoverage/@branch-rate)" target/scala-3.3.2/scoverage-report/scoverage.xml)" >> $GITHUB_OUTPUT
 
       - name: Release
         run: |
@@ -95,9 +94,8 @@ jobs:
           message: Update badages for ${{ steps.VersionExport.outputs.CURRENT_VERSION }}
 
       - name: Assembly JAR
-          apt-get -y install xorg-dev libglu1-mesa libgl1-mesa-dev xvfb libxinerama1 libxcursor1 libswt-gtk-4-java libswt-gtk-4-jni libxml2-utils bc
-      - name: Compile and Test
         run: |
+          apt-get -y install xorg-dev libglu1-mesa libgl1-mesa-dev xvfb libxinerama1 libxcursor1 libswt-gtk-4-java libswt-gtk-4-jni libxml2-utils bc
           ./distclean
           sbt clean assembly
 
@@ -129,6 +127,3 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
-
-
-          xvfb-run --auto-servernum sbt compile test

@@ -6,6 +6,8 @@ import moe.brianhsu.live2d.enitiy.avatar.motion.data.{CurveTarget, MotionCurve, 
 import org.json4s.{CustomSerializer, Formats, JString, NoTypeHints}
 import org.json4s.native.JsonMethods.parse
 import org.json4s.native.Serialization
+import org.json4s.jvalue2extractable
+import scala.reflect.ClassTag
 
 import scala.io.Source
 import scala.util.Using

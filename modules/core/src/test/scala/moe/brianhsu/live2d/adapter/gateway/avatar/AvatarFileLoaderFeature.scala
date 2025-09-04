@@ -8,7 +8,7 @@ import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{GivenWhenThen, TryValues}
 
-import java.io.FileNotFoundException
+import java.io.{FileNotFoundException, IOException}
 
 class AvatarFileLoaderFeature extends AnyFeatureSpec with GivenWhenThen with Matchers with TryValues {
   private given cubismCore: JnaNativeCubismAPILoader = new JnaNativeCubismAPILoader
@@ -22,7 +22,7 @@ class AvatarFileLoaderFeature extends AnyFeatureSpec with GivenWhenThen with Mat
       val avatarHolder = new AvatarFileReader(directory).loadAvatar()
 
       Then("it should return a Failure")
-      avatarHolder.failure.exception shouldBe a [FileNotFoundException]
+      avatarHolder.failure.exception shouldBe a [IOException]
     }
 
     Scenario("Loading an avatar from an exist directory that is not an avatar runtime") {
@@ -33,7 +33,7 @@ class AvatarFileLoaderFeature extends AnyFeatureSpec with GivenWhenThen with Mat
       val avatarHolder = new AvatarFileReader(directory).loadAvatar()
 
       Then("it should return a Failure")
-      avatarHolder.failure.exception shouldBe an[FileNotFoundException]
+      avatarHolder.failure.exception shouldBe an[IOException]
     }
 
     Scenario("Loading an avatar from an exist directory that has corrupted settings") {
