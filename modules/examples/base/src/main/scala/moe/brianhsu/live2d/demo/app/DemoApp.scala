@@ -182,7 +182,7 @@ abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnO
   private var offsetX: Float = 0.0f
   private var offsetY: Float = 0.0f
 
-  // Emoji shortcut mapping: e.g. ‘1’ -> “Smile”
+  // Emoji shortcut mapping: e.g. '1' -> "Smile"
   private var expressionKeyMap: Map[Char, String] = Map()
 
   {

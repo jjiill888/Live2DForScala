@@ -16,7 +16,7 @@ import scala.collection.mutable
  */
 class PerformanceMonitor(using gl: OpenGLBinding) {
   
-  // 性能计数器
+  // Performance counters
   private val fboCreateCount = new AtomicLong(0)
   private val fboReuseCount = new AtomicLong(0)
   private val textureLoadCount = new AtomicLong(0)
@@ -26,28 +26,28 @@ class PerformanceMonitor(using gl: OpenGLBinding) {
   private val viewportSetCount = new AtomicLong(0)
   private val viewportCacheHitCount = new AtomicLong(0)
   
-  // 时间统计
+  // Time statistics
   private val renderTimes = mutable.ArrayBuffer[Long]()
   private val fboCreateTimes = mutable.ArrayBuffer[Long]()
   private val textureLoadTimes = mutable.ArrayBuffer[Long]()
   
-  // 内存使用统计
+  // Memory usage statistics
   private val memoryUsage = mutable.ArrayBuffer[Long]()
   
-  // 开始时间记录
+  // Start time recording
   private var renderStartTime: Long = 0
   private var fboCreateStartTime: Long = 0
   private var textureLoadStartTime: Long = 0
 
   /**
-   * 开始渲染计时
+   * Start render timing
    */
   def startRenderTiming(): Unit = {
     renderStartTime = System.nanoTime()
   }
 
   /**
-   * 结束渲染计时
+   * End render timing
    */
   def endRenderTiming(): Unit = {
     val duration = System.nanoTime() - renderStartTime
@@ -55,7 +55,7 @@ class PerformanceMonitor(using gl: OpenGLBinding) {
   }
 
   /**
-   * 记录FBO创建
+   * Record FBO creation
    */
   def recordFBOCreation(isReuse: Boolean): Unit = {
     if (isReuse) {
@@ -66,14 +66,14 @@ class PerformanceMonitor(using gl: OpenGLBinding) {
   }
 
   /**
-   * 开始FBO创建计时
+   * Start FBO creation timing
    */
   def startFBOCreationTiming(): Unit = {
     fboCreateStartTime = System.nanoTime()
   }
 
   /**
-   * 结束FBO创建计时
+   * End FBO creation timing
    */
   def endFBOCreationTiming(): Unit = {
     val duration = System.nanoTime() - fboCreateStartTime
@@ -81,7 +81,7 @@ class PerformanceMonitor(using gl: OpenGLBinding) {
   }
 
   /**
-   * 记录纹理加载
+   * Record texture loading
    */
   def recordTextureLoad(isReuse: Boolean): Unit = {
     if (isReuse) {
@@ -92,14 +92,14 @@ class PerformanceMonitor(using gl: OpenGLBinding) {
   }
 
   /**
-   * 开始纹理加载计时
+   * Start texture loading timing
    */
   def startTextureLoadTiming(): Unit = {
     textureLoadStartTime = System.nanoTime()
   }
 
   /**
-   * 结束纹理加载计时
+   * End texture loading timing
    */
   def endTextureLoadTiming(): Unit = {
     val duration = System.nanoTime() - textureLoadStartTime
@@ -107,7 +107,7 @@ class PerformanceMonitor(using gl: OpenGLBinding) {
   }
 
   /**
-   * 记录状态切换
+   * Record state switch
    */
   def recordStateSwitch(isCacheHit: Boolean): Unit = {
     stateSwitchCount.incrementAndGet()
@@ -117,7 +117,7 @@ class PerformanceMonitor(using gl: OpenGLBinding) {
   }
 
   /**
-   * 记录视口设置
+   * Record viewport setting
    */
   def recordViewportSet(isCacheHit: Boolean): Unit = {
     viewportSetCount.incrementAndGet()
@@ -127,14 +127,14 @@ class PerformanceMonitor(using gl: OpenGLBinding) {
   }
 
   /**
-   * 记录内存使用
+   * Record memory usage
    */
   def recordMemoryUsage(bytes: Long): Unit = {
     memoryUsage += bytes
   }
 
   /**
-   * 获取性能统计报告
+   * Get performance statistics report
    */
   def getPerformanceReport: PerformanceReport = {
     val totalFBOOps = fboCreateCount.get() + fboReuseCount.get()
@@ -143,38 +143,38 @@ class PerformanceMonitor(using gl: OpenGLBinding) {
     val totalViewportOps = viewportSetCount.get()
     
     PerformanceReport(
-      // FBO统计
+      // FBO statistics
       fboCreateCount = fboCreateCount.get(),
       fboReuseCount = fboReuseCount.get(),
       fboReuseRate = if (totalFBOOps > 0) fboReuseCount.get().toDouble / totalFBOOps else 0.0,
       avgFBOCreationTime = if (fboCreateTimes.nonEmpty) fboCreateTimes.sum / fboCreateTimes.length else 0L,
       
-      // 纹理统计
+      // Texture statistics
       textureLoadCount = textureLoadCount.get(),
       textureReuseCount = textureReuseCount.get(),
       textureReuseRate = if (totalTextureOps > 0) textureReuseCount.get().toDouble / totalTextureOps else 0.0,
       avgTextureLoadTime = if (textureLoadTimes.nonEmpty) textureLoadTimes.sum / textureLoadTimes.length else 0L,
       
-      // 状态统计
+      // State statistics
       stateSwitchCount = stateSwitchCount.get(),
       stateCacheHitCount = stateCacheHitCount.get(),
       stateCacheHitRate = if (totalStateOps > 0) stateCacheHitCount.get().toDouble / totalStateOps else 0.0,
       
-      // 视口统计
+      // Viewport statistics
       viewportSetCount = viewportSetCount.get(),
       viewportCacheHitCount = viewportCacheHitCount.get(),
       viewportCacheHitRate = if (totalViewportOps > 0) viewportCacheHitCount.get().toDouble / totalViewportOps else 0.0,
       
-      // 渲染统计
+      // Render statistics
       avgRenderTime = if (renderTimes.nonEmpty) renderTimes.sum / renderTimes.length else 0L,
       minRenderTime = if (renderTimes.nonEmpty) renderTimes.min else 0L,
       maxRenderTime = if (renderTimes.nonEmpty) renderTimes.max else 0L,
       
-      // 内存统计
+      // Memory statistics
       avgMemoryUsage = if (memoryUsage.nonEmpty) memoryUsage.sum / memoryUsage.length else 0L,
       maxMemoryUsage = if (memoryUsage.nonEmpty) memoryUsage.max else 0L,
       
-      // 总体统计
+      // Overall statistics
       totalOperations = totalFBOOps + totalTextureOps + totalStateOps + totalViewportOps,
       totalCacheHits = fboReuseCount.get() + textureReuseCount.get() + stateCacheHitCount.get() + viewportCacheHitCount.get(),
       overallCacheHitRate = {
@@ -185,7 +185,27 @@ class PerformanceMonitor(using gl: OpenGLBinding) {
   }
 
   /**
-   * 重置所有统计
+   * Get comprehensive performance metrics
+   */
+  def getMetrics(): PerformanceMetrics = {
+    PerformanceMetrics(
+      fboCreateCount = fboCreateCount.get(),
+      fboReuseCount = fboReuseCount.get(),
+      textureLoadCount = textureLoadCount.get(),
+      textureReuseCount = textureReuseCount.get(),
+      stateSwitchCount = stateSwitchCount.get(),
+      stateCacheHitCount = stateCacheHitCount.get(),
+      viewportSetCount = viewportSetCount.get(),
+      viewportCacheHitCount = viewportCacheHitCount.get(),
+      averageRenderTime = if (renderTimes.nonEmpty) renderTimes.sum.toDouble / renderTimes.size else 0.0,
+      averageFBOCreationTime = if (fboCreateTimes.nonEmpty) fboCreateTimes.sum.toDouble / fboCreateTimes.size else 0.0,
+      averageTextureLoadTime = if (textureLoadTimes.nonEmpty) textureLoadTimes.sum.toDouble / textureLoadTimes.size else 0.0,
+      memoryUsage = if (memoryUsage.nonEmpty) memoryUsage.sum else 0L
+    )
+  }
+
+  /**
+   * Reset all statistics
    */
   def reset(): Unit = {
     fboCreateCount.set(0)
@@ -204,7 +224,7 @@ class PerformanceMonitor(using gl: OpenGLBinding) {
   }
 
   /**
-   * 获取实时性能指标
+   * Get real-time performance metrics
    */
   def getRealtimeMetrics: RealtimeMetrics = {
     RealtimeMetrics(
@@ -223,94 +243,112 @@ class PerformanceMonitor(using gl: OpenGLBinding) {
 }
 
 /**
- * 性能报告
+ * Performance report
  */
 case class PerformanceReport(
-  // FBO统计
+  // FBO statistics
   fboCreateCount: Long,
   fboReuseCount: Long,
   fboReuseRate: Double,
   avgFBOCreationTime: Long,
   
-  // 纹理统计
+  // Texture statistics
   textureLoadCount: Long,
   textureReuseCount: Long,
   textureReuseRate: Double,
   avgTextureLoadTime: Long,
   
-  // 状态统计
+  // State statistics
   stateSwitchCount: Long,
   stateCacheHitCount: Long,
   stateCacheHitRate: Double,
   
-  // 视口统计
+  // Viewport statistics
   viewportSetCount: Long,
   viewportCacheHitCount: Long,
   viewportCacheHitRate: Double,
   
-  // 渲染统计
+  // Render statistics
   avgRenderTime: Long,
   minRenderTime: Long,
   maxRenderTime: Long,
   
-  // 内存统计
+  // Memory statistics
   avgMemoryUsage: Long,
   maxMemoryUsage: Long,
   
-  // 总体统计
+  // Overall statistics
   totalOperations: Long,
   totalCacheHits: Long,
   overallCacheHitRate: Double
 ) {
   
   /**
-   * 格式化报告为字符串
+   * Format report as string
    */
   def formatReport: String = {
     s"""
-    |=== 离屏渲染性能报告 ===
-    |FBO统计:
-    |  创建次数: $fboCreateCount
-    |  复用次数: $fboReuseCount
-    |  复用率: ${String.format("%.2f%%", fboReuseRate * 100)}
-    |  平均创建时间: ${avgFBOCreationTime / 1000000.0}ms
+    |=== Offscreen Rendering Performance Report ===
+    |FBO Statistics:
+    |  Create Count: $fboCreateCount
+    |  Reuse Count: $fboReuseCount
+    |  Reuse Rate: ${String.format("%.2f%%", fboReuseRate * 100)}
+    |  Average Creation Time: ${avgFBOCreationTime / 1000000.0}ms
     |
-    |纹理统计:
-    |  加载次数: $textureLoadCount
-    |  复用次数: $textureReuseCount
-    |  复用率: ${String.format("%.2f%%", textureReuseRate * 100)}
-    |  平均加载时间: ${avgTextureLoadTime / 1000000.0}ms
+    |Texture Statistics:
+    |  Load Count: $textureLoadCount
+    |  Reuse Count: $textureReuseCount
+    |  Reuse Rate: ${String.format("%.2f%%", textureReuseRate * 100)}
+    |  Average Load Time: ${avgTextureLoadTime / 1000000.0}ms
     |
-    |状态统计:
-    |  切换次数: $stateSwitchCount
-    |  缓存命中: $stateCacheHitCount
-    |  缓存命中率: ${String.format("%.2f%%", stateCacheHitRate * 100)}
+    |State Statistics:
+    |  Switch Count: $stateSwitchCount
+    |  Cache Hits: $stateCacheHitCount
+    |  Cache Hit Rate: ${String.format("%.2f%%", stateCacheHitRate * 100)}
     |
-    |视口统计:
-    |  设置次数: $viewportSetCount
-    |  缓存命中: $viewportCacheHitCount
-    |  缓存命中率: ${String.format("%.2f%%", viewportCacheHitRate * 100)}
+    |Viewport Statistics:
+    |  Set Count: $viewportSetCount
+    |  Cache Hits: $viewportCacheHitCount
+    |  Cache Hit Rate: ${String.format("%.2f%%", viewportCacheHitRate * 100)}
     |
-    |渲染统计:
-    |  平均渲染时间: ${avgRenderTime / 1000000.0}ms
-    |  最小渲染时间: ${minRenderTime / 1000000.0}ms
-    |  最大渲染时间: ${maxRenderTime / 1000000.0}ms
+    |Render Statistics:
+    |  Average Render Time: ${avgRenderTime / 1000000.0}ms
+    |  Min Render Time: ${minRenderTime / 1000000.0}ms
+    |  Max Render Time: ${maxRenderTime / 1000000.0}ms
     |
-    |内存统计:
-    |  平均内存使用: ${avgMemoryUsage / 1024.0 / 1024.0}MB
-    |  最大内存使用: ${maxMemoryUsage / 1024.0 / 1024.0}MB
+    |Memory Statistics:
+    |  Average Memory Usage: ${avgMemoryUsage / 1024.0 / 1024.0}MB
+    |  Max Memory Usage: ${maxMemoryUsage / 1024.0 / 1024.0}MB
     |
-    |总体统计:
-    |  总操作数: $totalOperations
-    |  总缓存命中: $totalCacheHits
-    |  总体缓存命中率: ${String.format("%.2f%%", overallCacheHitRate * 100)}
-    |=======================
+    |Overall Statistics:
+    |  Total Operations: $totalOperations
+    |  Total Cache Hits: $totalCacheHits
+    |  Overall Cache Hit Rate: ${String.format("%.2f%%", overallCacheHitRate * 100)}
+    |===============================================
     """.stripMargin
   }
 }
 
 /**
- * 实时性能指标
+ * Performance metrics for the new system
+ */
+case class PerformanceMetrics(
+  fboCreateCount: Long,
+  fboReuseCount: Long,
+  textureLoadCount: Long,
+  textureReuseCount: Long,
+  stateSwitchCount: Long,
+  stateCacheHitCount: Long,
+  viewportSetCount: Long,
+  viewportCacheHitCount: Long,
+  averageRenderTime: Double,
+  averageFBOCreationTime: Double,
+  averageTextureLoadTime: Double,
+  memoryUsage: Long
+)
+
+/**
+ * Real-time performance metrics
  */
 case class RealtimeMetrics(
   currentFBOReuseRate: Double,

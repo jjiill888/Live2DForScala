@@ -7,39 +7,92 @@ import java.util.concurrent.ConcurrentHashMap
 import scala.collection.mutable
 
 /**
- * Offscreen Rendering State Cache Manager
+ * Advanced Offscreen Rendering Cache Manager
  * 
- * Main optimization features:
- * 1. FBO Cache Pool - Avoid duplicate FBO creation
- * 2. OpenGL State Cache - Reduce state switching overhead
- * 3. Texture Cache - Reuse loaded textures
+ * Enhanced optimization features:
+ * 1. Multi-tier FBO Pool Management - Intelligent FBO pooling and reuse
+ * 2. Texture Batch Processing - Batch texture loading and binding
+ * 3. OpenGL State Cache - Reduce state switching overhead
  * 4. Viewport Cache - Avoid duplicate viewport settings
+ * 5. Performance Monitoring - Real-time optimization tracking
+ * 6. Memory Management - Intelligent resource cleanup
  */
 class OffscreenRenderCache(using gl: OpenGLBinding) {
   import gl.constants._
 
-  // FBO cache pool - cache FBOs by size
-  private val fboCache = new ConcurrentHashMap[String, OffscreenFrame]()
+  // Enhanced FBO pool management
+  private val fboPoolManager = new FBOPoolManager
+  
+  // Advanced texture batch processing
+  private val textureBatchProcessor = new TextureBatchProcessor
   
   // OpenGL state cache
   private val stateCache = new OpenGLStateCache
   
-  // Texture cache
+  // Legacy texture cache (for backward compatibility)
   private val textureCache = new TextureCache
   
   // Viewport cache
   private var cachedViewport: Option[(Int, Int, Int, Int)] = None
   private var currentViewport: (Int, Int, Int, Int) = (0, 0, 0, 0)
+  
+  // Performance monitoring
+  private val performanceMonitor = new PerformanceMonitor
+  
+  // Cache initialization
+  initializeOptimizations()
 
   /**
-   * Get or create FBO with cache reuse support
+   * Initialize optimization systems
+   */
+  private def initializeOptimizations(): Unit = {
+    // Pre-allocate common FBO sizes
+    fboPoolManager.preAllocateCommonSizes()
+    
+    // Start performance monitoring
+    performanceMonitor.startRenderTiming()
+  }
+
+  /**
+   * Get or create FBO with enhanced pool management
    */
   def getOrCreateFBO(width: Int, height: Int): OffscreenFrame = {
-    val key = s"${width}x${height}"
-    
-    fboCache.computeIfAbsent(key, _ => {
-      createOptimizedFBO(width, height)
-    })
+    fboPoolManager.getFBO(width, height) match {
+      case scala.util.Success(pooledFBO) =>
+        new EnhancedOffscreenFrame(pooledFBO, this)
+      case scala.util.Failure(e) =>
+        // Fallback to legacy method
+        System.err.println(s"FBO pool failed, using legacy method: ${e.getMessage}")
+        createOptimizedFBO(width, height)
+    }
+  }
+
+  /**
+   * Return FBO to pool for reuse
+   */
+  def returnFBOToPool(fbo: EnhancedOffscreenFrame): Unit = {
+    fboPoolManager.returnFBO(fbo.pooledFBO)
+  }
+
+  /**
+   * Add texture to batch processing queue
+   */
+  def addTextureToBatch(textureFile: java.io.File, priority: Int = 0): Unit = {
+    textureBatchProcessor.addToLoadingBatch(textureFile, priority)
+  }
+
+  /**
+   * Add texture binding to batch queue
+   */
+  def addTextureBindingToBatch(textureId: Int, target: Int = GL_TEXTURE_2D, unit: Int = 0): Unit = {
+    textureBatchProcessor.addToBindingBatch(textureId, target, unit)
+  }
+
+  /**
+   * Process all pending texture batches
+   */
+  def processTextureBatches(): Unit = {
+    textureBatchProcessor.flushAllBatches()
   }
 
   /**
@@ -118,47 +171,156 @@ class OffscreenRenderCache(using gl: OpenGLBinding) {
   def getStateCache: OpenGLStateCache = stateCache
 
   /**
-   * Clear cache
+   * Clear all caches and pools
    */
   def clearCache(): Unit = {
-    // Clear FBO cache
-    fboCache.values().forEach { frame =>
-      frame match {
-        case cached: CachedOffscreenFrame => cached.cleanup()
-        case _ => // Regular OffscreenFrame doesn't need special cleanup
-      }
-    }
-    fboCache.clear()
+    // Clear enhanced FBO pools
+    fboPoolManager.clearAllPools()
     
-    // Clear other caches
+    // Clear texture batch processor
+    textureBatchProcessor.clearAllBatches()
+    
+    // Clear legacy caches
     textureCache.clearCache()
     stateCache.clearCache()
     cachedViewport = None
+    
+    // Reset performance monitoring
+    performanceMonitor.reset()
   }
 
   /**
-   * Get cache statistics
+   * Get comprehensive cache statistics
    */
   def getCacheStats: CacheStats = {
+    val poolInfo = fboPoolManager.getPoolInfo
+    val batchStats = textureBatchProcessor.getBatchStats
+    
     CacheStats(
-      fboCount = fboCache.size(),
+      fboCount = poolInfo.activeFBOs,
       textureCount = textureCache.getCacheSize,
-      stateCacheSize = stateCache.getCacheSize
+      stateCacheSize = stateCache.getCacheSize,
+      poolStats = Some(poolInfo),
+      batchStats = Some(batchStats)
     )
+  }
+
+  /**
+   * Get detailed performance metrics
+   */
+  def getPerformanceMetrics: PerformanceMetrics = {
+    performanceMonitor.getMetrics()
+  }
+
+  /**
+   * Get FBO pool information
+   */
+  def getFBOPoolInfo: PoolInfo = {
+    fboPoolManager.getPoolInfo
+  }
+
+  /**
+   * Get texture batch processing statistics
+   */
+  def getTextureBatchStats: BatchProcessingStats = {
+    textureBatchProcessor.getBatchStats
   }
 }
 
 /**
- * Cache statistics
+ * Enhanced cache statistics
  */
 case class CacheStats(
   fboCount: Int,
   textureCount: Int,
-  stateCacheSize: Int
+  stateCacheSize: Int,
+  poolStats: Option[PoolInfo] = None,
+  batchStats: Option[BatchProcessingStats] = None
 )
 
 /**
- * Cached OffscreenFrame implementation
+ * Enhanced OffscreenFrame with pool management
+ */
+class EnhancedOffscreenFrame(
+  val pooledFBO: PooledFBO,
+  cache: OffscreenRenderCache
+)(using gl: OpenGLBinding) extends OffscreenFrame(pooledFBO.textureId, pooledFBO.frameBufferId) {
+  import gl.constants._
+  
+  private var isActive = false
+  private var savedState: Option[OpenGLState] = None
+
+  override def beginDraw(currentFrameBufferId: Int): Unit = {
+    if (isActive) {
+      throw new RuntimeException("EnhancedOffscreenFrame is already active")
+    }
+    
+    isActive = true
+    
+    // Use cached state management
+    savedState = Some(cache.getStateCache.saveCurrentState())
+    
+    // Set viewport (using cache optimization)
+    cache.setViewport(0, 0, pooledFBO.width, pooledFBO.height)
+    
+    // Bind FBO
+    gl.glBindFramebuffer(GL_FRAMEBUFFER, pooledFBO.frameBufferId)
+    gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f)
+    gl.glClear(GL_COLOR_BUFFER_BIT)
+    
+    // Verify FBO status
+    val status = gl.glCheckFramebufferStatus(GL_FRAMEBUFFER)
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+      throw new RuntimeException(s"Framebuffer is not complete during beginDraw: status = $status")
+    }
+  }
+
+  override def endDraw(): Unit = {
+    if (!isActive) {
+      throw new RuntimeException("EnhancedOffscreenFrame is not active")
+    }
+    
+    try {
+      // Use cached state restoration
+      savedState.foreach(cache.getStateCache.restoreState)
+      savedState = None
+      
+    } catch {
+      case e: Exception =>
+        throw new RuntimeException("Failed to restore OpenGL state during endDraw", e)
+    } finally {
+      isActive = false
+    }
+  }
+
+  override def isValid: Boolean = {
+    if (!isActive) {
+      try {
+        gl.glBindFramebuffer(GL_FRAMEBUFFER, pooledFBO.frameBufferId)
+        val status = gl.glCheckFramebufferStatus(GL_FRAMEBUFFER)
+        gl.glBindFramebuffer(GL_FRAMEBUFFER, 0)
+        status == GL_FRAMEBUFFER_COMPLETE
+      } catch {
+        case _: Exception => false
+      }
+    } else {
+      true // If in use, consider it valid
+    }
+  }
+
+  /**
+   * Return to pool when done
+   */
+  def returnToPool(): Unit = {
+    if (isActive) {
+      endDraw()
+    }
+    cache.returnFBOToPool(this)
+  }
+}
+
+/**
+ * Cached OffscreenFrame implementation (legacy)
  */
 class CachedOffscreenFrame(
   colorTextureBufferId: Int, 
