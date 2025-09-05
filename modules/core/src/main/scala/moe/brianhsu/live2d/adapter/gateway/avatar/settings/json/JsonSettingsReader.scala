@@ -214,9 +214,9 @@ class JsonSettingsReader(directory: String) extends SettingsReader {
           groupList.map {
             case JArray(parts) =>
               parts.map { partJson =>
-                val partCamel = partJson.camelizeKeys
-                val id = (partCamel \ "id").extract[String]
-                val links = (partCamel \ "link").extractOpt[List[String]].getOrElse(Nil)
+                // Use original JSON field names directly
+                val id = (partJson \ "Id").extract[String]
+                val links = (partJson \ "Link").extractOpt[List[String]].getOrElse(Nil)
                 PoseSetting.Part(id, links)
               }
             case _ => Nil

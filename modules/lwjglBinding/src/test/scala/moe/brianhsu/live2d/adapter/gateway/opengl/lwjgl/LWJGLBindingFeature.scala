@@ -1,12 +1,11 @@
 package moe.brianhsu.live2d.adapter.gateway.opengl.lwjgl
 
 import org.lwjgl.opengl._
-import org.scalamock.scalatest.MockFactory
 import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
 
-class LWJGLBindingFeature extends AnyFeatureSpec with Matchers with GivenWhenThen with MockFactory {
+class LWJGLBindingFeature extends AnyFeatureSpec with Matchers with GivenWhenThen {
   Feature("OpenGL constant") {
     Scenario("Validate OpenGL constant") {
       Given("a LWJGL OpenGL binding")

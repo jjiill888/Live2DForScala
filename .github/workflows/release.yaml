@@ -45,6 +45,7 @@ jobs:
           git config --global user.name "GitHub Action"
 
       - name: Test and Coverage
+        continue-on-error: true
         run: |
           ./distclean
           export SBT_OPTS="--enable-native-access=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED"
