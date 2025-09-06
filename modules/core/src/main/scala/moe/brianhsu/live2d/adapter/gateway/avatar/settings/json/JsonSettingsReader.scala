@@ -6,7 +6,7 @@ import moe.brianhsu.live2d.enitiy.avatar.settings.detail.{ExpressionSetting, Mot
 import moe.brianhsu.live2d.adapter.gateway.avatar.settings.json.model.{Group, ModelSetting, FileReferences, MotionFile}
 import moe.brianhsu.live2d.boundary.gateway.avatar.SettingsReader
 import org.json4s.native.JsonMethods.parse
-import org.json4s.{DefaultFormats, Formats, JArray}
+import org.json4s.{DefaultFormats, Formats, JArray, JString, JInt, JDouble, JNothing}
 import org.json4s.MonadicJValue.jvalueToMonadic
 import org.json4s.jvalue2extractable
 import scala.reflect.ClassTag
@@ -213,11 +213,25 @@ class JsonSettingsReader(directory: String) extends SettingsReader {
         case JArray(groupList) =>
           groupList.map {
             case JArray(parts) =>
-              parts.map { partJson =>
-                // Use original JSON field names directly
-                val id = (partJson \ "Id").extract[String]
-                val links = (partJson \ "Link").extractOpt[List[String]].getOrElse(Nil)
-                PoseSetting.Part(id, links)
+              parts.flatMap { partJson =>
+                // Use camelized JSON field names (Id becomes id after camelizeKeys)
+                (partJson \ "id") match {
+                  case JString(s) => 
+                    val links = (partJson \ "link").extractOpt[List[String]].getOrElse(Nil)
+                    Some(PoseSetting.Part(s, links))
+                  case JInt(i) => 
+                    val links = (partJson \ "link").extractOpt[List[String]].getOrElse(Nil)
+                    Some(PoseSetting.Part(i.toString, links))
+                  case JDouble(d) => 
+                    val links = (partJson \ "link").extractOpt[List[String]].getOrElse(Nil)
+                    Some(PoseSetting.Part(d.toString, links))
+                  case JNothing => 
+                    println(s"Warning: Missing id field in pose, skipping part")
+                    None // Skip this part entirely
+                  case other => 
+                    println(s"Warning: Unexpected id type in pose: $other, skipping part")
+                    None // Skip this part entirely
+                }
               }
             case _ => Nil
           }

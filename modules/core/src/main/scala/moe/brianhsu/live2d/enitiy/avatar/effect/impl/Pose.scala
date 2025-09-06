@@ -60,7 +60,10 @@ case class Pose(posePartGroups: List[List[PosePart]] = Nil,
 
     val actualDeltaTimeSeconds = if (deltaTimeInSeconds < 0.0f) 0 else deltaTimeInSeconds
     val resetModelOperation: List[UpdateOperation] = if (!isAlreadyInit) { resetParts() } else Nil
+    
+    // Process all pose groups to ensure proper pose management
     val fadeOperation: List[UpdateOperation] = posePartGroups.flatMap(poseParts => doFade(model, actualDeltaTimeSeconds, poseParts))
+    
     val resetAndFade = resetModelOperation ++ fadeOperation
     val copyPartOpacityOperations: List[UpdateOperation] = copyPartOpacitiesToLinkedParts(model, resetAndFade)
 
@@ -81,9 +84,18 @@ case class Pose(posePartGroups: List[List[PosePart]] = Nil,
    * @param   poseParts           The parts that should be updated.
    */
   private def doFade(model: Live2DModel, deltaTimeSeconds: Float, poseParts: List[PosePart]): List[UpdateOperation] = {
-    val visiblePartHolder = poseParts
+    // Filter out invalid part IDs to prevent crashes
+    val validPoseParts = poseParts.filter(partData => 
+      model.parts.contains(partData.partId) && partData.partId != "JNothing"
+    )
+    
+    if (validPoseParts.isEmpty) {
+      return Nil // Return empty list if no valid parts
+    }
+    
+    val visiblePartHolder = validPoseParts
       .find(partData => model.parameterWithFallback(partData.partId).current > Epsilon)
-      .orElse(poseParts.headOption)
+      .orElse(validPoseParts.headOption)
       .map { partData =>
         val newOpacity = model.parts(partData.partId).opacity + (deltaTimeSeconds / fadeTimeInSeconds)
         (partData, Math.min(newOpacity, 1.0f))
@@ -95,7 +107,7 @@ case class Pose(posePartGroups: List[List[PosePart]] = Nil,
 
     val otherOperations = for {
       (firstVisiblePart, targetedOpacity) <- visiblePartHolder.toList
-      partData <- poseParts if partData != firstVisiblePart
+      partData <- validPoseParts if partData != firstVisiblePart
       partId = partData.partId
     } yield {
       val originalOpacity = model.parts(partId).opacity
@@ -170,17 +182,18 @@ case class Pose(posePartGroups: List[List[PosePart]] = Nil,
    * @note It will set the opacity to 1 for parameters with a non-zero initial opacity.
    */
   private def resetParts(): List[UpdateOperation] = {
+    // Process all pose groups, but ensure only one part per group is visible (default pose)
     val operationsForEachPose: List[List[UpdateOperation]] = for {
       poseGroup <- posePartGroups
       posePartData <- poseGroup
       partId = posePartData.partId
     } yield {
+      // Set the first part in each group to visible (opacity=1), others to hidden (opacity=0)
       val initOpacity = if (posePartData == poseGroup.head) 1.0f else 0.0f
       val partOperation = FallbackParameterValueUpdate(partId, initOpacity)
       val linkOperation = posePartData.link.map(link => FallbackParameterValueUpdate(link.partId, 1))
       partOperation :: linkOperation
     }
-
     operationsForEachPose.flatten
   }
 }
