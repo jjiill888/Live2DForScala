@@ -23,10 +23,12 @@ object SWTWithLWJGLMain {
 
   private var hideTask: Runnable = _
   private val uiListener: Listener = (_: Event) => showUIForTimeout()
+  private var isUIHidden: Boolean = false
 
   def main(args: Array[String]): Unit = {
     setupUILayout()
     setupAvatarEventListener()
+    setupKeyboardControls()
 
     shell.setText("Live 2D Scala Demo (SWT+LWJGL)")
     
@@ -69,7 +71,35 @@ object SWTWithLWJGLMain {
       }
       override def onStatusUpdated(status: String): Unit = statusBar.updateStatus(status)
     })
+  }
 
+  private def setupKeyboardControls(): Unit = {
+    // Add ESC key listener to shell for UI toggle
+    shell.addListener(SWT.KeyDown, new Listener {
+      override def handleEvent(event: Event): Unit = {
+        if (event.keyCode == SWT.ESC) {
+          toggleUI()
+        }
+      }
+    })
+    
+    // Also add to avatar area for when it has focus
+    avatarArea.glCanvas.addListener(SWT.KeyDown, new Listener {
+      override def handleEvent(event: Event): Unit = {
+        if (event.keyCode == SWT.ESC) {
+          toggleUI()
+        }
+      }
+    })
+    
+    // Add left mouse double-click listener to avatar area for UI toggle
+    avatarArea.glCanvas.addListener(SWT.MouseDoubleClick, new Listener {
+      override def handleEvent(event: Event): Unit = {
+        if (event.button == 1) { // Left mouse button
+          toggleUI()
+        }
+      }
+    })
   }
 
   private def setupUILayout(): Unit = {
@@ -136,7 +166,16 @@ object SWTWithLWJGLMain {
     if (hideTask != null) display.timerExec(-1, hideTask)
   }
 
+  private def toggleUI(): Unit = {
+    if (isUIHidden) {
+      showUI()
+    } else {
+      hideUI()
+    }
+  }
+
   private def hideUI(): Unit = {
+    isUIHidden = true
     toolbar.setVisible(false)
     statusBar.setVisible(false)
     avatarControl.setVisible(false)
@@ -148,6 +187,7 @@ object SWTWithLWJGLMain {
   }
 
   private def showUI(): Unit = {
+    isUIHidden = false
     toolbar.setVisible(true)
     statusBar.setVisible(true)
     avatarControl.setVisible(true)
