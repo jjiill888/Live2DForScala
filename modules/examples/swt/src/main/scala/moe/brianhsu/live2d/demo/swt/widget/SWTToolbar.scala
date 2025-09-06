@@ -13,7 +13,7 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
   private var demoAppHolder: Option[DemoApp] = None
   private val toolBar = new ToolBar(this, SWT.NONE)
   private val (
-    loadAvatar, defaultAvatar, changeToDefaultBackground,
+    loadAvatar, changeToDefaultBackground,
     selectBackground, pureColorBackground, transparentBackground) = createToolItems()
     transparentBackground.setSelection(DemoApp.loadTransparentBackground())
 
@@ -24,7 +24,6 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
     changeToDefaultBackground.addListener(SWT.Selection, { (event: Event) => onDefaultBackgroundSelected(event) })
     pureColorBackground.addListener(SWT.Selection, { (event: Event) => onPureColorBackground(event) })
     transparentBackground.addListener(SWT.Selection, { (event: Event) => onTransparentBackground(event) })
-    defaultAvatar.addListener(SWT.Selection, { (event: Event) => onDefaultAvatarSelected(event) })
   }
 
   def setDemoApp(demoApp: DemoApp): Unit = {
@@ -92,21 +91,9 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
     }
   }
 
-  private def onDefaultAvatarSelected(event: Event): Unit = {
-    val defaultAvatarPath = "def_avatar" // Same directory as jar package
-    demoAppHolder.foreach { demoApp =>
-      demoApp.switchAvatar(defaultAvatarPath).failed.foreach { e =>
-        val messageBox = new MessageBox(parent.getShell, SWT.OK | SWT.ICON_ERROR)
-        messageBox.setText("Cannot load default avatar.")
-        messageBox.setMessage(e.getMessage)
-        messageBox.open()
-      }
-    }
-  }
 
-  private def createToolItems(): (ToolItem, ToolItem, ToolItem, ToolItem, ToolItem, ToolItem) = {
+  private def createToolItems(): (ToolItem, ToolItem, ToolItem, ToolItem, ToolItem) = {
     val loadAvatar = new ToolItem(toolBar, SWT.PUSH)
-    val defaultAvatar = new ToolItem(toolBar, SWT.PUSH)
     new ToolItem(toolBar, SWT.SEPARATOR)
     val defaultBackground = new ToolItem(toolBar, SWT.PUSH)
     new ToolItem(toolBar, SWT.SEPARATOR)
@@ -118,12 +105,11 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
     transparentBackground.setSelection(DemoApp.loadTransparentBackground())
 
     loadAvatar.setText("Load Avatar")
-    defaultAvatar.setText("Default Avatar")
     defaultBackground.setText("Green Background")
     selectBackground.setText("Select Background")
     pureColorBackground.setText("Pure Color Background")
     transparentBackground.setText("Transparent Background")
 
-    (loadAvatar, defaultAvatar, defaultBackground, selectBackground, pureColorBackground, transparentBackground)
+    (loadAvatar, defaultBackground, selectBackground, pureColorBackground, transparentBackground)
   }
 }

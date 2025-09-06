@@ -34,9 +34,14 @@ class JavaFXMain extends Application {
       controlPanel.setDemoApp(app)
       DemoApp.loadLastAvatarPath() match {
         case Some(path) =>
-          app.switchAvatar(path).recoverWith { case _ => app.switchAvatar("def_avatar") }
+          app.switchAvatar(path).recoverWith { case e =>
+            System.err.println(s"[WARN] Cannot load last avatar '$path': ${e.getMessage}")
+            // 不再尝试加载默认avatar
+            scala.util.Failure(e)
+          }
         case None =>
-          app.switchAvatar("def_avatar")
+          // 不再尝试加载默认avatar
+          System.out.println("[INFO] No avatar to load on startup. Please use 'Load Avatar' button to load a model.")
       }
       loadInitialAvatar(app)
     }
@@ -65,11 +70,17 @@ class JavaFXMain extends Application {
   private def loadInitialAvatar(app: DemoApp): Unit = {
     val loadResult = DemoApp.loadLastAvatarPath() match {
       case Some(path) =>
-        app.switchAvatar(path).recoverWith { case _ => app.switchAvatar("def_avatar") }
+        app.switchAvatar(path).recoverWith { case e =>
+          System.err.println(s"[WARN] Cannot load last avatar '$path': ${e.getMessage}")
+          // No longer attempt to load default avatar
+          scala.util.Failure(e)
+        }
       case None =>
-        app.switchAvatar("def_avatar")
+        // No longer attempt to load default avatar
+        System.out.println("[INFO] No avatar to load on startup. Please use 'Load Avatar' button to load a model.")
+        scala.util.Success(())
     }
-    loadResult.failed.foreach(e => System.err.println(s"[WARN] Cannot load default avatar: ${e.getMessage}"))
+    loadResult.failed.foreach(e => System.err.println(s"[WARN] Cannot load avatar: ${e.getMessage}"))
   }
 
   // Load window settings from saved configuration

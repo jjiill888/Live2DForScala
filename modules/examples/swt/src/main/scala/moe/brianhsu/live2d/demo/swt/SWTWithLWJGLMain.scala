@@ -99,13 +99,16 @@ object SWTWithLWJGLMain {
       case Some(path) =>
         avatarArea.demoApp.switchAvatar(path).recoverWith { case e =>
           System.err.println(s"[WARN] Cannot load last avatar '$path': ${e.getMessage}")
-          avatarArea.demoApp.switchAvatar("def_avatar")
+          // No longer attempt to load default avatar
+          scala.util.Failure(e)
         }
       case None =>
-        avatarArea.demoApp.switchAvatar("def_avatar")
+        // No longer attempt to load default avatar, return success directly
+        System.out.println("[INFO] No avatar to load on startup. Please use 'Load Avatar' button to load a model.")
+        scala.util.Success(())
     }
     loadResult.failed.foreach { e =>
-      System.err.println(s"[WARN] Cannot load default avatar: ${e.getMessage}")
+      System.err.println(s"[WARN] Cannot load avatar: ${e.getMessage}")
     }
   }
 

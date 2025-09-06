@@ -14,7 +14,6 @@ class JavaFXToolbar extends ToolBar {
   private var demoAppHolder: Option[DemoApp] = None
 
   private val loadAvatar       = new Button("Load Avatar")
-  private val defaultAvatar    = new Button("Default Avatar")
   private val defaultBackground = new Button("Green Background")
   private val selectBackground  = new Button("Select Background")
   private val pureColorBackground = new Button("Pure Color Background")
@@ -23,7 +22,6 @@ class JavaFXToolbar extends ToolBar {
 
   this.getItems.addAll(
     loadAvatar,
-    defaultAvatar,
     defaultBackground,
     selectBackground,
     pureColorBackground,
@@ -31,7 +29,6 @@ class JavaFXToolbar extends ToolBar {
   )
 
   loadAvatar.setOnAction(_ => openLoadAvatarDialog())
-  defaultAvatar.setOnAction(_ => onDefaultAvatarSelected())
   defaultBackground.setOnAction(_ => onDefaultBackgroundSelected())
   selectBackground.setOnAction(_ => onSelectBackgroundSelected())
   pureColorBackground.setOnAction(_ => onPureColorBackground())
@@ -60,16 +57,6 @@ class JavaFXToolbar extends ToolBar {
     }
   }
 
-  private def onDefaultAvatarSelected(): Unit = {
-    demoAppHolder.foreach { demoApp =>
-      demoApp.switchAvatar("def_avatar").failed.foreach { e =>
-        val alert = new Alert(Alert.AlertType.ERROR)
-        alert.setTitle("Cannot load default avatar.")
-        alert.setContentText(e.getMessage)
-        alert.showAndWait()
-      }
-    }
-  }
 
   private def onSelectBackgroundSelected(): Unit = {
     val chooser = new FileChooser()
