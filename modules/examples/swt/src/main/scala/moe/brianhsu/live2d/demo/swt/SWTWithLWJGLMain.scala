@@ -21,8 +21,6 @@ object SWTWithLWJGLMain {
   private val avatarArea = new SWTAvatarDisplayArea(sashForm)
   private val statusBar = new SWTStatusBar(shell)
 
-  private var hideTask: Runnable = _
-  private val uiListener: Listener = (_: Event) => showUIForTimeout()
   private var isUIHidden: Boolean = false
 
   def main(args: Array[String]): Unit = {
@@ -68,6 +66,9 @@ object SWTWithLWJGLMain {
           avatarControl.motionSelector.syncWithStrategy(strategy)
         }
         avatarControl.faceTrackingComposite.enableStartButton()
+        
+        // Update Model Control panel with the loaded model
+        avatarControl.modelControlPanel.setDemoApp(Some(live2DView))
       }
       override def onStatusUpdated(status: String): Unit = statusBar.updateStatus(status)
     })
@@ -144,26 +145,10 @@ object SWTWithLWJGLMain {
 
   def enterCaptureMode(): Unit = {
     hideUI()
-    avatarArea.glCanvas.addListener(SWT.MouseMove, uiListener)
-    avatarArea.glCanvas.addListener(SWT.MouseDown, uiListener)
   }
 
   def exitCaptureMode(): Unit = {
-    avatarArea.glCanvas.removeListener(SWT.MouseMove, uiListener)
-    avatarArea.glCanvas.removeListener(SWT.MouseDown, uiListener)
-    cancelHideTask()
     showUI()
-  }
-
-  private def showUIForTimeout(): Unit = {
-    showUI()
-    cancelHideTask()
-    hideTask = () => hideUI()
-    display.timerExec(2000, hideTask)
-  }
-
-  private def cancelHideTask(): Unit = {
-    if (hideTask != null) display.timerExec(-1, hideTask)
   }
 
   private def toggleUI(): Unit = {

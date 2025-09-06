@@ -42,5 +42,9 @@ class SWTAvatarControlPanel(parent: Composite) extends Composite(parent, SWT.NON
     motionSelector.setDemoApp(demoApp)
     expressionSelector.setDemoApp(demoApp)
     faceTrackingComposite.setDemoApp(demoApp)
+    modelControlPanel.setDemoApp(Some(demoApp))
+    
+    // Start real-time parameter refresh for face tracking integration
+    modelControlPanel.startRealTimeRefresh()
   }
 }

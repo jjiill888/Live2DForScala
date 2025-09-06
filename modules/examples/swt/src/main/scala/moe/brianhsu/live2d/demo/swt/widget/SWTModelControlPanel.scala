@@ -1,280 +1,459 @@
 package moe.brianhsu.live2d.demo.swt.widget
 
-import org.eclipse.swt.widgets.{Composite, TabFolder, TabItem, Button, FileDialog, Label, Text}
+import moe.brianhsu.live2d.demo.app.DemoApp
+import moe.brianhsu.live2d.enitiy.model.parameter.Parameter
+import org.eclipse.swt.widgets.{Composite, TabFolder, TabItem, Button, Label, Scale, Text, Group}
+import org.eclipse.swt.custom.ScrolledComposite
 import org.eclipse.swt.SWT
-import org.eclipse.swt.layout.{GridLayout, GridData}
-import org.json4s.native.JsonMethods.parse
-import org.json4s.jvalue2extractable
-import org.json4s.DefaultFormats
-import scala.reflect.ClassTag
-
-// ClassTag to Manifest bridge for json4s compatibility
-given [T](using ct: ClassTag[T]): scala.reflect.Manifest[T] = 
-  new scala.reflect.Manifest[T] {
-    override def runtimeClass: Class[_] = ct.runtimeClass
-    override def typeArguments: List[scala.reflect.Manifest[_]] = Nil
-    override def arrayManifest: scala.reflect.Manifest[Array[T]] = 
-      new scala.reflect.Manifest[Array[T]] {
-        override def runtimeClass: Class[_] = java.lang.reflect.Array.newInstance(ct.runtimeClass, 0).getClass
-        override def typeArguments: List[scala.reflect.Manifest[_]] = List(summon[scala.reflect.Manifest[T]])
-        override def arrayManifest: scala.reflect.Manifest[Array[Array[T]]] = 
-          new scala.reflect.Manifest[Array[Array[T]]] {
-            override def runtimeClass: Class[_] = java.lang.reflect.Array.newInstance(runtimeClass, 0).getClass
-            override def typeArguments: List[scala.reflect.Manifest[_]] = List(this)
-            override def arrayManifest: scala.reflect.Manifest[Array[Array[Array[T]]]] = ???
-            override def erasure: Class[_] = runtimeClass
-          }
-        override def erasure: Class[_] = runtimeClass
-      }
-    override def erasure: Class[_] = runtimeClass
-  }
-import scala.io.Source
-import java.io.File
+import org.eclipse.swt.layout.{GridLayout, GridData, FillLayout}
+import org.eclipse.swt.events.{SelectionAdapter, SelectionEvent, FocusAdapter, FocusEvent, KeyAdapter, KeyEvent}
+import scala.collection.mutable
+import java.io.{File, PrintWriter, BufferedReader, FileReader}
+import scala.util.{Try, Success, Failure}
 
 class ModelControlPanel(parent: Composite) extends Composite(parent, SWT.NONE) {
 
+  private var demoApp: Option[DemoApp] = None
+  private var currentModelPath: Option[String] = None
   private val tabFolder = new TabFolder(this, SWT.BORDER)
+  private val parameterControls = mutable.Map[String, Scale]()
+  private val parameterLabels = mutable.Map[String, Label]()
+  private val parameterTexts = mutable.Map[String, Text]()
 
   // Constructor block
   {
-    this.setLayout(new GridLayout(1, false))
-
-    // Add Load JSON button
-    val loadJsonButton = new Button(this, SWT.PUSH)
-    loadJsonButton.setText("Load JSON")
-    loadJsonButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false))
-
-    loadJsonButton.addListener(SWT.Selection, _ => {
-      val fileDialog = new FileDialog(getShell, SWT.OPEN)
-      fileDialog.setText("Load JSON File")
-      fileDialog.setFilterExtensions(Array("*.json"))
-      val filePath = fileDialog.open()
-
-      if (filePath != null) {
-        loadJsonFromFile(filePath) match {
-          case Some(modelData) =>
-            println(s"Successfully loaded JSON file: $filePath")
-            tabFolder.getItems.foreach(_.dispose()) // Clear existing tabs
-            createPhysicsTabs(modelData)           // Create new tabs
+    this.setLayout(new FillLayout)
+    tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true))
+    
+    // Create initial empty state
+    createEmptyState()
+  }
+  
+  def setDemoApp(app: Option[DemoApp]): Unit = {
+    demoApp = app
+    // Update model path when demo app changes
+    app.foreach { app =>
+      app.avatarHolder.foreach { avatar =>
+        // Extract model path from avatar settings
+        val modelPath = new File(avatar.avatarSettings.mocFile).getParent
+        currentModelPath = Some(modelPath)
+        println(s"[ModelControl] Model path set to: $modelPath")
+      }
+    }
+    updateParameterDisplay()
+  }
+  
+  private def createEmptyState(): Unit = {
+    // Clear existing tabs
+    tabFolder.getItems.foreach(_.dispose())
+    
+    // Create empty state tab
+    val emptyComposite = new Composite(tabFolder, SWT.NONE)
+    emptyComposite.setLayout(new GridLayout(1, false))
+    
+    val emptyTab = new TabItem(tabFolder, SWT.NONE)
+    emptyTab.setText("Model Control")
+    emptyTab.setControl(emptyComposite)
+    
+    val emptyLabel = new Label(emptyComposite, SWT.CENTER)
+    emptyLabel.setText("No model loaded")
+    emptyLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true))
+    
             tabFolder.layout()
+  }
+  
+  private def updateParameterDisplay(): Unit = {
+    demoApp match {
+      case Some(app) =>
+        app.avatarHolder.flatMap(_.model.parameters.headOption) match {
+          case Some(_) =>
+            createParameterTabs(app)
           case None =>
-            println(s"Failed to load JSON file: $filePath")
+            createEmptyState()
+        }
+      case None =>
+        createEmptyState()
+    }
+  }
+  
+  private def createParameterTabs(app: DemoApp): Unit = {
+    // Clear existing tabs
+    tabFolder.getItems.foreach(_.dispose())
+    parameterControls.clear()
+    parameterLabels.clear()
+    parameterTexts.clear()
+    
+    val model = app.avatarHolder.get.model
+    val parameters = model.parameters.values.toList
+    
+    // Group parameters by category
+    val parameterGroups = groupParameters(parameters)
+    
+    // Define the desired order: Facial Expression first, Other last
+    val categoryOrder = List("Facial Expression", "Head Pose", "Body Pose", "Other")
+    
+    // Create tabs in the specified order
+    categoryOrder.foreach { category =>
+      parameterGroups.get(category).foreach { params =>
+        createParameterTab(category, params, model)
+      }
+    }
+    
+    // Ensure Facial Expression tab is selected first (if it exists)
+    if (parameterGroups.contains("Facial Expression")) {
+      val facialExpressionTab = tabFolder.getItems.find(_.getText == "Facial Expression")
+      facialExpressionTab.foreach(tabFolder.setSelection)
+    }
+    
+    tabFolder.layout()
+    
+    // Load saved parameters after creating all controls and layout
+    // Use a small delay to ensure UI is fully initialized
+    val display = tabFolder.getDisplay
+    display.asyncExec(new Runnable {
+      override def run(): Unit = {
+        loadSavedParameters()
+      }
+    })
+  }
+  
+  private def groupParameters(parameters: List[Parameter]): Map[String, List[Parameter]] = {
+    parameters.groupBy { param =>
+      val id = param.id.toLowerCase
+      if (id.contains("eye")) "Facial Expression"
+      else if (id.contains("mouth") || id.contains("brow") || id.contains("cheek")) "Facial Expression"
+      else if (id.contains("angle") || id.contains("head")) "Head Pose"
+      else if (id.contains("body") || id.contains("arm") || id.contains("hand")) "Body Pose"
+      else "Other"
+    }
+  }
+  
+  private def createParameterTab(category: String, parameters: List[Parameter], model: moe.brianhsu.live2d.enitiy.model.Live2DModel): Unit = {
+    // Create ScrolledComposite for scrollable content (only vertical scrollbar)
+    val scrolledComposite = new ScrolledComposite(tabFolder, SWT.V_SCROLL)
+    scrolledComposite.setLayout(new FillLayout)
+    
+    // Create content composite inside scrolled composite
+    val contentComposite = new Composite(scrolledComposite, SWT.NONE)
+    contentComposite.setLayout(new GridLayout(1, false)) // Single column layout for better control
+    
+    // Set the content of scrolled composite
+    scrolledComposite.setContent(contentComposite)
+    
+    // Create tab item
+    val tabItem = new TabItem(tabFolder, SWT.NONE)
+    tabItem.setText(category)
+    tabItem.setControl(scrolledComposite)
+    
+    // Create parameters container with two columns
+    val parametersContainer = new Composite(contentComposite, SWT.NONE)
+    parametersContainer.setLayout(new GridLayout(2, false))
+    parametersContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true))
+    
+    // Create parameter controls in two columns
+    parameters.zipWithIndex.foreach { case (param, index) =>
+      createParameterControl(parametersContainer, param, model, index)
+    }
+    
+    // Add Save and Reset buttons at the bottom, separated from parameters (for all tabs)
+    createControlButtons(contentComposite)
+    
+    // Set minimum size and expand the content
+    contentComposite.pack()
+    scrolledComposite.setMinSize(contentComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT))
+    scrolledComposite.setExpandHorizontal(true)
+    scrolledComposite.setExpandVertical(true)
+  }
+  
+  private def createParameterControl(parent: Composite, param: Parameter, model: moe.brianhsu.live2d.enitiy.model.Live2DModel, index: Int): Unit = {
+    // Create group for parameter
+    val group = new Group(parent, SWT.SHADOW_ETCHED_IN)
+    group.setLayout(new GridLayout(1, false))
+    group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false))
+    
+    // Parameter name label
+    val nameLabel = new Label(group, SWT.CENTER)
+    nameLabel.setText(formatParameterName(param.id))
+    nameLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false))
+    
+    // Editable value text field
+    val valueText = new Text(group, SWT.CENTER | SWT.BORDER)
+    valueText.setText(f"${param.current}%.2f")
+    valueText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false))
+    parameterTexts(param.id) = valueText
+    
+    // Scale control for parameter value
+    val scale = new Scale(group, SWT.HORIZONTAL)
+    scale.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false))
+    scale.setMinimum((param.min * 100).toInt)
+    scale.setMaximum((param.max * 100).toInt)
+    scale.setSelection((param.current * 100).toInt)
+    scale.setIncrement(1)
+    scale.setPageIncrement(10)
+    parameterControls(param.id) = scale
+    
+    // Helper function to update parameter value
+    def updateParameterValue(newValue: Float): Unit = {
+      // Clamp value to valid range
+      val clampedValue = Math.max(param.min, Math.min(param.max, newValue))
+      param.update(clampedValue)
+      valueText.setText(f"$clampedValue%.2f")
+      scale.setSelection((clampedValue * 100).toInt)
+      
+      // Force model update to reflect parameter changes immediately
+      model.update()
+      
+      // Also trigger a display update to ensure visual changes are rendered
+      demoApp.foreach { app =>
+        app.display(true) // Force update
+      }
+      
+      // Auto-save parameters when they change
+      saveParameters()
+    }
+    
+    // Add selection listener for scale
+    scale.addSelectionListener(new SelectionAdapter {
+      override def widgetSelected(e: SelectionEvent): Unit = {
+        val newValue = scale.getSelection / 100.0f
+        updateParameterValue(newValue)
+      }
+    })
+    
+    // Add key listener for text field (Enter key to apply)
+    valueText.addKeyListener(new KeyAdapter {
+      override def keyPressed(e: KeyEvent): Unit = {
+        if (e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR) {
+          try {
+            val newValue = valueText.getText.toFloat
+            updateParameterValue(newValue)
+          } catch {
+            case _: NumberFormatException =>
+              // Invalid input, revert to current value
+              valueText.setText(f"${param.current}%.2f")
+          }
         }
       }
     })
-
-    // Attempt to load default JSON from def_avatar folder
-    val defaultJsonPath = "def_avatar"
-    val files = Option(new File(defaultJsonPath).listFiles).getOrElse(Array.empty[File])
-    val defaultJsonFiles = files.filter(file => file.isFile && file.getName.endsWith("physics3.json"))
-
-    if (defaultJsonFiles.isEmpty) {
-      // Print warning and allow program to continue
-      System.err.println("[WARN] No physics3.json files found in def_avatar. Skipping default model load.")
-      new Label(this, SWT.NONE).setText("No default model data found.")
-    } else {
-      val defaultJsonFile = defaultJsonFiles.head
-      loadJsonFromFile(defaultJsonFile.getAbsolutePath) match {
-        case Some(modelData) =>
-          println(s"Successfully loaded default JSON file: ${defaultJsonFile.getAbsolutePath}")
-          createPhysicsTabs(modelData)
-          this.layout()
-        case None =>
-          println(s"Failed to load default JSON file: ${defaultJsonFile.getAbsolutePath}")
-          new Label(this, SWT.NONE).setText("Failed to load default model data.")
+    
+    // Add focus listener for text field (apply on focus lost)
+    valueText.addFocusListener(new FocusAdapter {
+      override def focusLost(e: FocusEvent): Unit = {
+        try {
+          val newValue = valueText.getText.toFloat
+          updateParameterValue(newValue)
+        } catch {
+          case _: NumberFormatException =>
+            // Invalid input, revert to current value
+            valueText.setText(f"${param.current}%.2f")
+        }
       }
-    }
-
-    tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true))
+    })
   }
-
-  // Load and parse JSON file
-  private def loadJsonFromFile(filePath: String): Option[ModelData] = {
-    try {
-      val jsonContent = Source.fromFile(filePath, "UTF-8").mkString
-      given formats: DefaultFormats.type = DefaultFormats
-      Some(parse(jsonContent).extract[ModelData])
-    } catch {
-      case ex: Exception =>
-        println(s"Error loading JSON file: ${ex.getMessage}")
-        None
+  
+  private def createControlButtons(parent: Composite): Unit = {
+    // Create a group for control buttons
+    val buttonGroup = new Group(parent, SWT.SHADOW_ETCHED_IN)
+    buttonGroup.setLayout(new GridLayout(2, true))
+    buttonGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false))
+    
+    // Save button
+    val saveButton = new Button(buttonGroup, SWT.PUSH)
+    saveButton.setText("Save Parameters")
+    saveButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false))
+    saveButton.addSelectionListener(new SelectionAdapter {
+      override def widgetSelected(e: SelectionEvent): Unit = {
+        saveParameters()
+      }
+    })
+    
+    // Reset button
+    val resetButton = new Button(buttonGroup, SWT.PUSH)
+    resetButton.setText("Reset to Default")
+    resetButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false))
+    resetButton.addSelectionListener(new SelectionAdapter {
+      override def widgetSelected(e: SelectionEvent): Unit = {
+        resetAllParameters()
+      }
+    })
+  }
+  
+  private def formatParameterName(paramId: String): String = {
+    // Convert parameter ID to readable name
+    paramId
+      .replace("Param", "")
+      .replaceAll("([A-Z])", " $1")
+      .trim
+      .split(" ")
+      .map(_.capitalize)
+      .mkString(" ")
+  }
+  
+  def refreshParameters(): Unit = {
+    demoApp.foreach { app =>
+      app.avatarHolder.foreach { avatar =>
+        val model = avatar.model
+        println(s"[ModelControl] Refreshing parameters, found ${parameterControls.size} controls")
+        parameterControls.foreach { case (paramId, scale) =>
+          model.parameters.get(paramId).foreach { param =>
+            val currentValue = param.current
+            scale.setSelection((currentValue * 100).toInt)
+            parameterTexts.get(paramId).foreach(_.setText(f"$currentValue%.2f"))
+            println(s"[ModelControl] Refreshed $paramId: $currentValue")
+          }
+        }
+        
+        // Force UI update to ensure changes are visible
+        val display = tabFolder.getDisplay
+        display.asyncExec(new Runnable {
+          override def run(): Unit = {
+            tabFolder.layout()
+            tabFolder.getParent.layout()
+            println(s"[ModelControl] UI layout refreshed")
+          }
+        })
+      }
     }
   }
-
-  // Create tabs for physics settings
-  private def createPhysicsTabs(modelData: ModelData): Unit = {
-    val metaComposite = new Composite(tabFolder, SWT.NONE)
-    metaComposite.setLayout(new GridLayout(2, false))
-    val metaTab = new TabItem(tabFolder, SWT.NONE)
-    metaTab.setText("Meta")
-    metaTab.setControl(metaComposite)
-
-    new Label(metaComposite, SWT.NONE).setText("Version:")
-    val versionText = new Text(metaComposite, SWT.BORDER)
-    versionText.setText(modelData.Version.toString)
-
-    new Label(metaComposite, SWT.NONE).setText("FPS:")
-    val fpsText = new Text(metaComposite, SWT.BORDER)
-    fpsText.setText(modelData.Meta.Fps.toString)
-
-    new Label(metaComposite, SWT.NONE).setText("Gravity:")
-    val gravityText = new Text(metaComposite, SWT.BORDER)
-    gravityText.setText(s"X: ${modelData.Meta.EffectiveForces.Gravity.X}, Y: ${modelData.Meta.EffectiveForces.Gravity.Y}")
-
-    new Label(metaComposite, SWT.NONE).setText("Wind:")
-    val windText = new Text(metaComposite, SWT.BORDER)
-    windText.setText(s"X: ${modelData.Meta.EffectiveForces.Wind.X}, Y: ${modelData.Meta.EffectiveForces.Wind.Y}")
-
-    if (modelData.Meta.PhysicsDictionary.isEmpty) {
-      println("PhysicsDictionary is empty, no tabs to create.")
-    } else {
-      modelData.Meta.PhysicsDictionary.foreach { setting =>
-        val tabItem = new TabItem(tabFolder, SWT.NONE)
-        tabItem.setText(setting.Name)
-
-        val composite = new Composite(tabFolder, SWT.NONE)
-        composite.setLayout(new GridLayout(1, false))
-        tabItem.setControl(composite)
-
-        createPhysicsContent(composite, setting.Id, modelData)
-      }
-    }
-    tabFolder.layout()
+  
+  def startRealTimeRefresh(): Unit = {
+    // Real-time refresh is handled by the parameter change listeners
+    // This method is kept for compatibility but doesn't need to do anything
+    // since parameter updates are handled immediately when they change
   }
-
-  // Create UI content for a given physics setting
-  private def createPhysicsContent(parent: Composite, settingId: String, modelData: ModelData): Unit = {
-    val setting = modelData.PhysicsSettings.find(_.Id == settingId)
-
-    setting.foreach { physicsSetting =>
-      parent.setLayout(new GridLayout(2, false))
-
-      // Input Parameters
-      new Label(parent, SWT.NONE).setText("Input Parameters:")
-      val inputComposite = new Composite(parent, SWT.NONE)
-      inputComposite.setLayout(new GridLayout(2, false))
-      physicsSetting.Input.foreach { input =>
-        new Label(inputComposite, SWT.NONE).setText(s"Source: ${input.Source.Id}, Type: ${input.Type}")
-        val weightText = new Text(inputComposite, SWT.BORDER)
-        weightText.setText(input.Weight.toString)
+  
+  def resetAllParameters(): Unit = {
+    demoApp.foreach { app =>
+      app.avatarHolder.foreach { avatar =>
+        val model = avatar.model
+        model.parameters.values.foreach { param =>
+          param.update(param.default)
+        }
+        model.update()
+        refreshParameters()
       }
-
-      // Output Parameters
-      new Label(parent, SWT.NONE).setText("Output Parameters:")
-      val outputComposite = new Composite(parent, SWT.NONE)
-      outputComposite.setLayout(new GridLayout(2, false))
-      physicsSetting.Output.foreach { output =>
-        new Label(outputComposite, SWT.NONE).setText(s"Destination: ${output.Destination.Id}, Type: ${output.Type}")
-        val scaleText = new Text(outputComposite, SWT.BORDER)
-        scaleText.setText(output.Scale.toString)
-      }
-
-      // Vertices
-      new Label(parent, SWT.NONE).setText("Vertices:")
-      val vertexComposite = new Composite(parent, SWT.NONE)
-      vertexComposite.setLayout(new GridLayout(4, false))
-      physicsSetting.Vertices.foreach { vertex =>
-        new Label(vertexComposite, SWT.NONE).setText(s"Position: (${vertex.Position.X}, ${vertex.Position.Y})")
-        val mobilityText = new Text(vertexComposite, SWT.BORDER)
-        mobilityText.setText(vertex.Mobility.toString)
-      }
-
-      // Normalization
-      new Label(parent, SWT.NONE).setText("Normalization:")
-      val normComposite = new Composite(parent, SWT.NONE)
-      normComposite.setLayout(new GridLayout(2, false))
-      new Label(normComposite, SWT.NONE).setText(s"Position:")
-      val positionText = new Text(normComposite, SWT.BORDER)
-      positionText.setText(s"Min=${physicsSetting.Normalization.Position.Minimum}, Max=${physicsSetting.Normalization.Position.Maximum}, Default=${physicsSetting.Normalization.Position.Default}")
-      new Label(normComposite, SWT.NONE).setText(s"Angle:")
-      val angleText = new Text(normComposite, SWT.BORDER)
-      angleText.setText(s"Min=${physicsSetting.Normalization.Angle.Minimum}, Max=${physicsSetting.Normalization.Angle.Maximum}, Default=${physicsSetting.Normalization.Angle.Default}")
     }
-
-    parent.layout()
+  }
+  
+  def saveParameters(): Unit = {
+    currentModelPath.foreach { modelPath =>
+      demoApp.foreach { app =>
+        app.avatarHolder.foreach { avatar =>
+          val model = avatar.model
+          val paramFile = new File(modelPath, "model_parameters.txt")
+          
+          Try {
+            val writer = new PrintWriter(paramFile)
+            try {
+              // Write header
+              writer.println("# Live2D Model Parameters")
+              writer.println("# Format: parameterId=value")
+              writer.println()
+              
+              // Write all current parameter values
+              model.parameters.foreach { case (paramId, param) =>
+                writer.println(s"$paramId=${param.current}")
+              }
+              
+              writer.flush()
+              println(s"[ModelControl] Parameters saved to: ${paramFile.getAbsolutePath}")
+            } finally {
+              writer.close()
+            }
+          } match {
+            case Success(_) => 
+              println(s"[ModelControl] Successfully saved parameters to ${paramFile.getAbsolutePath}")
+            case Failure(e) => 
+              println(s"[ModelControl] Failed to save parameters: ${e.getMessage}")
+          }
+        }
+      }
+    }
+  }
+  
+  def loadParameters(): Unit = {
+    loadSavedParameters()
+  }
+  
+  private def loadSavedParameters(): Unit = {
+    currentModelPath.foreach { modelPath =>
+      demoApp.foreach { app =>
+        app.avatarHolder.foreach { avatar =>
+          val model = avatar.model
+          val paramFile = new File(modelPath, "model_parameters.txt")
+          
+          if (paramFile.exists()) {
+            Try {
+              val reader = new BufferedReader(new FileReader(paramFile))
+              try {
+                var line: String = null
+                var loadedCount = 0
+                
+                while ({ line = reader.readLine(); line != null }) {
+                  val trimmedLine = line.trim
+                  
+                  // Skip empty lines and comments
+                  if (trimmedLine.nonEmpty && !trimmedLine.startsWith("#")) {
+                    val parts = trimmedLine.split("=", 2)
+                    if (parts.length == 2) {
+                      val paramId = parts(0).trim
+                      val valueStr = parts(1).trim
+                      
+                      Try {
+                        val value = valueStr.toFloat
+                        model.parameters.get(paramId).foreach { param =>
+                          // Clamp value to valid range
+                          val clampedValue = Math.max(param.min, Math.min(param.max, value))
+                          param.update(clampedValue)
+                          loadedCount += 1
+                        }
+                      }.recover {
+                        case _: NumberFormatException =>
+                          println(s"[ModelControl] Invalid parameter value for $paramId: $valueStr")
+                      }
+                    }
+                  }
+                }
+                
+                // Update UI controls to reflect loaded values
+                refreshParameters()
+                
+                // Force UI update after loading parameters
+                val display = tabFolder.getDisplay
+                display.asyncExec(new Runnable {
+                  override def run(): Unit = {
+                    // Force refresh of all parameter controls
+                    parameterControls.foreach { case (paramId, scale) =>
+                      model.parameters.get(paramId).foreach { param =>
+                        val currentValue = param.current
+                        scale.setSelection((currentValue * 100).toInt)
+                        parameterTexts.get(paramId).foreach(_.setText(f"$currentValue%.2f"))
+                        println(s"[ModelControl] Updated UI for $paramId: $currentValue")
+                      }
+                    }
+                    
+                    // Force layout update
+                    tabFolder.layout()
+                    tabFolder.getParent.layout()
+                    println(s"[ModelControl] UI layout updated after loading parameters")
+                  }
+                })
+                
+                println(s"[ModelControl] Loaded $loadedCount parameters from ${paramFile.getAbsolutePath}")
+              } finally {
+                reader.close()
+              }
+            } match {
+              case Success(_) => 
+                println(s"[ModelControl] Successfully loaded parameters from ${paramFile.getAbsolutePath}")
+              case Failure(e) => 
+                println(s"[ModelControl] Failed to load parameters: ${e.getMessage}")
+            }
+          } else {
+            println(s"[ModelControl] No parameter file found at ${paramFile.getAbsolutePath}, using default values")
+          }
+        }
+      }
+    }
   }
 }
-
-// JSON data model classes (unchanged) [omitted for brevity]
-case class ModelData(
-  Version: Int,
-  Meta: MetaData,
-  PhysicsSettings: List[PhysicsSetting]
-)
-
-case class MetaData(
-  Fps: Int,
-  EffectiveForces: EffectiveForces,
-  PhysicsDictionary: List[PhysicsSettingInfo]
-)
-
-case class EffectiveForces(
-  Gravity: Force,
-  Wind: Force
-)
-
-case class Force(
-  X: Double,
-  Y: Double
-)
-
-case class PhysicsSettingInfo(
-  Id: String,
-  Name: String
-)
-
-case class PhysicsSetting(
-  Id: String,
-  Input: List[PhysicsInput],
-  Output: List[PhysicsOutput],
-  Vertices: List[Vertex],
-  Normalization: Normalization
-)
-
-case class PhysicsInput(
-  Source: SourceInfo,
-  Weight: Double,
-  Type: String,
-  Reflect: Boolean
-)
-
-case class PhysicsOutput(
-  Destination: DestinationInfo,
-  VertexIndex: Int,
-  Scale: Double,
-  Weight: Double,
-  Type: String,
-  Reflect: Boolean
-)
-
-case class Vertex(
-  Position: Position,
-  Mobility: Double,
-  Delay: Double,
-  Acceleration: Double,
-  Radius: Double
-)
-
-case class Normalization(
-  Position: Range,
-  Angle: Range
-)
-
-case class Range(
-  Minimum: Double,
-  Default: Double,
-  Maximum: Double
-)
-
-case class SourceInfo(
-  Id: String
-)
-
-case class DestinationInfo(
-  Id: String
-)
-
-case class Position(
-  X: Double,
-  Y: Double
-)
