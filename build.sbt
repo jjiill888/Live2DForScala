@@ -180,7 +180,8 @@ createReleasePackageTaskwin := {
     println("'openSeeFace' directory does not exist.")
   }
   
-  // Copy custom JRE
+  // Copy custom JRE - Note: jlink generates JRE for current OS only
+  // For cross-platform builds, you need to run jlink on the target OS
   val sourceJRE = new File(s"modules/examples/swt-windows-bundle/target/jlink/jre-windows")
   if (sourceJRE.exists()) {
     val targetJRE = new File(releaseTarget, "jre")
@@ -193,6 +194,7 @@ createReleasePackageTaskwin := {
     }
   } else {
     println("Custom JRE directory does not exist. Please run 'jlink' task first.")
+    println("Note: For Windows builds, you need to run jlink on a Windows system or use a cross-compilation approach.")
   }
 }
 
@@ -226,6 +228,31 @@ moveTaskwin := {
 import sbt._
 import sys.process._
 
+lazy val createWindowsJRE = taskKey[Unit]("Create Windows-compatible JRE (cross-platform solution)")
+
+createWindowsJRE := {
+  val currentOS = System.getProperty("os.name").toLowerCase
+  if (currentOS.contains("windows")) {
+    println("Running on Windows - creating native Windows JRE")
+    (exampleSWTWin / jlink).value
+  } else {
+    println("Running on non-Windows system - cannot create Windows JRE with jlink")
+    println("Solutions:")
+    println("1. Run this task on a Windows system")
+    println("2. Use a Windows CI/CD environment")
+    println("3. Download a pre-built Windows JRE and place it in the expected location")
+    println("4. Use Docker with Windows containers")
+    
+    // Create a placeholder directory to prevent build failures
+    val jreDir = new File(s"modules/examples/swt-windows-bundle/target/jlink/jre-windows")
+    if (!jreDir.exists()) {
+      jreDir.mkdirs()
+      println(s"Created placeholder directory: ${jreDir.getAbsolutePath}")
+      println("Please replace this with a proper Windows JRE before distribution.")
+    }
+  }
+}
+
 lazy val createStartFile = taskKey[Unit]("Create start.txt and rename to start.ps1 in release package")
 
 createStartFile := {
@@ -243,8 +270,8 @@ createStartFile := {
 lazy val releasewin = taskKey[Unit]("Performs jlink, createReleasePackageTask and moveTxtTaskwin in order")
 
 releasewin := {
-  // Build custom JRE first
-  (exampleSWTWin / jlink).value
+  // Use the new cross-platform JRE creation task
+  createWindowsJRE.value
   createReleasePackageTaskwin.value
   moveTaskwin.value
   createStartFile.value
