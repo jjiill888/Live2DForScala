@@ -76,6 +76,9 @@ Extract the downloaded archive.
 - **Mouse Controls**:
   - Right-click and drag to move the avatar
   - Scroll wheel to zoom in/out
+  - **Left double-click** to toggle control panel visibility
+- **Keyboard Controls**:
+  - **ESC key** to toggle control panel visibility
 - Click `Default Avatar` to auto-load from the `def_avatar/` folder next to the JAR
 - The application saves the last loaded model path to `last_avatar`
   - It auto-loads this model on next launch
@@ -98,6 +101,7 @@ You can run two face tracking instances simultaneously on one computer by settin
 - **OBS-Friendly Transparency** – For streaming with alpha channel
 - **Simulated Eye Gaze** – Natural idle gaze movement
 - **XWayland support** SWT version can working on XWayland
+- **UI Toggle Controls** – ESC key or left double-click to hide/show control panels
 - Run two Avatar on the same computer
 ---
 
