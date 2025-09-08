@@ -1,6 +1,6 @@
 package moe.brianhsu.live2d.demo.swt.widget
 
-import moe.brianhsu.live2d.demo.app.DemoApp
+import moe.brianhsu.live2d.demo.app.{DemoApp, LanguageManager}
 import moe.brianhsu.live2d.enitiy.model.parameter.Parameter
 import org.eclipse.swt.widgets.{Composite, TabFolder, TabItem, Button, Label, Scale, Text, Group}
 import org.eclipse.swt.custom.ScrolledComposite
@@ -24,6 +24,9 @@ class ModelControlPanel(parent: Composite) extends Composite(parent, SWT.NONE) {
   {
     this.setLayout(new FillLayout)
     tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true))
+    
+    // Add language change listener
+    LanguageManager.addLanguageChangeListener(() => updateUITexts())
     
     // Create initial empty state
     createEmptyState()
@@ -90,7 +93,12 @@ class ModelControlPanel(parent: Composite) extends Composite(parent, SWT.NONE) {
     val parameterGroups = groupParameters(parameters)
     
     // Define the desired order: Facial Expression first, Other last
-    val categoryOrder = List("Facial Expression", "Head Pose", "Body Pose", "Other")
+    val categoryOrder = List(
+      LanguageManager.getText("model_control.facial_expression"),
+      LanguageManager.getText("model_control.head_pose"), 
+      LanguageManager.getText("model_control.body_pose"),
+      LanguageManager.getText("model_control.other")
+    )
     
     // Create tabs in the specified order
     categoryOrder.foreach { category =>
@@ -100,8 +108,9 @@ class ModelControlPanel(parent: Composite) extends Composite(parent, SWT.NONE) {
     }
     
     // Ensure Facial Expression tab is selected first (if it exists)
-    if (parameterGroups.contains("Facial Expression")) {
-      val facialExpressionTab = tabFolder.getItems.find(_.getText == "Facial Expression")
+    val facialExpressionCategory = LanguageManager.getText("model_control.facial_expression")
+    if (parameterGroups.contains(facialExpressionCategory)) {
+      val facialExpressionTab = tabFolder.getItems.find(_.getText == facialExpressionCategory)
       facialExpressionTab.foreach(tabFolder.setSelection)
     }
     
@@ -120,11 +129,11 @@ class ModelControlPanel(parent: Composite) extends Composite(parent, SWT.NONE) {
   private def groupParameters(parameters: List[Parameter]): Map[String, List[Parameter]] = {
     parameters.groupBy { param =>
       val id = param.id.toLowerCase
-      if (id.contains("eye")) "Facial Expression"
-      else if (id.contains("mouth") || id.contains("brow") || id.contains("cheek")) "Facial Expression"
-      else if (id.contains("angle") || id.contains("head")) "Head Pose"
-      else if (id.contains("body") || id.contains("arm") || id.contains("hand")) "Body Pose"
-      else "Other"
+      if (id.contains("eye")) LanguageManager.getText("model_control.facial_expression")
+      else if (id.contains("mouth") || id.contains("brow") || id.contains("cheek")) LanguageManager.getText("model_control.facial_expression")
+      else if (id.contains("angle") || id.contains("head")) LanguageManager.getText("model_control.head_pose")
+      else if (id.contains("body") || id.contains("arm") || id.contains("hand")) LanguageManager.getText("model_control.body_pose")
+      else LanguageManager.getText("model_control.other")
     }
   }
   
@@ -259,7 +268,7 @@ class ModelControlPanel(parent: Composite) extends Composite(parent, SWT.NONE) {
     
     // Save button
     val saveButton = new Button(buttonGroup, SWT.PUSH)
-    saveButton.setText("Save Parameters")
+    saveButton.setText(LanguageManager.getText("model_control.save_parameters"))
     saveButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false))
     saveButton.addSelectionListener(new SelectionAdapter {
       override def widgetSelected(e: SelectionEvent): Unit = {
@@ -269,7 +278,7 @@ class ModelControlPanel(parent: Composite) extends Composite(parent, SWT.NONE) {
     
     // Reset button
     val resetButton = new Button(buttonGroup, SWT.PUSH)
-    resetButton.setText("Reset to Default")
+    resetButton.setText(LanguageManager.getText("model_control.reset_to_default"))
     resetButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false))
     resetButton.addSelectionListener(new SelectionAdapter {
       override def widgetSelected(e: SelectionEvent): Unit = {
@@ -279,14 +288,8 @@ class ModelControlPanel(parent: Composite) extends Composite(parent, SWT.NONE) {
   }
   
   private def formatParameterName(paramId: String): String = {
-    // Convert parameter ID to readable name
-    paramId
-      .replace("Param", "")
-      .replaceAll("([A-Z])", " $1")
-      .trim
-      .split(" ")
-      .map(_.capitalize)
-      .mkString(" ")
+    // Get localized parameter name
+    LanguageManager.getText(s"parameter.$paramId")
   }
   
   def refreshParameters(): Unit = {
@@ -373,6 +376,15 @@ class ModelControlPanel(parent: Composite) extends Composite(parent, SWT.NONE) {
   
   def loadParameters(): Unit = {
     loadSavedParameters()
+  }
+  
+  def updateUITexts(): Unit = {
+    // Recreate parameter tabs with new language
+    demoApp.foreach { app =>
+      if (app.avatarHolder.isDefined) {
+        createParameterTabs(app)
+      }
+    }
   }
   
   private def loadSavedParameters(): Unit = {

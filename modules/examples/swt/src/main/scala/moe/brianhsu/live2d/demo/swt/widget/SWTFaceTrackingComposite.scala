@@ -1,6 +1,6 @@
 package moe.brianhsu.live2d.demo.swt.widget
 
-import moe.brianhsu.live2d.demo.app.DemoApp
+import moe.brianhsu.live2d.demo.app.{DemoApp, LanguageManager}
 import moe.brianhsu.live2d.demo.openSeeFace.{CameraListing, ExternalOpenSeeFaceDataReader, OpenSeeFaceSetting}
 import moe.brianhsu.live2d.demo.swt.SWTWithLWJGLMain
 import moe.brianhsu.live2d.demo.swt.widget.faceTracking.{SWTOpenSeeFaceAdvance, SWTOpenSeeFaceBundle}
@@ -62,9 +62,12 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
   {
     this.setLayout(new GridLayout(1, false))
     this.openSeeFaceGroup.setLayout(new GridLayout(2, false))
-    this.openSeeFaceGroup.setText("OpenSeeFace Settings")
+    this.openSeeFaceGroup.setText(LanguageManager.getText("face_tracking.open_see_face_settings"))
 
-    this.outlineGroup.setText("Outline")
+    this.outlineGroup.setText(LanguageManager.getText("face_tracking.outline"))
+    
+    // Add language change listener
+    LanguageManager.addLanguageChangeListener(() => updateUITexts())
     this.outlineGroup.setLayout(new FillLayout)
 
     this.openSeeFacePanel.setLayout(stackLayout)
@@ -86,23 +89,23 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
 
     this.openSeeFacePanel.setLayoutData(gridData2)
 
-    disableEyeBlinkButton.setText("Disable Eye Blink")
+    disableEyeBlinkButton.setText(LanguageManager.getText("face_tracking.disable_eye_blink"))
     val blinkData = new GridData()
     blinkData.horizontalSpan = 2
     disableEyeBlinkButton.setLayoutData(blinkData)
     
-    simulateEyeGazeButton.setText("Simulate Eye Gaze")
+    simulateEyeGazeButton.setText(LanguageManager.getText("face_tracking.simulate_eye_gaze"))
     val gazeData = new GridData()
     gazeData.horizontalSpan = 2
     simulateEyeGazeButton.setLayoutData(gazeData)
 
-    pupilGazeButton.setText("Gaze Tracking")
+    pupilGazeButton.setText(LanguageManager.getText("face_tracking.gaze_tracking"))
     val pupilData = new GridData()
     pupilData.horizontalSpan = 2
     pupilGazeButton.setLayoutData(pupilData)
 
 
-    autoStartButton.setText("Auto Start")
+    autoStartButton.setText(LanguageManager.getText("face_tracking.auto_start"))
     val autoData = new GridData()
     autoData.horizontalSpan = 2
     autoStartButton.setLayoutData(autoData)
@@ -115,6 +118,15 @@ class SWTFaceTrackingComposite(parent: Composite) extends Composite(parent, SWT.
 
   def setDemoApp(demoApp: DemoApp): Unit = {
     this.demoAppHolder = Some(demoApp)
+  }
+  
+  def updateUITexts(): Unit = {
+    this.openSeeFaceGroup.setText(LanguageManager.getText("face_tracking.open_see_face_settings"))
+    this.outlineGroup.setText(LanguageManager.getText("face_tracking.outline"))
+    disableEyeBlinkButton.setText(LanguageManager.getText("face_tracking.disable_eye_blink"))
+    simulateEyeGazeButton.setText(LanguageManager.getText("face_tracking.simulate_eye_gaze"))
+    pupilGazeButton.setText(LanguageManager.getText("face_tracking.gaze_tracking"))
+    autoStartButton.setText(LanguageManager.getText("face_tracking.auto_start"))
   }
 
   def enableStartButton(): Unit = {

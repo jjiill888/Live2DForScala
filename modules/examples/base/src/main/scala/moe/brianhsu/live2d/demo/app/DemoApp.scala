@@ -118,6 +118,13 @@ object DemoApp {
   def loadTransparentBackground(): Boolean =
     readSettings().get("transparentBackground").flatMap(_.toBooleanOption).getOrElse(false)
 
+  def saveLanguage(language: String): Unit =
+    val settings = readSettings() + ("language" -> language)
+    writeSettings(settings)
+
+  def loadLanguage(): String =
+    readSettings().get("language").getOrElse("english")
+
   // Window settings management methods
   def saveWindowSettings(x: Int, y: Int, width: Int, height: Int, maximized: Boolean = false): Unit =
     try {

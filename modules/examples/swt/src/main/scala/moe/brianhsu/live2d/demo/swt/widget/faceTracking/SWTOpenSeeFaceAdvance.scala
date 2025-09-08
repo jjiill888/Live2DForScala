@@ -1,5 +1,6 @@
 package moe.brianhsu.live2d.demo.swt.widget.faceTracking
 
+import moe.brianhsu.live2d.demo.app.LanguageManager
 import moe.brianhsu.live2d.demo.openSeeFace.OpenSeeFaceSetting
 import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.{GridData, GridLayout}
@@ -9,27 +10,21 @@ import scala.annotation.unused
 
 class SWTOpenSeeFaceAdvance(parent: Composite) extends Composite(parent, SWT.NONE) with OpenSeeFaceSetting {
 
-  private val commandText = createTextField(this, "Command:", "python facetracker.py")
-  private val ipText = createTextField(this,"IP:", "127.0.0.1", "Set IP address for sending tracking data")
-  private val portText = createTextField(this,"Port:", "11573", "Set port for sending tracking data")
-  private val cameraIdText = createTextField(this,"Camera ID:", "0", "Set camera ID (0, 1...)")
+  private val commandText = createTextField(this, LanguageManager.getText("openseeface.command"), "python facetracker.py")
+  private val ipText = createTextField(this, LanguageManager.getText("openseeface.ip"), "127.0.0.1", LanguageManager.getText("openseeface.ip_tooltip"))
+  private val portText = createTextField(this, LanguageManager.getText("openseeface.port"), "11573", LanguageManager.getText("openseeface.port_tooltip"))
+  private val cameraIdText = createTextField(this, LanguageManager.getText("openseeface.camera_id"), "0", LanguageManager.getText("openseeface.camera_id_tooltip"))
   private val modelCombo = createComboField(
-    this, "Model:", Array("-3", "-2", "-1", "0", "1", "2", "3", "4"), 7,
-    "This can be used to select the tracking model.\n" +
-      "Higher numbers are models with better tracking quality, but slower speed, " +
-      "except for model 4, which is wink optimized.\n" +
-      "Models 1 and 0 tend to be too rigid for expression and blink detection.\n" +
-      "Model -2 is roughly equivalent to model 1, but faster.\n " +
-      "Model -3 is between models 0 and -1."
+    this, LanguageManager.getText("openseeface.model"), Array("-3", "-2", "-1", "0", "1", "2", "3", "4"), 7,
+    LanguageManager.getText("openseeface.model_tooltip")
   )
   private val visualizeCombo = createComboField(
-    this, "Visualize:", Array("0", "1", "2", "3", "4"), 0,
-    "Set this to 1 to visualize the tracking, to 2 to also show face ids, " +
-      "to 3 to add confidence values or to 4 to add numbers to the point display."
+    this, LanguageManager.getText("openseeface.visualize"), Array("0", "1", "2", "3", "4"), 0,
+    LanguageManager.getText("openseeface.visualize_tooltip")
   )
-  private val extraParameterText = createTextField(this, "Extra Parameters:", "--width 640 --height 480 --fps 60")
-  private val mirrorCheckbox = createCheckbox(this, "Mirror Input", "Process a mirror image of the input video")
-  private val commandPreviewText = createCommandPreview(this, "Command Preview:")
+  private val extraParameterText = createTextField(this, LanguageManager.getText("openseeface.extra_parameters"), "--width 640 --height 480 --fps 60")
+  private val mirrorCheckbox = createCheckbox(this, LanguageManager.getText("openseeface.mirror_input"), LanguageManager.getText("openseeface.mirror_input_tooltip"))
+  private val commandPreviewText = createCommandPreview(this, LanguageManager.getText("openseeface.command_preview"))
 
   {
     this.setLayout(new GridLayout(2, true))

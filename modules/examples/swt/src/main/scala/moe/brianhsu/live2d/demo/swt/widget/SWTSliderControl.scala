@@ -60,6 +60,10 @@ class SWTSliderControl(title: String, min: Int, max: Int, default: Int, parent: 
     scale.setSelection(value)
     valueLabel.setText(s"$value%")
   }
+  
+  def updateLabel(newTitle: String): Unit = {
+    titleLabel.setText(newTitle)
+  }
 
   private def createLabel(title: String): Label = {
     val label = new Label(this, SWT.NONE)

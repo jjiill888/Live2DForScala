@@ -1,6 +1,6 @@
 package moe.brianhsu.live2d.demo.swt.widget
 
-import moe.brianhsu.live2d.demo.app.DemoApp
+import moe.brianhsu.live2d.demo.app.{DemoApp, LanguageManager}
 import moe.brianhsu.live2d.demo.swt.widget.ModelControlPanel
 import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.FillLayout
@@ -14,9 +14,9 @@ class SWTAvatarControlPanel(parent: Composite) extends Composite(parent, SWT.NON
   val tabItemFaceTracking = new TabItem(tabFolder, SWT.NONE)
   val tabItemModelControl = new TabItem(tabFolder, SWT.NONE)
 
-  tabItemNormal.setText("Normal")
-  tabItemFaceTracking.setText("Face Tracking")
-  tabItemModelControl.setText("Model Control")
+  tabItemNormal.setText(LanguageManager.getText("tabs.normal"))
+  tabItemFaceTracking.setText(LanguageManager.getText("tabs.face_tracking"))
+  tabItemModelControl.setText(LanguageManager.getText("tabs.model_control"))
 
   val normalComposite = new Composite(tabFolder, SWT.NONE)
   val faceTrackingComposite = new SWTFaceTrackingComposite(tabFolder)
@@ -35,6 +35,9 @@ class SWTAvatarControlPanel(parent: Composite) extends Composite(parent, SWT.NON
     val fillLayout = new FillLayout(SWT.VERTICAL)
     fillLayout.marginWidth = 10
     this.normalComposite.setLayout(fillLayout)
+    
+    // 添加语言变更监听器
+    LanguageManager.addLanguageChangeListener(() => updateUITexts())
   }
 
   def setDemoApp(demoApp: DemoApp): Unit = {
@@ -46,5 +49,17 @@ class SWTAvatarControlPanel(parent: Composite) extends Composite(parent, SWT.NON
     
     // Start real-time parameter refresh for face tracking integration
     modelControlPanel.startRealTimeRefresh()
+  }
+  
+  private def updateUITexts(): Unit = {
+    tabItemNormal.setText(LanguageManager.getText("tabs.normal"))
+    tabItemFaceTracking.setText(LanguageManager.getText("tabs.face_tracking"))
+    tabItemModelControl.setText(LanguageManager.getText("tabs.model_control"))
+    
+    // Update component texts
+    effectSelector.updateUITexts()
+    motionSelector.updateUITexts()
+    expressionSelector.updateUITexts()
+    faceTrackingComposite.updateUITexts()
   }
 }

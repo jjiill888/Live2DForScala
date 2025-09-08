@@ -1,6 +1,6 @@
 package moe.brianhsu.live2d.demo.swt.widget
 
-import moe.brianhsu.live2d.demo.app.DemoApp
+import moe.brianhsu.live2d.demo.app.{DemoApp, LanguageManager}
 import moe.brianhsu.live2d.demo.app.DemoApp.{ClickAndDrag, FollowMouse}
 import moe.brianhsu.live2d.usecase.updater.impl.EasyUpdateStrategy
 import org.eclipse.swt.SWT
@@ -14,17 +14,17 @@ class SWTEffectSelector(parent: Composite) extends Composite(parent, SWT.NONE) {
   private var demoAppHolder: Option[DemoApp] = None
 
   private val effectGroup = new Group(this, SWT.SHADOW_ETCHED_IN)
-  private val blink = createCheckbox("Blink")
-  private val breath = createCheckbox("Breath")
-  private val faceDirection = createCheckbox("Face Direction", 2)
-  private val faceDirectionMode = createDropdown("Click and drag" :: "Follow by mouse" :: Nil)
-  private val lipSyncFromMic = createCheckbox("Lip Sync", 2)
+  private val blink = createCheckbox(LanguageManager.getText("effects.blink"))
+  private val breath = createCheckbox(LanguageManager.getText("effects.breath"))
+  private val faceDirection = createCheckbox(LanguageManager.getText("effects.face_direction"), 2)
+  private val faceDirectionMode = createDropdown(LanguageManager.getText("effects.click_and_drag") :: LanguageManager.getText("effects.follow_by_mouse") :: Nil)
+  private val lipSyncFromMic = createCheckbox(LanguageManager.getText("effects.lip_sync"), 2)
   private val lipSyncDevice = new SWTMixerSelector(effectGroup, onMixerChanged)
 
   {
     this.setLayout(new FillLayout)
 
-    effectGroup.setText("Effects")
+    effectGroup.setText(LanguageManager.getText("effects.title"))
     effectGroup.setLayout(new GridLayout(2, false))
 
     val deviceSelectorLayoutData = new GridData
@@ -46,6 +46,19 @@ class SWTEffectSelector(parent: Composite) extends Composite(parent, SWT.NONE) {
 
   def setDemoApp(demoApp: DemoApp): Unit = {
     this.demoAppHolder = Some(demoApp)
+  }
+  
+  def updateUITexts(): Unit = {
+    effectGroup.setText(LanguageManager.getText("effects.title"))
+    blink.setText(LanguageManager.getText("effects.blink"))
+    breath.setText(LanguageManager.getText("effects.breath"))
+    faceDirection.setText(LanguageManager.getText("effects.face_direction"))
+    lipSyncFromMic.setText(LanguageManager.getText("effects.lip_sync"))
+    
+    // Update dropdown items
+    faceDirectionMode.removeAll()
+    faceDirectionMode.add(LanguageManager.getText("effects.click_and_drag"))
+    faceDirectionMode.add(LanguageManager.getText("effects.follow_by_mouse"))
   }
 
 

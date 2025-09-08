@@ -1,6 +1,6 @@
 package moe.brianhsu.live2d.demo.swt.widget
 
-import moe.brianhsu.live2d.demo.app.DemoApp
+import moe.brianhsu.live2d.demo.app.{DemoApp, LanguageManager}
 import moe.brianhsu.live2d.enitiy.avatar.Avatar
 import org.eclipse.swt.SWT
 import org.eclipse.swt.events.{SelectionEvent, SelectionListener}
@@ -16,7 +16,7 @@ class SWTExpressionSelector(parent: Composite) extends Composite(parent, SWT.NON
 
   {
     this.setLayout(new FillLayout)
-    this.expressionGroup.setText("Expressions")
+    this.expressionGroup.setText(LanguageManager.getText("expressions.title"))
     this.expressionGroup.setLayout(new FillLayout)
 
     expressionSelector.addSelectionListener(new SelectionListener {
@@ -27,6 +27,10 @@ class SWTExpressionSelector(parent: Composite) extends Composite(parent, SWT.NON
 
   def setDemoApp(demoApp: DemoApp): Unit = {
     this.demoAppHolder = Some(demoApp)
+  }
+  
+  def updateUITexts(): Unit = {
+    this.expressionGroup.setText(LanguageManager.getText("expressions.title"))
   }
 
   def updateExpressionList(avatar: Avatar): Unit = {

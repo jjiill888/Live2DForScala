@@ -1,38 +1,33 @@
 package moe.brianhsu.live2d.demo.swt.widget.faceTracking
 
+import moe.brianhsu.live2d.demo.app.LanguageManager
 import moe.brianhsu.live2d.demo.openSeeFace.{CameraListing, OpenSeeFaceSetting}
 import org.eclipse.swt.SWT
 import org.eclipse.swt.layout.{GridData, GridLayout}
 import org.eclipse.swt.widgets.{Button, Combo, Composite, Label, Text}
 
 class SWTOpenSeeFaceBundle(parent: Composite, cameraListing: CameraListing) extends Composite(parent, SWT.NONE) with OpenSeeFaceSetting {
-  private val cameraCombo = createComboField(this, "Camera:", cameraListing.listing.map(_.title), 0, "Select camera for face tracking")
+  private val cameraCombo = createComboField(this, LanguageManager.getText("openseeface.camera"), cameraListing.listing.map(_.title), 0, LanguageManager.getText("openseeface.camera_tooltip"))
   val webcamResetButton = createResetButton(this)
   private val fpsCombo = createComboField(
-    this, "FPS:", List("24", "30", "60", "120"), 2,
-    "Set camera frames per second"
+    this, LanguageManager.getText("openseeface.fps"), List("24", "30", "60", "120"), 2,
+    LanguageManager.getText("openseeface.fps_tooltip")
   )
 
   private val resolutionCombo = createComboField(
-    this, "Resolution:", List("320x240", "640x480", "1024x768", "1280x720", "1920x1080"), 1,
-    "Set camera resolution"
+    this, LanguageManager.getText("openseeface.resolution"), List("320x240", "640x480", "1024x768", "1280x720", "1920x1080"), 1,
+    LanguageManager.getText("openseeface.resolution_tooltip")
   )
 
-  private val portText = createTextField(this, "Port:", "11573", "Set port for sending tracking data")
+  private val portText = createTextField(this, LanguageManager.getText("openseeface.port"), "11573", LanguageManager.getText("openseeface.port_tooltip"))
 
   private val modelCombo = createComboField(
-    this, "Model:", List("-3", "-2", "-1", "0", "1", "2", "3", "4"), 7,
-    "This can be used to select the tracking model.\n" +
-      "Higher numbers are models with better tracking quality, but slower speed, " +
-      "except for model 4, which is wink optimized.\n" +
-      "Models 1 and 0 tend to be too rigid for expression and blink detection.\n" +
-      "Model -2 is roughly equivalent to model 1, but faster.\n " +
-      "Model -3 is between models 0 and -1."
+    this, LanguageManager.getText("openseeface.model"), List("-3", "-2", "-1", "0", "1", "2", "3", "4"), 7,
+    LanguageManager.getText("openseeface.model_tooltip")
   )
   private val visualizeCombo = createComboField(
-    this, "Visualize:", List("0", "1", "2", "3", "4"), 0,
-    "Set this to 1 to visualize the tracking, to 2 to also show face ids, " +
-      "to 3 to add confidence values or to 4 to add numbers to the point display."
+    this, LanguageManager.getText("openseeface.visualize"), List("0", "1", "2", "3", "4"), 0,
+    LanguageManager.getText("openseeface.visualize_tooltip")
   )
 
   {

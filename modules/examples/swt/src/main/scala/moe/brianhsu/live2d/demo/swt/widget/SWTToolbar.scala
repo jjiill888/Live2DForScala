@@ -1,6 +1,6 @@
 package moe.brianhsu.live2d.demo.swt.widget
 
-import moe.brianhsu.live2d.demo.app.DemoApp
+import moe.brianhsu.live2d.demo.app.{DemoApp, LanguageManager}
 import org.eclipse.swt.SWT
 import org.eclipse.swt.graphics.RGB
 import org.eclipse.swt.layout.FillLayout
@@ -14,16 +14,20 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
   private val toolBar = new ToolBar(this, SWT.NONE)
   private val (
     loadAvatar, changeToDefaultBackground,
-    selectBackground, pureColorBackground, transparentBackground) = createToolItems()
+    selectBackground, pureColorBackground, transparentBackground, languageSelector) = createToolItems()
     transparentBackground.setSelection(DemoApp.loadTransparentBackground())
 
   {
     this.setLayout(new FillLayout)
+    // 初始化语言管理器
+    LanguageManager.initializeFromDemoApp()
+    
     loadAvatar.addListener(SWT.Selection, { (event: Event) => openLoadAvatarDialog(event) })
     selectBackground.addListener(SWT.Selection, { (event: Event) => onSelectBackgroundSelected(event) })
     changeToDefaultBackground.addListener(SWT.Selection, { (event: Event) => onDefaultBackgroundSelected(event) })
     pureColorBackground.addListener(SWT.Selection, { (event: Event) => onPureColorBackground(event) })
     transparentBackground.addListener(SWT.Selection, { (event: Event) => onTransparentBackground(event) })
+    languageSelector.addListener(SWT.Selection, { (event: Event) => onLanguageSelected(event) })
   }
 
   def setDemoApp(demoApp: DemoApp): Unit = {
@@ -42,8 +46,8 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
     } {
       demoApp.changeBackground(selectedFile).failed.foreach { _ =>
         val messageBox = new MessageBox(parent.getShell, SWT.OK|SWT.ICON_ERROR)
-        messageBox.setText("Cannot load background")
-        messageBox.setMessage("Unsupported file type.")
+        messageBox.setText(LanguageManager.getText("message.cannot_load_background"))
+        messageBox.setMessage(LanguageManager.getText("message.unsupported_file_type"))
         messageBox.open()
       }
     }
@@ -51,7 +55,7 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
 
   private def onPureColorBackground(event: Event): Unit = {
     val colorChooser = new ColorDialog(parent.getShell)
-    colorChooser.setText("Select Background Color")
+    colorChooser.setText(LanguageManager.getText("message.select_background_color"))
     colorChooser.setRGB(new RGB(0, 255, 0))
 
     for {
@@ -75,6 +79,26 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
     DemoApp.saveTransparentBackground(false)
   }
 
+  private def onLanguageSelected(event: Event): Unit = {
+    val menu = new Menu(parent.getShell, SWT.POP_UP)
+    
+    LanguageManager.getSupportedLanguages.foreach { case (language, displayName) =>
+      val menuItem = new MenuItem(menu, SWT.RADIO)
+      menuItem.setText(displayName)
+      menuItem.setSelection(LanguageManager.getCurrentLanguage == language)
+      menuItem.addListener(SWT.Selection, { (_: Event) =>
+        LanguageManager.setLanguage(language)
+        DemoApp.saveLanguage(language.toString.toLowerCase)
+        updateUITexts()
+      })
+    }
+    
+    val location = languageSelector.getBounds
+    val point = toolBar.toDisplay(location.x, location.y + location.height)
+    menu.setLocation(point)
+    menu.setVisible(true)
+  }
+
   private def openLoadAvatarDialog(event: Event): Unit = {
     val directoryDialog = new DirectoryDialog(parent.getShell, SWT.OPEN)
     val selectedDirectoryHolder = Option(directoryDialog.open())
@@ -84,7 +108,7 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
     } {
       demoApp.switchAvatar(selectedDirectory).failed.foreach { e =>
         val messageBox = new MessageBox(parent.getShell, SWT.OK|SWT.ICON_ERROR)
-        messageBox.setText("Cannot load avatar.")
+        messageBox.setText(LanguageManager.getText("message.cannot_load_avatar"))
         messageBox.setMessage(e.getMessage)
         messageBox.open()
       }
@@ -92,7 +116,7 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
   }
 
 
-  private def createToolItems(): (ToolItem, ToolItem, ToolItem, ToolItem, ToolItem) = {
+  private def createToolItems(): (ToolItem, ToolItem, ToolItem, ToolItem, ToolItem, ToolItem) = {
     val loadAvatar = new ToolItem(toolBar, SWT.PUSH)
     new ToolItem(toolBar, SWT.SEPARATOR)
     val defaultBackground = new ToolItem(toolBar, SWT.PUSH)
@@ -102,14 +126,26 @@ class SWTToolbar(parent: Composite) extends Composite(parent, SWT.NONE) {
     val pureColorBackground = new ToolItem(toolBar, SWT.PUSH)
     new ToolItem(toolBar, SWT.SEPARATOR)
     val transparentBackground = new ToolItem(toolBar, SWT.CHECK)
+    new ToolItem(toolBar, SWT.SEPARATOR)
+    val languageSelector = new ToolItem(toolBar, SWT.DROP_DOWN)
     transparentBackground.setSelection(DemoApp.loadTransparentBackground())
 
-    loadAvatar.setText("Load Avatar")
-    defaultBackground.setText("Green Background")
-    selectBackground.setText("Select Background")
-    pureColorBackground.setText("Pure Color Background")
-    transparentBackground.setText("Transparent Background")
+    loadAvatar.setText(LanguageManager.getText("toolbar.load_avatar"))
+    defaultBackground.setText(LanguageManager.getText("toolbar.green_background"))
+    selectBackground.setText(LanguageManager.getText("toolbar.select_background"))
+    pureColorBackground.setText(LanguageManager.getText("toolbar.pure_color_background"))
+    transparentBackground.setText(LanguageManager.getText("toolbar.transparent_background"))
+    languageSelector.setText(LanguageManager.getText("toolbar.language"))
 
-    (loadAvatar, defaultBackground, selectBackground, pureColorBackground, transparentBackground)
+    (loadAvatar, defaultBackground, selectBackground, pureColorBackground, transparentBackground, languageSelector)
+  }
+
+  private def updateUITexts(): Unit = {
+    loadAvatar.setText(LanguageManager.getText("toolbar.load_avatar"))
+    changeToDefaultBackground.setText(LanguageManager.getText("toolbar.green_background"))
+    selectBackground.setText(LanguageManager.getText("toolbar.select_background"))
+    pureColorBackground.setText(LanguageManager.getText("toolbar.pure_color_background"))
+    transparentBackground.setText(LanguageManager.getText("toolbar.transparent_background"))
+    languageSelector.setText(LanguageManager.getText("toolbar.language"))
   }
 }

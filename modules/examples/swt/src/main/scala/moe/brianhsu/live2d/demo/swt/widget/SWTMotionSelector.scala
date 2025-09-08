@@ -1,6 +1,6 @@
 package moe.brianhsu.live2d.demo.swt.widget
 
-import moe.brianhsu.live2d.demo.app.DemoApp
+import moe.brianhsu.live2d.demo.app.{DemoApp, LanguageManager}
 import moe.brianhsu.live2d.enitiy.avatar.Avatar
 import moe.brianhsu.live2d.enitiy.avatar.effect.impl.LipSyncFromMotionSound
 import moe.brianhsu.live2d.usecase.updater.impl.GenericUpdateStrategy
@@ -17,10 +17,10 @@ class SWTMotionSelector(parent: Composite) extends Composite(parent, SWT.NONE) {
   private var demoAppHolder: Option[DemoApp] = None
 
   private val group = new Group(this, SWT.SHADOW_ETCHED_IN)
-  private val loop = createCheckbox("Loop")
-  private val lipSync = createCheckbox("Lip Sync")
-  private val lipSyncWeight = new SWTSliderControl("Weight:", 0, 100, 50, group)
-  private val lipSyncVolume = new SWTSliderControl("Volume:", 0, 100, 100, group)
+  private val loop = createCheckbox(LanguageManager.getText("motions.loop"))
+  private val lipSync = createCheckbox(LanguageManager.getText("motions.lip_sync"))
+  private val lipSyncWeight = new SWTSliderControl(LanguageManager.getText("motions.weight"), 0, 100, 50, group)
+  private val lipSyncVolume = new SWTSliderControl(LanguageManager.getText("motions.volume"), 0, 100, 100, group)
 
   private val motionTree = new Tree(group, SWT.BORDER)
 
@@ -29,7 +29,7 @@ class SWTMotionSelector(parent: Composite) extends Composite(parent, SWT.NONE) {
 
     val gridLayout = new GridLayout(1, false)
     group.setLayout(gridLayout)
-    group.setText("Motions")
+    group.setText(LanguageManager.getText("motions.title"))
 
     val loopLayoutData = new GridData
     loopLayoutData.horizontalAlignment = GridData.FILL
@@ -123,6 +123,14 @@ class SWTMotionSelector(parent: Composite) extends Composite(parent, SWT.NONE) {
 
   def setDemoApp(demoApp: DemoApp): Unit = {
     this.demoAppHolder = Some(demoApp)
+  }
+  
+  def updateUITexts(): Unit = {
+    group.setText(LanguageManager.getText("motions.title"))
+    loop.setText(LanguageManager.getText("motions.loop"))
+    lipSync.setText(LanguageManager.getText("motions.lip_sync"))
+    lipSyncWeight.updateLabel(LanguageManager.getText("motions.weight"))
+    lipSyncVolume.updateLabel(LanguageManager.getText("motions.volume"))
   }
 
   def updateMotionTree(avatar: Avatar): Unit = {
