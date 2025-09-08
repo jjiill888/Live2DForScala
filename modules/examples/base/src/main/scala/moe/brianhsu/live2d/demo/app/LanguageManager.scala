@@ -9,6 +9,7 @@ object LanguageManager {
   sealed trait Language
   case object English extends Language
   case object Chinese extends Language
+  case object Japanese extends Language
   
   private val LanguageSettingsFile = new File("language_settings.txt")
   
@@ -337,6 +338,167 @@ object LanguageManager {
       "message.unsupported_file_type" -> "不支持的文件类型。",
       "message.cannot_load_avatar" -> "无法加载模型。",
       "message.select_background_color" -> "选择背景颜色"
+    ),
+    
+    Japanese -> Map(
+      // Toolbar
+      "toolbar.load_avatar" -> "アバター読み込み",
+      "toolbar.green_background" -> "緑背景", 
+      "toolbar.select_background" -> "背景選択",
+      "toolbar.pure_color_background" -> "単色背景",
+      "toolbar.transparent_background" -> "透明背景",
+      "toolbar.language" -> "言語",
+      
+      // Tabs
+      "tabs.normal" -> "通常",
+      "tabs.face_tracking" -> "顔追跡",
+      "tabs.model_control" -> "モデル制御",
+      
+      // Face Tracking
+      "face_tracking.open_see_face_settings" -> "OpenSeeFace設定",
+      "face_tracking.disable_eye_blink" -> "まばたき無効",
+      "face_tracking.simulate_eye_gaze" -> "視線シミュレート", 
+      "face_tracking.gaze_tracking" -> "視線追跡",
+      "face_tracking.auto_start" -> "自動開始",
+      "face_tracking.outline" -> "アウトライン",
+      
+      // OpenSeeFace
+      "openseeface.camera" -> "カメラ:",
+      "openseeface.camera_tooltip" -> "顔追跡用カメラを選択",
+      "openseeface.fps" -> "FPS:",
+      "openseeface.fps_tooltip" -> "カメラのフレームレートを設定",
+      "openseeface.resolution" -> "解像度:",
+      "openseeface.resolution_tooltip" -> "カメラの解像度を設定",
+      "openseeface.port" -> "ポート:",
+      "openseeface.port_tooltip" -> "追跡データ送信用ポートを設定",
+      "openseeface.model" -> "モデル:",
+      "openseeface.model_tooltip" -> "追跡モデルを選択。数字が大きいほど追跡品質は良いが速度は遅い。モデル4はまばたきに特化。モデル1と0は表情とまばたき検出が硬い。モデル-2はモデル1とほぼ同等だが高速。モデル-3はモデル0と-1の中間。",
+      "openseeface.visualize" -> "可視化:",
+      "openseeface.visualize_tooltip" -> "1で追跡を可視化、2で顔ID表示、3で信頼度値追加、4で点表示に数字追加。",
+      "openseeface.command" -> "コマンド:",
+      "openseeface.ip" -> "IP:",
+      "openseeface.ip_tooltip" -> "追跡データ送信用IPアドレスを設定",
+      "openseeface.camera_id" -> "カメラID:",
+      "openseeface.camera_id_tooltip" -> "カメラIDを設定 (0, 1...)",
+      "openseeface.extra_parameters" -> "追加パラメータ:",
+      "openseeface.mirror_input" -> "入力ミラー",
+      "openseeface.mirror_input_tooltip" -> "入力動画のミラー処理",
+      "openseeface.command_preview" -> "コマンドプレビュー:",
+      
+      // Model Control
+      "model_control.facial_expression" -> "顔表情",
+      "model_control.head_pose" -> "頭部姿勢",
+      "model_control.body_pose" -> "体姿勢",
+      "model_control.other" -> "その他",
+      "model_control.save_parameters" -> "パラメータ保存",
+      "model_control.reset_to_default" -> "デフォルトに戻す",
+      
+      // Parameters
+      "parameter.ParamMouthOpenY" -> "口開きY",
+      "parameter.ParamEyeLSmile" -> "左目微笑",
+      "parameter.ParamEyeBallX" -> "眼球X",
+      "parameter.ParamCheek" -> "頬",
+      "parameter.ParamEyeROpen" -> "右目開き",
+      "parameter.ParamBrowLY" -> "左眉Y",
+      "parameter.ParamBrowLForm" -> "左眉形状",
+      "parameter.ParamBrowRAngle" -> "右眉角度",
+      "parameter.ParamBrowRX" -> "右眉X",
+      "parameter.ParamEyeBallY" -> "眼球Y",
+      "parameter.ParamEyeRSmile" -> "右目微笑",
+      "parameter.ParamBrowRY" -> "右眉Y",
+      "parameter.ParamBrowLAngle" -> "左眉角度",
+      "parameter.ParamMouthForm" -> "口形状",
+      "parameter.ParamBrowLX" -> "左眉X",
+      "parameter.ParamBrowRForm" -> "右眉形状",
+      "parameter.ParamEyeLOpen" -> "左目開き",
+      "parameter.ParamBreath" -> "呼吸",
+      "parameter.ParamBodyAngleZ" -> "体角度Z",
+      "parameter.ParamHairSide" -> "横髪",
+      "parameter.ParamBodyAngleY" -> "体角度Y",
+      "parameter.ParamBodyAngleX" -> "体角度X",
+      "parameter.ParamHairFront" -> "前髪",
+      "parameter.ParamHairBack" -> "後髪",
+      "parameter.ParamAngleZ" -> "角度Z",
+      "parameter.ParamAngleY" -> "角度Y",
+      "parameter.ParamAngleX" -> "角度X",
+      "parameter.Param" -> "パラメータ",
+      "parameter.Param2" -> "パラメータ2",
+      "parameter.Param5" -> "パラメータ5",
+      "parameter.Param6" -> "パラメータ6",
+      "parameter.Param7" -> "パラメータ7",
+      "parameter.Param8" -> "パラメータ8",
+      "parameter.Param9" -> "パラメータ9",
+      "parameter.Param11" -> "パラメータ11",
+      "parameter.Param12" -> "パラメータ12",
+      "parameter.Param13" -> "パラメータ13",
+      "parameter.Param14" -> "パラメータ14",
+      "parameter.Param15" -> "パラメータ15",
+      "parameter.Param16" -> "パラメータ16",
+      "parameter.Param17" -> "パラメータ17",
+      "parameter.Param19" -> "パラメータ19",
+      "parameter.Param20" -> "パラメータ20",
+      "parameter.Param21" -> "パラメータ21",
+      "parameter.Param22" -> "パラメータ22",
+      
+      // Angle Rotation Parameters
+      "parameter.Param_Angle_Rotation_1_ArtMesh121" -> "角度回転1",
+      "parameter.Param_Angle_Rotation_2_ArtMesh121" -> "角度回転2",
+      "parameter.Param_Angle_Rotation_3_ArtMesh121" -> "角度回転3",
+      "parameter.Param_Angle_Rotation_4_ArtMesh121" -> "角度回転4",
+      "parameter.Param_Angle_Rotation_5_ArtMesh121" -> "角度回転5",
+      "parameter.Param_Angle_Rotation_6_ArtMesh121" -> "角度回転6",
+      "parameter.Param_Angle_Rotation_7_ArtMesh121" -> "角度回転7",
+      "parameter.Param_Angle_Rotation_8_ArtMesh121" -> "角度回転8",
+      "parameter.Param_Angle_Rotation_9_ArtMesh121" -> "角度回転9",
+      
+      // Additional Parameters
+      "parameter.Param3" -> "パラメータ3",
+      "parameter.Param4" -> "パラメータ4",
+      "parameter.Param10" -> "パラメータ10",
+      "parameter.Param18" -> "パラメータ18",
+      "parameter.Param23" -> "パラメータ23",
+      "parameter.Param24" -> "パラメータ24",
+      "parameter.Param25" -> "パラメータ25",
+      "parameter.Param26" -> "パラメータ26",
+      "parameter.Param27" -> "パラメータ27",
+      "parameter.Param28" -> "パラメータ28",
+      "parameter.Param29" -> "パラメータ29",
+      "parameter.Param30" -> "パラメータ30",
+      "parameter.Param31" -> "パラメータ31",
+      "parameter.Param32" -> "パラメータ32",
+      "parameter.Param33" -> "パラメータ33",
+      "parameter.Param34" -> "パラメータ34",
+      "parameter.Param35" -> "パラメータ35",
+      "parameter.Param36" -> "パラメータ36",
+      "parameter.Param37" -> "パラメータ37",
+      "parameter.Param38" -> "パラメータ38",
+      "parameter.Param39" -> "パラメータ39",
+      "parameter.Param40" -> "パラメータ40",
+      
+      // Effects
+      "effects.title" -> "エフェクト",
+      "effects.blink" -> "まばたき",
+      "effects.breath" -> "呼吸",
+      "effects.face_direction" -> "顔方向",
+      "effects.click_and_drag" -> "クリック&ドラッグ",
+      "effects.follow_by_mouse" -> "マウス追従",
+      "effects.lip_sync" -> "リップシンク",
+      
+      // Motions
+      "motions.title" -> "モーション",
+      "motions.loop" -> "ループ",
+      "motions.lip_sync" -> "リップシンク",
+      "motions.weight" -> "重み:",
+      "motions.volume" -> "音量:",
+      
+      // Expressions
+      "expressions.title" -> "表情",
+      
+      // Messages
+      "message.cannot_load_background" -> "背景を読み込めません",
+      "message.unsupported_file_type" -> "サポートされていないファイルタイプです。",
+      "message.cannot_load_avatar" -> "モデルを読み込めません。",
+      "message.select_background_color" -> "背景色を選択"
     )
   )
   
@@ -349,6 +511,7 @@ object LanguageManager {
     val language = savedLanguage match {
       case "chinese" => Chinese
       case "english" => English
+      case "japanese" => Japanese
       case _ => defaultLanguage
     }
     if (currentLanguage != language) {
@@ -411,6 +574,7 @@ object LanguageManager {
                 value.toLowerCase match {
                   case "chinese" => Some(Chinese)
                   case "english" => Some(English)
+                  case "japanese" => Some(Japanese)
                   case _ => None
                 }
               case _ => None
@@ -430,6 +594,7 @@ object LanguageManager {
   // 获取所有支持的语言
   def getSupportedLanguages: List[(Language, String)] = List(
     (English, "English"),
-    (Chinese, "中文")
+    (Chinese, "中文"),
+    (Japanese, "日本語")
   )
 }
