@@ -1,7 +1,6 @@
 package moe.brianhsu.live2d.demo.app
 
-import java.io.{File, PrintWriter}
-import scala.io.Source
+import moe.brianhsu.live2d.config.UnifiedConfig
 import scala.util.Try
 
 object LanguageManager {
@@ -10,8 +9,6 @@ object LanguageManager {
   case object English extends Language
   case object Chinese extends Language
   case object Japanese extends Language
-  
-  private val LanguageSettingsFile = new File("language_settings.txt")
   
   // 默认语言
   private val defaultLanguage: Language = English
@@ -551,43 +548,20 @@ object LanguageManager {
   }
   
   private def saveLanguage(language: Language): Unit = {
-    Try {
-      val writer = new PrintWriter(LanguageSettingsFile, "UTF-8")
-      try {
-        writer.println(s"language=${language.toString}")
-      } finally writer.close()
-    }.recover {
-      case e: Exception =>
-        System.err.println(s"[WARN] Cannot save language settings: ${e.getMessage}")
+    val languageString = language match {
+      case English => "english"
+      case Chinese => "chinese"
+      case Japanese => "japanese"
     }
+    DemoApp.saveLanguage(languageString)
   }
   
   private def loadLanguage(): Language = {
-    if (LanguageSettingsFile.exists()) {
-      Try {
-        val src = Source.fromFile(LanguageSettingsFile, "UTF-8")
-        try {
-          val lines = src.getLines().toList.map(_.trim).filter(_.nonEmpty)
-          lines.flatMap { line =>
-            line.split("=", 2) match {
-              case Array("language", value) => 
-                value.toLowerCase match {
-                  case "chinese" => Some(Chinese)
-                  case "english" => Some(English)
-                  case "japanese" => Some(Japanese)
-                  case _ => None
-                }
-              case _ => None
-            }
-          }.headOption.getOrElse(defaultLanguage)
-        } finally src.close()
-      }.recover {
-        case e: Exception =>
-          System.err.println(s"[WARN] Cannot read language settings: ${e.getMessage}")
-          defaultLanguage
-      }.getOrElse(defaultLanguage)
-    } else {
-      defaultLanguage
+    val languageString = DemoApp.loadLanguage()
+    languageString.toLowerCase match {
+      case "chinese" => Chinese
+      case "japanese" => Japanese
+      case _ => English
     }
   }
   

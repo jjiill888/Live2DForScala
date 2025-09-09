@@ -2,6 +2,7 @@ package moe.brianhsu.live2d.demo.swt.widget
 
 import moe.brianhsu.live2d.demo.app.{DemoApp, LanguageManager}
 import moe.brianhsu.live2d.enitiy.model.parameter.Parameter
+import moe.brianhsu.live2d.config.UnifiedConfig
 import org.eclipse.swt.widgets.{Composite, TabFolder, TabItem, Button, Label, Scale, Text, Group}
 import org.eclipse.swt.custom.ScrolledComposite
 import org.eclipse.swt.SWT
@@ -339,37 +340,16 @@ class ModelControlPanel(parent: Composite) extends Composite(parent, SWT.NONE) {
   }
   
   def saveParameters(): Unit = {
-    currentModelPath.foreach { modelPath =>
-      demoApp.foreach { app =>
-        app.avatarHolder.foreach { avatar =>
-          val model = avatar.model
-          val paramFile = new File(modelPath, "model_parameters.txt")
-          
-          Try {
-            val writer = new PrintWriter(paramFile)
-            try {
-              // Write header
-              writer.println("# Live2D Model Parameters")
-              writer.println("# Format: parameterId=value")
-              writer.println()
-              
-              // Write all current parameter values
-              model.parameters.foreach { case (paramId, param) =>
-                writer.println(s"$paramId=${param.current}")
-              }
-              
-              writer.flush()
-              println(s"[ModelControl] Parameters saved to: ${paramFile.getAbsolutePath}")
-            } finally {
-              writer.close()
-            }
-          } match {
-            case Success(_) => 
-              println(s"[ModelControl] Successfully saved parameters to ${paramFile.getAbsolutePath}")
-            case Failure(e) => 
-              println(s"[ModelControl] Failed to save parameters: ${e.getMessage}")
-          }
+    demoApp.foreach { app =>
+      app.avatarHolder.foreach { avatar =>
+        val model = avatar.model
+        
+        // 保存所有参数到统一配置
+        model.parameters.foreach { case (paramId, param) =>
+          UnifiedConfig.saveModelParameter(paramId, param.current)
         }
+        
+        println(s"[ModelControl] Parameters saved to unified config")
       }
     }
   }
@@ -388,83 +368,47 @@ class ModelControlPanel(parent: Composite) extends Composite(parent, SWT.NONE) {
   }
   
   private def loadSavedParameters(): Unit = {
-    currentModelPath.foreach { modelPath =>
-      demoApp.foreach { app =>
-        app.avatarHolder.foreach { avatar =>
-          val model = avatar.model
-          val paramFile = new File(modelPath, "model_parameters.txt")
-          
-          if (paramFile.exists()) {
-            Try {
-              val reader = new BufferedReader(new FileReader(paramFile))
-              try {
-                var line: String = null
-                var loadedCount = 0
-                
-                while ({ line = reader.readLine(); line != null }) {
-                  val trimmedLine = line.trim
-                  
-                  // Skip empty lines and comments
-                  if (trimmedLine.nonEmpty && !trimmedLine.startsWith("#")) {
-                    val parts = trimmedLine.split("=", 2)
-                    if (parts.length == 2) {
-                      val paramId = parts(0).trim
-                      val valueStr = parts(1).trim
-                      
-                      Try {
-                        val value = valueStr.toFloat
-                        model.parameters.get(paramId).foreach { param =>
-                          // Clamp value to valid range
-                          val clampedValue = Math.max(param.min, Math.min(param.max, value))
-                          param.update(clampedValue)
-                          loadedCount += 1
-                        }
-                      }.recover {
-                        case _: NumberFormatException =>
-                          println(s"[ModelControl] Invalid parameter value for $paramId: $valueStr")
-                      }
-                    }
-                  }
-                }
-                
-                // Update UI controls to reflect loaded values
-                refreshParameters()
-                
-                // Force UI update after loading parameters
-                val display = tabFolder.getDisplay
-                display.asyncExec(new Runnable {
-                  override def run(): Unit = {
-                    // Force refresh of all parameter controls
-                    parameterControls.foreach { case (paramId, scale) =>
-                      model.parameters.get(paramId).foreach { param =>
-                        val currentValue = param.current
-                        scale.setSelection((currentValue * 100).toInt)
-                        parameterTexts.get(paramId).foreach(_.setText(f"$currentValue%.2f"))
-                        println(s"[ModelControl] Updated UI for $paramId: $currentValue")
-                      }
-                    }
-                    
-                    // Force layout update
-                    tabFolder.layout()
-                    tabFolder.getParent.layout()
-                    println(s"[ModelControl] UI layout updated after loading parameters")
-                  }
-                })
-                
-                println(s"[ModelControl] Loaded $loadedCount parameters from ${paramFile.getAbsolutePath}")
-              } finally {
-                reader.close()
-              }
-            } match {
-              case Success(_) => 
-                println(s"[ModelControl] Successfully loaded parameters from ${paramFile.getAbsolutePath}")
-              case Failure(e) => 
-                println(s"[ModelControl] Failed to load parameters: ${e.getMessage}")
-            }
-          } else {
-            println(s"[ModelControl] No parameter file found at ${paramFile.getAbsolutePath}, using default values")
+    demoApp.foreach { app =>
+      app.avatarHolder.foreach { avatar =>
+        val model = avatar.model
+        val savedParameters = UnifiedConfig.loadModelParameters()
+        var loadedCount = 0
+        
+        // 从统一配置加载参数
+        savedParameters.foreach { case (paramId, value) =>
+          model.parameters.get(paramId).foreach { param =>
+            // Clamp value to valid range
+            val clampedValue = Math.max(param.min, Math.min(param.max, value))
+            param.update(clampedValue)
+            loadedCount += 1
           }
         }
+        
+        // Update UI controls to reflect loaded values
+        refreshParameters()
+        
+        // Force UI update after loading parameters
+        val display = tabFolder.getDisplay
+        display.asyncExec(new Runnable {
+          override def run(): Unit = {
+            // Force refresh of all parameter controls
+            parameterControls.foreach { case (paramId, scale) =>
+              model.parameters.get(paramId).foreach { param =>
+                val currentValue = param.current
+                scale.setSelection((currentValue * 100).toInt)
+                parameterTexts.get(paramId).foreach(_.setText(f"$currentValue%.2f"))
+                println(s"[ModelControl] Updated UI for $paramId: $currentValue")
+              }
+            }
+            
+            // Force layout update
+            tabFolder.layout()
+            tabFolder.getParent.layout()
+            println(s"[ModelControl] UI layout updated after loading parameters")
+          }
+        })
+        
+        println(s"[ModelControl] Loaded $loadedCount parameters from unified config")
       }
     }
   }

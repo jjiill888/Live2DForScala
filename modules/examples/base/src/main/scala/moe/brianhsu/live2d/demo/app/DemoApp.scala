@@ -11,11 +11,10 @@ import moe.brianhsu.live2d.enitiy.updater.SystemNanoTimeBasedFrameInfo
 import moe.brianhsu.live2d.usecase.renderer.opengl.AvatarRenderer
 import moe.brianhsu.live2d.usecase.renderer.viewport.{ProjectionMatrixCalculator, ViewOrientation, ViewPortMatrixCalculator}
 import moe.brianhsu.live2d.usecase.updater.impl.EasyUpdateStrategy
+import moe.brianhsu.live2d.config.UnifiedConfig
 
 import scala.annotation.unused
 import scala.util.{Try, Success, Failure}
-import java.io.{File, PrintWriter}
-import scala.io.Source
 import moe.brianhsu.live2d.enitiy.model.parameter.StartupOptimizations.*
 
 object DemoApp {
@@ -25,149 +24,69 @@ object DemoApp {
   case object FollowMouse extends FaceDirectionMode
   case object ClickAndDrag extends FaceDirectionMode
 
-  private val LastAvatarFile = new File("last_avatar")
-  private val AutoStartFile = new File("auto_start.txt")
-  private val WindowSettingsFile = new File("window_settings.txt")
+  // 使用统一配置管理器的便捷方法
+  def saveLastAvatar(path: String): Unit = UnifiedConfig.saveLastAvatar(path)
 
-  private def readSettings(): Map[String, String] =
-    if (AutoStartFile.exists()) {
-      try {
-        val src = Source.fromFile(AutoStartFile, "UTF-8")
-        try {
-          val lines = src.getLines().toList.map(_.trim).filter(_.nonEmpty)
-          if (lines.size == 1 && !lines.head.contains("=")) {
-            Map("autoStart" -> lines.head)
-          } else {
-            lines.flatMap { line =>
-              line.split("=", 2) match {
-                case Array(k, v) => Some(k -> v)
-                case _ => None
-              }
-            }.toMap
-          }
-        } finally src.close()
-      } catch {
-        case e: Exception =>
-          System.err.println(s"[WARN] Cannot read settings: ${e.getMessage}")
-          Map.empty
-      }
-    } else Map.empty
+  def loadLastAvatarPath(): Option[String] = UnifiedConfig.loadLastAvatarPath()
 
-  private def writeSettings(settings: Map[String, String]): Unit =
-    try {
-      val writer = new PrintWriter(AutoStartFile, "UTF-8")
-      try settings.foreach { case (k, v) => writer.println(s"$k=$v") } finally writer.close()
-    } catch {
-      case e: Exception =>
-        System.err.println(s"[WARN] Cannot save settings: ${e.getMessage}")
-    }
+  def saveAutoStart(enabled: Boolean): Unit = {
+    val currentConfig = UnifiedConfig.config
+    val newAutoStartSettings = currentConfig.autoStart.copy(enabled = enabled)
+    UnifiedConfig.updateAutoStartSettings(newAutoStartSettings)
+  }
 
-  def saveLastAvatar(path: String): Unit =
-    try {
-      val writer = new PrintWriter(LastAvatarFile, "UTF-8")
-      try writer.print(path) finally writer.close()
-    } catch {
-      case e: Exception =>
-        System.err.println(s"[WARN] Cannot save last avatar path: ${e.getMessage}")
-    }
+  def loadAutoStart(): Boolean = UnifiedConfig.config.autoStart.enabled
 
-  def loadLastAvatarPath(): Option[String] =
-    if (LastAvatarFile.exists()) {
-      try {
-        val src = Source.fromFile(LastAvatarFile, "UTF-8")
-        try Some(src.mkString.trim) finally src.close()
-      } catch {
-        case e: Exception =>
-          System.err.println(s"[WARN] Cannot read last avatar path: ${e.getMessage}")
-          None
-      }
-    } else None
+  def saveEyeGaze(enabled: Boolean): Unit = {
+    val currentConfig = UnifiedConfig.config
+    val newAutoStartSettings = currentConfig.autoStart.copy(eyeGaze = enabled)
+    UnifiedConfig.updateAutoStartSettings(newAutoStartSettings)
+  }
 
-  def saveAutoStart(enabled: Boolean): Unit =
-    val settings = readSettings() + ("autoStart" -> enabled.toString)
-    writeSettings(settings)
+  def loadEyeGaze(): Boolean = UnifiedConfig.config.autoStart.eyeGaze
 
-  def loadAutoStart(): Boolean =
-    readSettings().get("autoStart").flatMap(_.toBooleanOption).getOrElse(false)
+  def savePupilGaze(enabled: Boolean): Unit = {
+    val currentConfig = UnifiedConfig.config
+    val newAutoStartSettings = currentConfig.autoStart.copy(pupilGaze = enabled)
+    UnifiedConfig.updateAutoStartSettings(newAutoStartSettings)
+  }
 
-  def saveEyeGaze(enabled: Boolean): Unit =
-    val settings = readSettings() + ("eyeGaze" -> enabled.toString)
-    writeSettings(settings)
+  def loadPupilGaze(): Boolean = UnifiedConfig.config.autoStart.pupilGaze
 
-  def loadEyeGaze(): Boolean =
-    readSettings().get("eyeGaze").flatMap(_.toBooleanOption).getOrElse(false)
+  def saveDisableEyeBlink(enabled: Boolean): Unit = {
+    val currentConfig = UnifiedConfig.config
+    val newAutoStartSettings = currentConfig.autoStart.copy(disableEyeBlink = enabled)
+    UnifiedConfig.updateAutoStartSettings(newAutoStartSettings)
+  }
 
-  def savePupilGaze(enabled: Boolean): Unit =
-    val settings = readSettings() + ("pupilGaze" -> enabled.toString)
-    writeSettings(settings)
-
-  def loadPupilGaze(): Boolean =
-    readSettings().get("pupilGaze").flatMap(_.toBooleanOption).getOrElse(true)
-
-  def saveDisableEyeBlink(enabled: Boolean): Unit =
-    val settings = readSettings() + ("disableEyeBlink" -> enabled.toString)
-    writeSettings(settings)
-
-  def loadDisableEyeBlink(): Boolean =
-    readSettings().get("disableEyeBlink").flatMap(_.toBooleanOption).getOrElse(false)
+  def loadDisableEyeBlink(): Boolean = UnifiedConfig.config.autoStart.disableEyeBlink
     
-  def saveTransparentBackground(enabled: Boolean): Unit =
-    val settings = readSettings() + ("transparentBackground" -> enabled.toString)
-    writeSettings(settings)
+  def saveTransparentBackground(enabled: Boolean): Unit = {
+    val currentConfig = UnifiedConfig.config
+    val newAutoStartSettings = currentConfig.autoStart.copy(transparentBackground = enabled)
+    UnifiedConfig.updateAutoStartSettings(newAutoStartSettings)
+  }
 
-  def loadTransparentBackground(): Boolean =
-    readSettings().get("transparentBackground").flatMap(_.toBooleanOption).getOrElse(false)
+  def loadTransparentBackground(): Boolean = UnifiedConfig.config.autoStart.transparentBackground
 
-  def saveLanguage(language: String): Unit =
-    val settings = readSettings() + ("language" -> language)
-    writeSettings(settings)
+  def saveLanguage(language: String): Unit = {
+    val currentConfig = UnifiedConfig.config
+    val newLanguageSettings = currentConfig.language.copy(language = language)
+    UnifiedConfig.updateLanguageSettings(newLanguageSettings)
+  }
 
-  def loadLanguage(): String =
-    readSettings().get("language").getOrElse("english")
+  def loadLanguage(): String = UnifiedConfig.config.language.language
 
   // Window settings management methods
-  def saveWindowSettings(x: Int, y: Int, width: Int, height: Int, maximized: Boolean = false): Unit =
-    try {
-      val writer = new PrintWriter(WindowSettingsFile, "UTF-8")
-      try {
-        writer.println(s"x=$x")
-        writer.println(s"y=$y")
-        writer.println(s"width=$width")
-        writer.println(s"height=$height")
-        writer.println(s"maximized=$maximized")
-      } finally writer.close()
-    } catch {
-      case e: Exception =>
-        System.err.println(s"[WARN] Cannot save window settings: ${e.getMessage}")
-    }
+  def saveWindowSettings(x: Int, y: Int, width: Int, height: Int, maximized: Boolean = false): Unit = {
+    val newWindowSettings = UnifiedConfig.WindowSettings(x, y, width, height, maximized)
+    UnifiedConfig.updateWindowSettings(newWindowSettings)
+  }
 
-  def loadWindowSettings(): Option[(Int, Int, Int, Int, Boolean)] =
-    if (WindowSettingsFile.exists()) {
-      try {
-        val src = Source.fromFile(WindowSettingsFile, "UTF-8")
-        try {
-          val settings = src.getLines().toList.map(_.trim).filter(_.nonEmpty)
-            .flatMap { line =>
-              line.split("=", 2) match {
-                case Array(k, v) => Some(k -> v)
-                case _ => None
-              }
-            }.toMap
-          
-          val x = settings.get("x").flatMap(_.toIntOption).getOrElse(100)
-          val y = settings.get("y").flatMap(_.toIntOption).getOrElse(100)
-          val width = settings.get("width").flatMap(_.toIntOption).getOrElse(1080)
-          val height = settings.get("height").flatMap(_.toIntOption).getOrElse(720)
-          val maximized = settings.get("maximized").flatMap(_.toBooleanOption).getOrElse(false)
-          
-          Some((x, y, width, height, maximized))
-        } finally src.close()
-      } catch {
-        case e: Exception =>
-          System.err.println(s"[WARN] Cannot read window settings: ${e.getMessage}")
-          None
-      }
-    } else None
+  def loadWindowSettings(): Option[(Int, Int, Int, Int, Boolean)] = {
+    val windowSettings = UnifiedConfig.config.window
+    Some((windowSettings.x, windowSettings.y, windowSettings.width, windowSettings.height, windowSettings.maximized))
+  }
 }
 
 abstract class DemoApp(drawCanvasInfo: DrawCanvasInfoReader, onOpenGLThread: OnOpenGLThread)
