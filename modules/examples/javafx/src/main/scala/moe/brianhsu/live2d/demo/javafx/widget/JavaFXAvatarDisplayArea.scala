@@ -1,17 +1,14 @@
 package moe.brianhsu.live2d.demo.javafx.widget
 
-import com.jogamp.opengl.awt.GLCanvas
-import com.jogamp.opengl.{GLAutoDrawable, GLCapabilities, GLEventListener, GLProfile}
-import javafx.embed.swing.SwingNode
-import javafx.scene.layout.StackPane
-import javafx.scene.input.{KeyEvent => JFXKeyEvent}
-import moe.brianhsu.live2d.adapter.gateway.opengl.jogl.JavaOpenGLBinding
-import moe.brianhsu.live2d.adapter.gateway.renderer.jogl.JOGLCanvasInfoReader
+import javafx.animation.AnimationTimer
+import javafx.scene.canvas.{Canvas, GraphicsContext}
+import javafx.scene.input.{KeyEvent, MouseEvent, ScrollEvent}
+import javafx.scene.layout.Pane
+import javafx.scene.paint.Color
+import moe.brianhsu.live2d.adapter.gateway.opengl.lwjgl.{JavaFXOpenGLCanvasInfoReader, LWJGLBinding}
 import moe.brianhsu.live2d.demo.app.DemoApp
-
-import java.awt.event.{KeyEvent, KeyListener, MouseAdapter, MouseEvent, MouseMotionAdapter, MouseWheelEvent, MouseWheelListener}
-import java.awt.BorderLayout
-import javax.swing.{JPanel, SwingUtilities}
+import moe.brianhsu.live2d.demo.javafx.widget.JavaFXAvatarDisplayArea.AvatarListener
+import scala.util.Try
 
 object JavaFXAvatarDisplayArea {
   trait AvatarListener {
@@ -20,116 +17,173 @@ object JavaFXAvatarDisplayArea {
   }
 }
 
-class JavaFXAvatarDisplayArea extends StackPane {
-  import JavaFXAvatarDisplayArea._
-
-  private val profile = GLProfile.get(GLProfile.GL2)
-  private val capabilities = new GLCapabilities(profile)
-  capabilities.setAlphaBits(8)
-  capabilities.setBackgroundOpaque(false)
-  private val glCanvas = new GLCanvas(capabilities)
-  private val swingNode = new SwingNode()
-
-  private val canvasInfo = new JOGLCanvasInfoReader(glCanvas)
-  private var demoAppHolder: Option[DemoApp] = None
-  private var animator: Option[FixedFPSAnimator] = None
+class JavaFXAvatarDisplayArea extends Pane {
+  private var lastX: Option[Double] = None
+  private var lastY: Option[Double] = None
   private var avatarListenerHolder: Option[AvatarListener] = None
-  private var lastMouseX: Option[Int] = None
-  private var lastMouseY: Option[Int] = None
-  private var demoAppReadyListener: Option[DemoApp => Unit] = None
+  private var initialized = false
 
-  createSwingContent()
+  private val canvas = new Canvas(800, 600)
+  private given openGLBinding: LWJGLBinding = new LWJGLBinding
+  private val canvasInfo = new JavaFXOpenGLCanvasInfoReader(canvas)
+
+  // Delay DemoApp creation until OpenGL is ready
+  private var demoAppHolder: Option[DemoApp] = None
+  
+  def demoApp: DemoApp = {
+    demoAppHolder.getOrElse {
+      throw new RuntimeException("DemoApp not initialized yet. Call initializeOpenGL first.")
+    }
+  }
+
+  private val animationTimer = new AnimationTimer {
+    private val FrameRate: Int = {
+      val overrideValue =
+        sys.props.get("live2d.frameRate").orElse(sys.env.get("LIVE2D_FRAME_RATE"))
+          .flatMap(v => Try(v.toInt).toOption)
+
+      overrideValue.getOrElse {
+        System.getProperty("os.name").toLowerCase match {
+          case os if os.contains("windows") => 144
+          case os if os.contains("linux")   => 60
+          case _ => 60
+        }
+      }
+    }
+    
+    private val frameTimeNanos = (1_000_000_000.0 / FrameRate).toLong
+    private var lastTime: Long = 0
+    
+    override def handle(now: Long): Unit = {
+      if (now - lastTime >= frameTimeNanos) {
+        if (initialized) {
+          // For now, just clear the canvas - we'll add Live2D rendering later
+          val gc = canvas.getGraphicsContext2D
+          gc.clearRect(0, 0, canvas.getWidth, canvas.getHeight)
+          gc.setFill(Color.BLACK)
+          gc.fillRect(0, 0, canvas.getWidth, canvas.getHeight)
+          
+          // Add some basic rendering indication
+          gc.setFill(Color.WHITE)
+          gc.fillText("Live2D JavaFX Demo - Basic Canvas", 10, 30)
+          gc.fillText(s"Canvas Size: ${canvas.getWidth.toInt} x ${canvas.getHeight.toInt}", 10, 50)
+        }
+        lastTime = now
+      }
+    }
+  }
+
+  // Initialize everything
   setupEventHandlers()
-  glCanvas.addGLEventListener(new CanvasGLEventListener)
+  getChildren.add(canvas)
 
-  def demoApp: Option[DemoApp] = demoAppHolder
-  def setAvatarListener(listener: AvatarListener): Unit = { avatarListenerHolder = Some(listener) }
-  def onDemoAppReady(listener: DemoApp => Unit): Unit = { demoAppReadyListener = Some(listener) }
+  def setAvatarListener(listener: AvatarListener): Unit = {
+    this.avatarListenerHolder = Some(listener)
+  }
 
-  private def createSwingContent(): Unit = {
-    val panel = new JPanel(new BorderLayout())
-    panel.add(glCanvas)
-    SwingUtilities.invokeLater(() => swingNode.setContent(panel))
-    this.getChildren.add(swingNode)
+  def initializeOpenGL(): Unit = {
+    if (initialized) return
+    
+    println("Initializing JavaFX Canvas...")
+    initialized = true
+    
+    // For now, skip DemoApp creation until we can properly initialize OpenGL context
+    println("Skipping DemoApp creation - OpenGL context needs to be properly initialized")
+    
+    animationTimer.start()
+    avatarListenerHolder.foreach(_.onStatusUpdated("JavaFX Canvas initialized (basic mode - Live2D integration pending)"))
+    println("JavaFX Canvas running in basic mode")
   }
 
   private def setupEventHandlers(): Unit = {
-    glCanvas.addMouseMotionListener(new MouseMotionAdapter() {
-      override def mouseMoved(e: MouseEvent): Unit = demoAppHolder.foreach(_.onMouseMoved(e.getX, e.getY))
-      override def mouseDragged(e: MouseEvent): Unit = {
-        if (SwingUtilities.isLeftMouseButton(e)) {
-          demoAppHolder.foreach(_.onMouseDragged(e.getX, e.getY))
-        }
-        if (SwingUtilities.isRightMouseButton(e)) {
-          val offsetX = lastMouseX.map(e.getX - _).getOrElse(0).toFloat * 0.002f
-          val offsetY = lastMouseY.map(_ - e.getY).getOrElse(0).toFloat * 0.002f
-          demoAppHolder.foreach(_.move(offsetX, offsetY))
-          lastMouseX = Some(e.getX)
-          lastMouseY = Some(e.getY)
-        }
+    // Mouse events
+    canvas.setOnMouseMoved(this.handleMouseMove)
+    canvas.setOnMouseDragged(this.handleMouseDrag)
+    canvas.setOnMouseReleased(this.handleMouseRelease)
+    canvas.setOnScroll(this.handleScroll)
+    
+    // Key events
+    canvas.setOnKeyReleased(this.handleKeyRelease)
+    
+    // Make canvas focusable for key events
+    canvas.setFocusTraversable(true)
+    
+    // Resize handlers
+    canvas.widthProperty().addListener((_, _, _) => {
+      if (initialized) {
+        println(s"Canvas resized to: ${canvas.getWidth} x ${canvas.getHeight}")
+      }
+    })
+    
+    canvas.heightProperty().addListener((_, _, _) => {
+      if (initialized) {
+        println(s"Canvas resized to: ${canvas.getWidth} x ${canvas.getHeight}")
       }
     })
 
-    glCanvas.addMouseListener(new MouseAdapter() {
-      override def mouseReleased(e: MouseEvent): Unit = {
-        demoAppHolder.foreach(_.onMouseReleased(e.getX, e.getY))
-        lastMouseX = None
-        lastMouseY = None
-      }
-    })
+    // Bind canvas size to pane size
+    canvas.widthProperty().bind(this.widthProperty())
+    canvas.heightProperty().bind(this.heightProperty())
+  }
 
-    glCanvas.addMouseWheelListener(new MouseWheelListener {
-      override def mouseWheelMoved(e: MouseWheelEvent): Unit = {
-        demoAppHolder.foreach(_.zoom(e.getScrollAmount * -e.getWheelRotation * 0.01f))
-      }
-    })
+  private def handleMouseMove(event: MouseEvent): Unit = {
+    // For now, just print mouse coordinates
+    // demoApp.onMouseMoved(event.getX.toInt, event.getY.toInt)
+  }
 
-    glCanvas.addKeyListener(new KeyListener {
-      override def keyTyped(e: KeyEvent): Unit = {}
-      override def keyPressed(e: KeyEvent): Unit = {}
-      override def keyReleased(e: KeyEvent): Unit = demoAppHolder.foreach(_.keyReleased(e.getKeyChar))
-    })
+  private def handleMouseDrag(event: MouseEvent): Unit = {
+    if (event.isPrimaryButtonDown) {
+      println(s"Mouse dragged at: ${event.getX}, ${event.getY}")
+    } else if (event.isSecondaryButtonDown) {
+      val offsetX = lastX.map(event.getX - _).getOrElse(0.0).toFloat * 0.002f
+      val offsetY = lastY.map(_ - event.getY).getOrElse(0.0).toFloat * 0.002f
+      
+      println(s"Right drag offset: $offsetX, $offsetY")
+      
+      lastX = Some(event.getX)
+      lastY = Some(event.getY)
+    }
+  }
 
-    this.addEventHandler(JFXKeyEvent.ANY, (_: JFXKeyEvent) => glCanvas.requestFocusInWindow())
+  private def handleMouseRelease(event: MouseEvent): Unit = {
+    if (event.getButton.toString == "PRIMARY") {
+      println(s"Mouse released at: ${event.getX}, ${event.getY}")
+    }
+    lastX = None
+    lastY = None
+  }
+
+  private def handleScroll(event: ScrollEvent): Unit = {
+    println(s"Mouse scroll: ${event.getDeltaY}")
+  }
+
+  private def handleKeyRelease(event: KeyEvent): Unit = {
+    if (event.getText.nonEmpty) {
+      println(s"Key released: ${event.getText.charAt(0)}")
+    }
   }
 
   private def runOnOpenGLThread(callback: => Any): Any = {
-    glCanvas.invoke(true, (_: GLAutoDrawable) => {
+    // For JavaFX, we'll execute on the JavaFX Application Thread
+    if (javafx.application.Platform.isFxApplicationThread()) {
       callback
-      true
-    })
+    } else {
+      var result: Any = null
+      val latch = new java.util.concurrent.CountDownLatch(1)
+      javafx.application.Platform.runLater(() => {
+        try {
+          result = callback
+        } finally {
+          latch.countDown()
+        }
+      })
+      latch.await()
+      result
+    }
   }
 
-  private class CanvasGLEventListener extends GLEventListener {
-    override def init(drawable: GLAutoDrawable): Unit = {
-      given openGL: JavaOpenGLBinding = new JavaOpenGLBinding(drawable.getGL.getGL2)
-      val app = new DemoApp(canvasInfo, runOnOpenGLThread) {
-        override def onAvatarLoaded(live2DView: DemoApp): Unit =
-          avatarListenerHolder.foreach(_.onAvatarLoaded(live2DView))
-        override def onStatusUpdated(status: String): Unit =
-          avatarListenerHolder.foreach(_.onStatusUpdated(status))
-      }
-      app.setTransparentBackground(DemoApp.loadTransparentBackground())
-      demoAppHolder = Some(app)
-      demoAppReadyListener.foreach(_(demoAppHolder.get))
-      animator = Some(new FixedFPSAnimator(60, drawable))
-      animator.foreach(_.start())
-    }
-
-    override def dispose(drawable: GLAutoDrawable): Unit = {
-      animator.foreach(_.stop())
-    }
-
-    override def display(drawable: GLAutoDrawable): Unit = {
-      demoAppHolder.foreach(_.display())
-            // Swap buffers manually if auto swap is disabled
-      if (!glCanvas.getAutoSwapBufferMode) {
-        glCanvas.swapBuffers()
-      }
-    }
-
-    override def reshape(drawable: GLAutoDrawable, x: Int, y: Int, width: Int, height: Int): Unit = {
-      demoAppHolder.foreach(_.resize())
-    }
+  def cleanup(): Unit = {
+    animationTimer.stop()
+    println("JavaFX Canvas cleanup completed")
   }
 }

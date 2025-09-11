@@ -1,122 +1,229 @@
 package moe.brianhsu.live2d.demo.javafx
 
-import javafx.application.Application
+import javafx.application.{Application, Platform}
 import javafx.scene.Scene
-import javafx.scene.control.SplitPane
-import javafx.scene.layout.BorderPane
-import javafx.geometry.Orientation
-import javafx.stage.Stage
+import javafx.scene.control.{Button, Label, MenuBar, Menu, MenuItem}
+import javafx.scene.input.{KeyCode, KeyEvent}
+import javafx.scene.layout.{BorderPane, VBox, HBox}
+import javafx.stage.{FileChooser, Stage}
 import moe.brianhsu.live2d.demo.app.DemoApp
 import moe.brianhsu.live2d.demo.javafx.widget.JavaFXAvatarDisplayArea
 import moe.brianhsu.live2d.demo.javafx.widget.JavaFXAvatarDisplayArea.AvatarListener
-import moe.brianhsu.live2d.demo.javafx.widget.{JavaFXAvatarControlPanel, JavaFXStatusBar, JavaFXToolbar}
+import scala.util.{Success, Failure}
+import java.io.File
 
-/** Simple JavaFX entry point that will later host the Live2D view. */
 class JavaFXMain extends Application {
+  private var avatarDisplayArea: JavaFXAvatarDisplayArea = _
+  private var statusLabel: Label = _
+  private var isUIHidden = false
+  private var controlPane: VBox = _
+  private var menuBar: MenuBar = _
+
   override def start(primaryStage: Stage): Unit = {
-    // Load window settings on startup
-    loadWindowSettings(primaryStage)
+    // Initialize components
+    avatarDisplayArea = new JavaFXAvatarDisplayArea()
+    statusLabel = new Label("Ready to load Live2D model...")
     
-    val avatarArea = new JavaFXAvatarDisplayArea
-    val toolbar = new JavaFXToolbar
-    val controlPanel = new JavaFXAvatarControlPanel
-    val statusBar = new JavaFXStatusBar
+    setupUI(primaryStage)
+    setupEventHandlers(primaryStage)
+    
+    primaryStage.setTitle("Live2D For Scala - JavaFX + LWJGL")
+    primaryStage.setWidth(1080)
+    primaryStage.setHeight(720)
+    primaryStage.show()
 
-    avatarArea.setAvatarListener(new AvatarListener {
-      override def onAvatarLoaded(live2DView: DemoApp): Unit =
-        statusBar.updateStatus("Avatar loaded")
-      override def onStatusUpdated(status: String): Unit =
-        statusBar.updateStatus(status)
+    // Initialize OpenGL after the stage is shown
+    Platform.runLater(() => {
+      avatarDisplayArea.initializeOpenGL()
+      loadInitialModel()
     })
+  }
 
-    avatarArea.onDemoAppReady { app =>
-      toolbar.setDemoApp(app)
-      controlPanel.setDemoApp(app)
-      DemoApp.loadLastAvatarPath() match {
-        case Some(path) =>
-          app.switchAvatar(path).recoverWith { case e =>
-            System.err.println(s"[WARN] Cannot load last avatar '$path': ${e.getMessage}")
-            // 不再尝试加载默认avatar
-            scala.util.Failure(e)
-          }
-        case None =>
-          // 不再尝试加载默认avatar
-          System.out.println("[INFO] No avatar to load on startup. Please use 'Load Avatar' button to load a model.")
-      }
-      loadInitialAvatar(app)
-    }
-
-    val splitPane = new SplitPane()
-    splitPane.setOrientation(Orientation.HORIZONTAL)
-    splitPane.getItems.addAll(controlPanel, avatarArea)
-    splitPane.setDividerPositions(0.2)
-
+  private def setupUI(primaryStage: Stage): Unit = {
     val root = new BorderPane()
-    root.setTop(toolbar)
-    root.setCenter(avatarArea)
-    root.setCenter(splitPane)
-    root.setBottom(statusBar)
-    val scene = new Scene(root, 800, 600)
-    scene.getStylesheets.add(getClass.getResource("/style/dark-theme.css").toExternalForm)
-    primaryStage.setTitle("Live2D Scala Demo (JavaFX)")
+    
+    // Menu Bar
+    menuBar = createMenuBar(primaryStage)
+    
+    // Control panel
+    controlPane = createControlPane(primaryStage)
+    
+    // Status bar
+    val statusBox = new HBox()
+    statusBox.getChildren.add(statusLabel)
+    statusBox.setStyle("-fx-padding: 5px; -fx-border-color: gray; -fx-border-width: 1px 0 0 0;")
+    
+    root.setTop(menuBar)
+    root.setLeft(controlPane)
+    root.setCenter(avatarDisplayArea)
+    root.setBottom(statusBox)
+    
+    val scene = new Scene(root)
     primaryStage.setScene(scene)
     
-    // Add window close listener to save settings
-    primaryStage.setOnCloseRequest(_ => saveWindowSettings(primaryStage))
+    // Setup avatar event listener
+    avatarDisplayArea.setAvatarListener(new AvatarListener {
+      override def onAvatarLoaded(live2DView: DemoApp): Unit = {
+        Platform.runLater(() => {
+          statusLabel.setText("Live2D model loaded successfully!")
+        })
+      }
+      
+      override def onStatusUpdated(status: String): Unit = {
+        Platform.runLater(() => {
+          statusLabel.setText(status)
+        })
+      }
+    })
+  }
+
+  private def createMenuBar(primaryStage: Stage): MenuBar = {
+    val menuBar = new MenuBar()
     
-    primaryStage.show()
+    val fileMenu = new Menu("File")
+    val loadMenuItem = new MenuItem("Load Avatar...")
+    loadMenuItem.setOnAction(_ => loadAvatarFile(primaryStage))
+    val exitMenuItem = new MenuItem("Exit")
+    exitMenuItem.setOnAction(_ => Platform.exit())
+    
+    fileMenu.getItems.addAll(loadMenuItem, exitMenuItem)
+    
+    val viewMenu = new Menu("View")
+    val toggleUIMenuItem = new MenuItem("Toggle UI (ESC)")
+    toggleUIMenuItem.setOnAction(_ => toggleUI())
+    
+    viewMenu.getItems.add(toggleUIMenuItem)
+    
+    menuBar.getMenus.addAll(fileMenu, viewMenu)
+    menuBar
   }
 
-  private def loadInitialAvatar(app: DemoApp): Unit = {
-    val loadResult = DemoApp.loadLastAvatarPath() match {
-      case Some(path) =>
-        app.switchAvatar(path).recoverWith { case e =>
-          System.err.println(s"[WARN] Cannot load last avatar '$path': ${e.getMessage}")
-          // No longer attempt to load default avatar
-          scala.util.Failure(e)
-        }
-      case None =>
-        // No longer attempt to load default avatar
-        System.out.println("[INFO] No avatar to load on startup. Please use 'Load Avatar' button to load a model.")
-        scala.util.Success(())
+  private def createControlPane(primaryStage: Stage): VBox = {
+    val controlPane = new VBox(10)
+    controlPane.setStyle("-fx-padding: 10px; -fx-border-color: gray; -fx-border-width: 0 1px 0 0; -fx-min-width: 200px;")
+    
+    val loadButton = new Button("Load Avatar...")
+    loadButton.setOnAction(_ => loadAvatarFile(primaryStage))
+    loadButton.setPrefWidth(180)
+    
+    val infoLabel = new Label("Controls:")
+    infoLabel.setStyle("-fx-font-weight: bold;")
+    
+    val controlsInfo = new Label(
+      """Left click: Select
+        |Right drag: Move model
+        |Mouse wheel: Zoom
+        |ESC: Toggle UI
+        |1-9: Expressions""".stripMargin)
+    controlsInfo.setStyle("-fx-font-size: 12px;")
+    
+    controlPane.getChildren.addAll(loadButton, infoLabel, controlsInfo)
+    controlPane
+  }
+
+  private def setupEventHandlers(primaryStage: Stage): Unit = {
+    // ESC key handler
+    primaryStage.getScene.setOnKeyPressed((event: KeyEvent) => {
+      if (event.getCode == KeyCode.ESCAPE) {
+        toggleUI()
+      }
+    })
+    
+    // Cleanup on close
+    primaryStage.setOnCloseRequest(_ => {
+      avatarDisplayArea.cleanup()
+      Platform.exit()
+    })
+  }
+
+  private def loadAvatarFile(primaryStage: Stage): Unit = {
+    val fileChooser = new FileChooser()
+    fileChooser.setTitle("Select Live2D Model File")
+    fileChooser.getExtensionFilters.addAll(
+      new FileChooser.ExtensionFilter("Live2D Model Files", "*.model3.json"),
+      new FileChooser.ExtensionFilter("All Files", "*.*")
+    )
+    
+    // Set initial directory to the 4.1a model directory if it exists
+    val modelDir = new File("4.1a")
+    if (modelDir.exists() && modelDir.isDirectory) {
+      fileChooser.setInitialDirectory(modelDir)
     }
-    loadResult.failed.foreach(e => System.err.println(s"[WARN] Cannot load avatar: ${e.getMessage}"))
-  }
-
-  // Load window settings from saved configuration
-  private def loadWindowSettings(stage: Stage): Unit = {
-    import moe.brianhsu.live2d.demo.app.DemoApp.loadWindowSettings
-    loadWindowSettings() match {
-      case Some((x, y, width, height, maximized)) =>
-        stage.setX(x)
-        stage.setY(y)
-        stage.setWidth(width)
-        stage.setHeight(height)
-        if (maximized) {
-          stage.setMaximized(true)
-        }
-      case None =>
-        // Use default size if no settings found
-        stage.setWidth(800)
-        stage.setHeight(600)
-        stage.centerOnScreen()
+    
+    val selectedFile = fileChooser.showOpenDialog(primaryStage)
+    if (selectedFile != null) {
+      loadAvatar(selectedFile.getAbsolutePath)
     }
   }
 
-  // Save current window settings
-  private def saveWindowSettings(stage: Stage): Unit = {
-    import moe.brianhsu.live2d.demo.app.DemoApp.saveWindowSettings
-    val x = stage.getX.toInt
-    val y = stage.getY.toInt
-    val width = stage.getWidth.toInt
-    val height = stage.getHeight.toInt
-    val maximized = stage.isMaximized
-    saveWindowSettings(x, y, width, height, maximized)
+  private def loadAvatar(path: String): Unit = {
+    statusLabel.setText("Loading avatar...")
+    
+    // Load avatar in background thread
+    val loadTask = new javafx.concurrent.Task[Unit] {
+      override def call(): Unit = {
+        try {
+          avatarDisplayArea.demoApp.switchAvatar(path) match {
+            case Success(_) =>
+              Platform.runLater(() => statusLabel.setText(s"Loaded: ${new File(path).getName}"))
+            case Failure(exception) =>
+              Platform.runLater(() => statusLabel.setText(s"Failed to load avatar: ${exception.getMessage}"))
+          }
+        } catch {
+          case e: Exception =>
+            Platform.runLater(() => statusLabel.setText(s"DemoApp not ready: ${e.getMessage}"))
+        }
+      }
+    }
+    
+    val thread = new Thread(loadTask)
+    thread.setDaemon(true)
+    thread.start()
+  }
+
+  private def loadInitialModel(): Unit = {
+    // Try to load the 4.1a model if it exists
+    val modelPath = "4.1a/spl2.model3.json"
+    val modelFile = new File(modelPath)
+    
+    if (modelFile.exists()) {
+      loadAvatar(modelPath)
+    } else {
+      statusLabel.setText("Ready - Use 'Load Avatar...' to load a Live2D model")
+    }
+  }
+
+  private def toggleUI(): Unit = {
+    if (isUIHidden) {
+      showUI()
+    } else {
+      hideUI()
+    }
+  }
+
+  private def hideUI(): Unit = {
+    isUIHidden = true
+    menuBar.setVisible(false)
+    menuBar.setManaged(false)
+    controlPane.setVisible(false)
+    controlPane.setManaged(false)
+  }
+
+  private def showUI(): Unit = {
+    isUIHidden = false
+    menuBar.setVisible(true)
+    menuBar.setManaged(true)
+    controlPane.setVisible(true)
+    controlPane.setManaged(true)
   }
 }
 
 object JavaFXMain {
   def main(args: Array[String]): Unit = {
+    // Set JavaFX system properties
+    System.setProperty("javafx.animation.pulse", "60")
+    System.setProperty("prism.vsync", "true")
+    
     Application.launch(classOf[JavaFXMain], args: _*)
   }
 }

@@ -1,11 +1,10 @@
 ThisBuild / organization := "moe.brianhsu.live2d"
 ThisBuild / scalaVersion := "3.3.2"
 
-// JDK 24 configuration
+// JDK 21+ configuration  
 ThisBuild / javacOptions ++= Seq(
   "--enable-preview",
-  "--release", "24",
-  "--add-modules", "jdk.incubator.vector"
+  "--release", "21"
 )
 
 ThisBuild / scalacOptions := Seq(
@@ -18,7 +17,7 @@ ThisBuild / scalacOptions := Seq(
   "-Wconf:cat=deprecation&msg=Manifest.*:silent"
 )
 
-// JDK 24 compatibility settings
+// JDK 21+ compatibility settings
 ThisBuild / javaOptions ++= Seq(
   "--enable-native-access=ALL-UNNAMED",
   "--add-opens", "java.base/java.lang=ALL-UNNAMED",
@@ -88,8 +87,16 @@ lazy val swtBinding = (project in file("modules/swtBinding"))
     libraryDependencies += swtFramework % "test,provided" 
   )
 
+lazy val javafxBinding = (project in file("modules/javafxBinding"))
+  .dependsOn(core, lwjglBinding)
+  .settings(
+    name := "JavaFX Binding",
+    publishArtifact := true,
+    sharedSettings
+  )
+
 lazy val exampleBase = (project in file("modules/examples/base"))
-  .dependsOn(core, joglBinding, lwjglBinding, swtBinding)
+  .dependsOn(core, joglBinding, lwjglBinding, swtBinding, javafxBinding)
   .settings(
     name := "Examples Base",
     publishArtifact := false,
@@ -114,6 +121,17 @@ lazy val exampleSWT = (project in file("modules/examples/swt"))
     publishArtifact := false,
     sharedSettings,
     libraryDependencies += swtFramework % "provided"
+  )
+
+lazy val exampleJavaFX = (project in file("modules/examples/javafx"))
+  .dependsOn(core, lwjglBinding, javafxBinding, exampleBase)
+  .settings(
+    name := "Example JavaFX+LWJGL",
+    fork := true,
+    publishArtifact := false,
+    Compile / mainClass := Some("moe.brianhsu.live2d.demo.javafx.JavaFXMain"),
+    sharedSettings,
+    assembly / assemblyJarName := s"Live2DForScala-JavaFX-${version.value}.jar"
   )
 
 lazy val exampleSWTLinux = (project in file("modules/examples/swt-linux-bundle"))
